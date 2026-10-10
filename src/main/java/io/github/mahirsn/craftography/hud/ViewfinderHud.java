@@ -17,15 +17,21 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
-/** Minimal camcorder viewfinder. The scene and saved photo share the full-screen aspect frame. */
+/**
+ * Draws camera mode: the live view on the rear LCD (frame mask, guides, focus point, level, histogram, time bar)
+ * and the camera body around it. Reads settings only.
+ */
 public final class ViewfinderHud {
-	private ViewfinderHud() { }
-
-	public static Rect liveView(double width, double height) {
-		return new Rect(0, 0, width, height);
+	private ViewfinderHud() {
 	}
 
-	/** Frame rectangle in GUI units. */
+	/** The live view in GUI units, including the open/close animation (it grows from the whole screen). */
+	public static Rect liveView(double width, double height) {
+		Rect full = new Rect(0, 0, width, height);
+		return full.lerp(BodyLayout.of(width, height).lcd, CameraMode.progress());
+	}
+
+	/** Frame rectangle in GUI units, including the open/close animation. */
 	public static Rect currentFrame(double width, double height) {
 		return AspectMask.frame(liveView(width, height), CameraSettings.get().aspect);
 	}
@@ -38,54 +44,42 @@ public final class ViewfinderHud {
 	public static void render(GuiGraphicsExtractor g, DeltaTracker delta) {
 		CameraSettings s = CameraSettings.get();
 		float p = CameraMode.progress();
+		BodyLayout l = BodyLayout.of(g.guiWidth(), g.guiHeight());
 		Rect lv = liveView(g.guiWidth(), g.guiHeight());
 		Rect f = AspectMask.frame(lv, s.aspect);
-		AspectMask.draw(g, lv, f, s.maskOpacity * p, 0.8f * p);
+
+		AspectMask.draw(g, lv, f, s.maskOpacity * p, 0.9f * p);
 		GuideOverlay.draw(g, f, s.guide, s.guideOpacity * p);
 		focusPoint(g, f, s, p);
-		if (!ControlsScreen.isOpen()) LevelGauge.draw(g, lv, s.roll, p);
+		LevelGauge.draw(g, lv, s.roll, p);
 		if (s.histogram) histogram(g, lv, p);
-		readouts(g, s, p);
+		if (ControlsScreen.isOpen() && BodyControls.page() == BodyControls.Page.WORLD) TimeBar.draw(g, lv, visibleDayTicks(s), s.timeOfDay >= 0, p);
 		Shutter.draw(g, f, lv);
+
+		CameraBody.drawSurroundings(g, lv, p);
+		g.pose().pushMatrix();
+		// The camera is raised into view while camera mode opens.
+		g.pose().translate(0, Math.round((1 - p) * g.guiHeight()));
+		CameraBody.draw(g, l, ControlsScreen.hoveredPart());
+		g.pose().popMatrix();
 	}
 
-	private static void readouts(GuiGraphicsExtractor g, CameraSettings s, float alpha) {
-		Font font = Minecraft.getInstance().font;
-		int white = Draw.argb(alpha, 0xF2EFE6);
-		int amber = Draw.argb(alpha, 0xFFC85A);
-		String status = Shutter.timerRunning() ? "● " + Component.translatable("craftography.status.timer").getString() + " " + Shutter.timerSeconds() + "s"
-			: Component.translatable("craftography.status.ready").getString();
-		g.text(font, status, 12, 12, Shutter.timerLampLit() ? Draw.argb(alpha, 0xFF6655) : white, true);
-		if (!ControlsScreen.isOpen()) {
-			String clock = TimeMath.format(visibleDayTicks(s));
-			g.text(font, clock, g.guiWidth() - font.width(clock) - 12, 12, white, true);
-			if (io.github.mahirsn.craftography.Tripod.isActive()) {
-				Draw.camera(g, "ui/icon_tripod", g.guiWidth() - 25, 28, 11, 11, amber);
-			}
-		}
-		String lens = Math.round(s.focalLength) + "mm";
-		String exposure = lens + "   ISO " + s.iso + "   " + ExposureMath.formatAperture(s.aperture) + "   " + ExposureMath.formatShutter(s.shutter);
-		int available = ControlsScreen.isOpen() ? (int) io.github.mahirsn.craftography.screen.DockLayout.of(g.guiWidth(), g.guiHeight()).panel().x() - 20 : g.guiWidth() - 24;
-		if (font.width(exposure) > available) exposure = lens + "   ISO " + s.iso;
-		g.text(font, exposure, 12, g.guiHeight() - 25, white, true);
-		String info = s.kelvin + "K   " + (s.autofocus ? "AF " : "MF ") + ExposureMath.formatFocus(Autofocus.distance());
-		if (s.selfTimer > 0) info += "   " + s.selfTimer + "s";
-		if (font.width(info) <= available) g.text(font, info, 12, g.guiHeight() - 13, white, true);
-	}
-
-	/** Autofocus point in the frame centre. */
+	/** Autofocus point in the frame centre with the distance the lens is focused at. */
 	private static void focusPoint(GuiGraphicsExtractor g, Rect f, CameraSettings s, float alpha) {
+		Font font = Minecraft.getInstance().font;
 		double cx = f.x() + f.w() / 2, cy = f.y() + f.h() / 2;
 		boolean dof = LensEffects.depthOfFieldAvailable();
 		int color = Draw.argb(0.85f * alpha, s.autofocus && dof ? 0x7CFC64 : 0xFFFFFF);
 		if (s.autofocus) Draw.sprite(g, "af", cx - 6.5, cy - 4.5, 13, 9, color);
+		String text = dof ? ExposureMath.formatFocus(Autofocus.distance()) : Component.translatable("craftography.dof.off_short").getString();
+		g.text(font, text, (int) Math.round(cx - font.width(text) / 2.0), (int) (cy + 7), color, true);
 	}
 
 	/** Luminance histogram in the top left of the live view. */
 	private static void histogram(GuiGraphicsExtractor g, Rect lv, float alpha) {
 		float[] bins = Meter.histogram();
 		int w = Meter.BINS, h = 28;
-		int x = (int) lv.x() + 12, y = (int) lv.y() + 30;
+		int x = (int) lv.x() + 6, y = (int) lv.y() + 20;
 		Draw.rect(g, x - 1, y - 1, x + w + 1, y + h + 1, Draw.argb(0.5f * alpha, 0x000000));
 		int bar = Draw.argb(0.85f * alpha, 0xFFFFFF);
 		for (int i = 0; i < w; i++) {

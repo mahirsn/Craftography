@@ -5,8 +5,7 @@ import io.github.mahirsn.craftography.CameraMode;
 import io.github.mahirsn.craftography.CameraSettings;
 import io.github.mahirsn.craftography.CraftographyClient;
 import io.github.mahirsn.craftography.hud.AspectMask;
-import io.github.mahirsn.craftography.hud.ViewfinderHud;
-import io.github.mahirsn.craftography.screen.ControlsScreen;
+import io.github.mahirsn.craftography.hud.BodyLayout;
 import io.github.mahirsn.craftography.util.Draw;
 import io.github.mahirsn.craftography.util.Rect;
 import net.minecraft.client.Minecraft;
@@ -115,7 +114,8 @@ public final class Shutter {
 		long mm = Math.round(CameraMode.focalLength());
 		Screenshot.takeScreenshot(mc.gameRenderer.mainRenderTarget(), image -> {
 			// The live view in window pixels, then the frame inside it: the same rectangles the HUD draws.
-			Rect lcd = ViewfinderHud.liveView(image.getWidth(), image.getHeight());
+			var window = mc.getWindow();
+			Rect lcd = BodyLayout.of(window.getGuiScaledWidth(), window.getGuiScaledHeight()).lcd.scale(window.getGuiScale());
 			Rect r = AspectMask.frame(lcd, aspect);
 			int x = (int) Math.round(r.x()), y = (int) Math.round(r.y());
 			int w = Math.min((int) Math.round(r.w()), image.getWidth() - x), h = Math.min((int) Math.round(r.h()), image.getHeight() - y);
@@ -187,8 +187,8 @@ public final class Shutter {
 				h = (int) liveView.h() / 3;
 				w = Math.max(1, Math.round((float) px.getWidth() * h / px.getHeight()));
 			}
-			int x = ControlsScreen.isOpen() ? 12 : (int) liveView.right() - w - 12;
-			int y = (int) liveView.y() + 30;
+			int x = (int) liveView.right() - w - 5;
+			int y = (int) liveView.y() + 18;
 			float fade = Math.min(1f, (PREVIEW_MS - (now - previewAt)) / 300f);
 			g.blit(RenderPipelines.GUI_TEXTURED, PREVIEW, x, y, 0, 0, w, h, px.getWidth(), px.getHeight(), px.getWidth(), px.getHeight(), Draw.argb(fade, 0xFFFFFF));
 			int line = Draw.argb(fade, 0xFFFFFF);
