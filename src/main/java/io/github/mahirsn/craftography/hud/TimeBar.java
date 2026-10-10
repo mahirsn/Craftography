@@ -18,13 +18,10 @@ public final class TimeBar {
 	private TimeBar() {
 	}
 
-	/** Bar line rectangle (height 0) for a frame, in GUI units. Also used to drag the handle. */
-	public static Rect bar(Rect f, double screenWidth, double screenHeight) {
-		double w = Math.max(160, f.w() * 0.8);
-		w = Math.min(w, screenWidth - 16);
-		// Below the bezel, above the camera bar.
-		double y = Math.min(f.bottom() + AspectMask.BEZEL + 14, CameraBar.top(screenHeight) - 7);
-		return new Rect((screenWidth - w) / 2, y, w, 0);
+	/** Bar line rectangle (height 0) at the bottom of the live view, in GUI units. Also used to drag the handle. */
+	public static Rect bar(Rect liveView) {
+		double w = liveView.w() - 40;
+		return new Rect(liveView.x() + 20, liveView.bottom() - 8, w, 0);
 	}
 
 	/** Day tick under a mouse x position, snapped to 10 ticks. */
@@ -33,15 +30,16 @@ public final class TimeBar {
 		return TimeMath.dayTicks(Math.round(t * TimeMath.DAY / 10.0) * 10);
 	}
 
-	public static void draw(GuiGraphicsExtractor g, Rect f, int dayTicks, boolean overridden, float alpha) {
+	public static void draw(GuiGraphicsExtractor g, Rect liveView, int dayTicks, boolean overridden, float alpha) {
 		Font font = Minecraft.getInstance().font;
-		Rect bar = bar(f, g.guiWidth(), g.guiHeight());
+		Rect bar = bar(liveView);
+		Draw.rect(g, liveView.x(), bar.y() - 15, liveView.right(), liveView.bottom(), Draw.argb(0.45f * alpha, 0x000000));
 		double y = bar.y();
-		Draw.line(g, bar.x(), y, bar.right(), y, Draw.argb(alpha * 0.5f, InfoStrip.WHITE));
+		Draw.line(g, bar.x(), y, bar.right(), y, Draw.argb(alpha * 0.5f, 0xFFFFFF));
 		band(g, bar, GOLDEN, Draw.argb(alpha * 0.8f, GOLD));
 		band(g, bar, BLUE_HOUR, Draw.argb(alpha * 0.8f, BLUE));
 
-		int dim = Draw.argb(alpha * 0.7f, InfoStrip.WHITE);
+		int dim = Draw.argb(alpha * 0.7f, 0xFFFFFF);
 		for (int m : MARKS) {
 			double x = x(bar, m);
 			Draw.line(g, x, y - 2, x, y + 2, dim);
@@ -52,7 +50,7 @@ public final class TimeBar {
 		Draw.sprite(g, "sun", bar.x() - 12, y - 3, 7, 7, dim);
 		Draw.sprite(g, "moon", bar.right() + 5, y - 3, 7, 7, dim);
 
-		int handle = Draw.argb(alpha, overridden ? InfoStrip.AMBER : InfoStrip.WHITE);
+		int handle = Draw.argb(alpha, overridden ? CameraBody.AMBER : 0xFFFFFF);
 		double hx = x(bar, dayTicks);
 		Draw.rect(g, hx - 1, y - 4, hx + 1, y + 4, handle);
 	}

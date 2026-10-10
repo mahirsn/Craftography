@@ -5,6 +5,7 @@ import io.github.mahirsn.craftography.CameraMode;
 import io.github.mahirsn.craftography.CameraSettings;
 import io.github.mahirsn.craftography.CraftographyClient;
 import io.github.mahirsn.craftography.hud.AspectMask;
+import io.github.mahirsn.craftography.hud.BodyLayout;
 import io.github.mahirsn.craftography.util.Draw;
 import io.github.mahirsn.craftography.util.Rect;
 import net.minecraft.client.Minecraft;
@@ -112,7 +113,10 @@ public final class Shutter {
 		CameraSettings.Aspect aspect = s.aspect;
 		long mm = Math.round(CameraMode.focalLength());
 		Screenshot.takeScreenshot(mc.gameRenderer.mainRenderTarget(), image -> {
-			Rect r = AspectMask.frame(image.getWidth(), image.getHeight(), aspect);
+			// The live view in window pixels, then the frame inside it: the same rectangles the HUD draws.
+			var window = mc.getWindow();
+			Rect lcd = BodyLayout.of(window.getGuiScaledWidth(), window.getGuiScaledHeight()).lcd.scale(window.getGuiScale());
+			Rect r = AspectMask.frame(lcd, aspect);
 			int x = (int) Math.round(r.x()), y = (int) Math.round(r.y());
 			int w = Math.min((int) Math.round(r.w()), image.getWidth() - x), h = Math.min((int) Math.round(r.h()), image.getHeight() - y);
 			NativeImage photo = new NativeImage(w, h, false);
@@ -151,11 +155,16 @@ public final class Shutter {
 		});
 	}
 
-	/** Countdown in the middle of the frame and a blinking lamp on the bezel, like a camera's self-timer lamp. */
-	private static void drawTimer(GuiGraphicsExtractor g, Rect f) {
+	/** Whether the self-timer lamp on the body is lit now: it blinks with the countdown beat. */
+	public static boolean timerLampLit() {
+		if (timerEnd < 0) return false;
 		long left = Math.max(0, timerLeft()), beat = beatMs(left);
-		boolean lit = left % beat > beat / 2;
-		Draw.camera(g, "icon_lamp", Math.round(f.right()) - 12, Math.round(f.y()) - 7, 5, 5, Draw.argb(1f, lit ? 0xFF3A2A : 0x5A1A14));
+		return left % beat > beat / 2;
+	}
+
+	/** Countdown in the middle of the frame. */
+	private static void drawTimer(GuiGraphicsExtractor g, Rect f) {
+		long left = Math.max(0, timerLeft());
 		String text = String.valueOf((left + 999) / 1000);
 		var font = Minecraft.getInstance().font;
 		g.pose().pushMatrix();
@@ -166,7 +175,7 @@ public final class Shutter {
 	}
 
 	/** Curtain over the frame and the preview in the corner. Drawn by the viewfinder HUD. */
-	public static void draw(GuiGraphicsExtractor g, Rect f) {
+	public static void draw(GuiGraphicsExtractor g, Rect f, Rect liveView) {
 		long now = Util.getMillis();
 		if (timerEnd >= 0) drawTimer(g, f);
 		if (shotAt >= 0 && now - shotAt < CURTAIN_MS) {
@@ -181,7 +190,7 @@ public final class Shutter {
 			NativeImage px = preview.getPixels();
 			if (px == null) return;
 			int w = PREVIEW_WIDTH, h = Math.round((float) px.getHeight() * w / px.getWidth());
-			int x = g.guiWidth() - w - 6, y = 6;
+			int x = (int) liveView.right() - w - 6, y = (int) liveView.y() + 6;
 			float fade = Math.min(1f, (PREVIEW_MS - (now - previewAt)) / 300f);
 			g.blit(RenderPipelines.GUI_TEXTURED, PREVIEW, x, y, 0, 0, w, h, px.getWidth(), px.getHeight(), px.getWidth(), px.getHeight(), Draw.argb(fade, 0xFFFFFF));
 			int line = Draw.argb(fade, 0xFFFFFF);

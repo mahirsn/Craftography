@@ -22,9 +22,9 @@ public final class Draw {
 		g.pose().popMatrix();
 	}
 
-	/** A sprite from assets/craftography/textures/gui/sprites/camera, at integer GUI coordinates. */
-	public static void camera(GuiGraphicsExtractor g, String name, double x, double y, int w, int h, int color) {
-		g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.fromNamespaceAndPath("craftography", "camera/" + name), (int) x, (int) y, w, h, color);
+	/** A sprite from assets/craftography/textures/gui/sprites ({@code path} like "body/dial"), at integer GUI coordinates. */
+	public static void camera(GuiGraphicsExtractor g, String path, double x, double y, int w, int h, int color) {
+		g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.fromNamespaceAndPath("craftography", path), (int) Math.round(x), (int) Math.round(y), w, h, color);
 	}
 
 	public static int argb(float alpha, int rgb) {
