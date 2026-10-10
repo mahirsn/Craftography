@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
 import java.util.Locale;
 
-/** Perspective camcorder housing. Hardware keys and wheels are drawn where they are actually hit-tested. */
+/** Retro box camera housing. Hardware keys and wheels are drawn where they are actually hit-tested. */
 public final class CameraBody {
 	static final int AMBER = 0xFFB000;
 	private static final int PRINT = 0xD6DAD8;
@@ -40,17 +40,20 @@ public final class CameraBody {
 		Draw.camera(g, "body/camcorder", l.x, l.y, (int) Math.round(480 * l.scale), (int) Math.round(270 * l.scale), -1);
 		Rect zoom = l.get(Part.ZOOM), release = l.get(Part.SHUTTER);
 		Draw.camera(g, "body/zoom_rocker" + (hovered == Part.ZOOM ? "_hl" : ""), zoom.x(), zoom.y(), (int) zoom.w(), (int) zoom.h(), -1);
-		text(g, l, "W", 385, 33, PRINT); text(g, l, "T", 420, 33, PRINT);
+		text(g, l, "W", 171, 46, PRINT); text(g, l, "T", 206, 46, PRINT);
 		Draw.camera(g, "body/capture_cap" + (hovered == Part.SHUTTER ? "_hl" : ""), release.x(), release.y(), (int) release.w(), (int) release.h(), -1);
-		text(g, l, "SNAP", 436, 24, PRINT);
-		text(g, l, "CRAFTOGRAPHY", 242, 37, 0xB5BDC1);
-		text(g, l, "HD / DIGITAL", 173, 52, 0x959FA5);
-		text(g, l, pageLabel(), 403, 55, 0x99C593);
+		text(g, l, "SNAP", 245, 30, PRINT);
+		text(g, l, "CRAFTOGRAPHY", 80, 35, 0xB5BDC1);
+
+		text(g, l, pageLabel(), 290, 22, 0x99C593);
 		// The six small physical mode keys live in the LCD's lower bezel, not in a floating settings panel.
 		for (Page page : Page.values()) {
 			Rect r = l.pageButton(page.ordinal());
 			Draw.camera(g, "body/button" + (page == BodyControls.page() ? "_on" : ""), r.x(), r.y(), (int) r.w(), (int) r.h(), -1);
-			String label = page.label;
+			String label = switch (page) {
+				case EXPOSURE -> "EXP"; case COLOUR -> "WB"; case FOCUS -> "FOC";
+				case FRAME -> "FRM"; case WORLD -> "TIME"; case DRIVE -> "DRV";
+			};
 			g.text(font, label, (int) (r.x() + (r.w() - font.width(label)) / 2), (int) r.y() + 3, Draw.argb(1f, page == BodyControls.page() ? AMBER : PRINT), false);
 		}
 		Rect lcd = l.lcd;
@@ -76,7 +79,7 @@ public final class CameraBody {
 		// As wide as the grip. The texture is flipped so the hand (the bottom of the arm texture) holds the grip and
 		// the arm leaves the screen at the bottom.
 		int scale = 5, w = armW * scale, h = 12 * scale;
-		int x = (int) l.grip.right() - w + 2, y = (int) l.body.bottom() - h + 8;
+		int x = (int) l.grip.right() - w + 2, y = (int) l.grip.y() + 24;
 		int side = 6;
 		// Skin layout of the right arm (row v 20..32, sleeve layer v 36..48): outer side, front, inner side (4 wide), back.
 		int inner = 44 + armW, back = 48 + armW;

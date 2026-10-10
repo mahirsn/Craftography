@@ -8,8 +8,8 @@ the time, weather and moon phase you pick are visual only.
 
 ## Features
 
-- A pixel-art camcorder held in your hand, drawn in perspective: a long lens barrel, raised carrying handle,
-  rubber grip, flip-out LCD, W/T zoom rocker and red capture button. The live view is inside the camera's LCD.
+- A retro pixel-art movie camera held by a vertical pistol grip: a boxy grey body, rear eyepiece, short
+  forward lens with blue glass, side LCD, W/T zoom rocker and red capture button. The live view stays inside the LCD.
 - Exposure in real stops: ISO 100-12800, aperture f/1.4-f/22 and shutter speed 1/4000-1 s. The defaults
   (ISO 100, f/5.6, 1/125) leave the game's picture as it is. A centre-weighted light meter and a histogram help.
 - White balance in kelvin (2500-10000 K) with a green-magenta tint.
