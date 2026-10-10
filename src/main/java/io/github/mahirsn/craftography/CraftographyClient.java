@@ -31,6 +31,7 @@ public class CraftographyClient implements ClientModInitializer {
 	public static KeyMapping weatherKey;
 	public static KeyMapping panelKey;
 	public static KeyMapping shutterKey;
+	public static KeyMapping timerKey;
 
 	/** Keys that only work in camera mode; vanilla keys bound to the same key are blocked while camera mode is on. */
 	private static List<KeyMapping> cameraKeys;
@@ -46,7 +47,8 @@ public class CraftographyClient implements ClientModInitializer {
 		weatherKey = register("weather", GLFW.GLFW_KEY_UNKNOWN);
 		panelKey = register("panel", GLFW.GLFW_KEY_UNKNOWN);
 		shutterKey = register("shutter", GLFW.GLFW_KEY_UNKNOWN);
-		cameraKeys = List.of(guideKey, aspectKey, resetRollKey, serverTimeKey, weatherKey, panelKey, shutterKey);
+		timerKey = register("timer", GLFW.GLFW_KEY_UNKNOWN);
+		cameraKeys = List.of(guideKey, aspectKey, resetRollKey, serverTimeKey, weatherKey, panelKey, shutterKey, timerKey);
 
 		ClientTickEvents.START_CLIENT_TICK.register(CraftographyClient::onTick);
 	}
@@ -59,12 +61,14 @@ public class CraftographyClient implements ClientModInitializer {
 	private static void onTick(Minecraft mc) {
 		if (mc.level == null || mc.player == null) {
 			CameraMode.reset();
+			Shutter.cancelTimer();
 			return;
 		}
 		while (toggleKey.consumeClick()) {
 			CameraMode.toggle();
 		}
 		if (!CameraMode.isOpen()) {
+			Shutter.cancelTimer();
 			for (KeyMapping key : cameraKeys) {
 				while (key.consumeClick()) {
 					// Not in camera mode: ignore.
@@ -94,9 +98,14 @@ public class CraftographyClient implements ClientModInitializer {
 			CameraSettings.get().cycleWeather();
 			changed = true;
 		}
+		while (timerKey.consumeClick()) {
+			CameraSettings.get().cycleTimer();
+			changed = true;
+		}
 		while (shutterKey.consumeClick()) {
 			Shutter.press();
 		}
+		Shutter.tick();
 		while (panelKey.consumeClick()) {
 			if (mc.gui.screen() == null) mc.gui.setScreen(new ControlsScreen());
 		}

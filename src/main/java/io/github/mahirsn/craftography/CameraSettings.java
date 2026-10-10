@@ -71,6 +71,10 @@ public final class CameraSettings {
 	public boolean lockTimeWeather = false;
 	/** Show a small preview of the photo for two seconds after the shot. */
 	public boolean showPreview = true;
+	/** Self-timer delay in seconds: 0 (off), 3 or 10. */
+	public int selfTimer = 0;
+
+	private static final int[] TIMERS = {0, 3, 10};
 
 	public static CameraSettings get() {
 		return instance;
@@ -104,6 +108,7 @@ public final class CameraSettings {
 		guideOpacity = clamp(guideOpacity, 0f, 1f);
 		if (weather == null) weather = Weather.SERVER;
 		if (moonPhase < -1 || moonPhase > 7) moonPhase = -1;
+		if (java.util.Arrays.stream(TIMERS).noneMatch(t -> t == selfTimer)) selfTimer = 0;
 		if (timeOfDay < -1 || timeOfDay >= TimeMath.DAY) timeOfDay = -1;
 		roll = Double.isNaN(roll) ? 0 : Math.max(-MAX_ROLL, Math.min(MAX_ROLL, roll));
 		focalLength = Double.isNaN(focalLength) ? LensMath.DEFAULT_MM : LensMath.clamp(focalLength);
@@ -134,6 +139,12 @@ public final class CameraSettings {
 	public void cycleAspect() {
 		Aspect[] values = Aspect.values();
 		aspect = values[(aspect.ordinal() + 1) % values.length];
+	}
+
+	public void cycleTimer() {
+		int i = 0;
+		while (TIMERS[i] != selfTimer) i++;
+		selfTimer = TIMERS[(i + 1) % TIMERS.length];
 	}
 
 	public void cycleGuide() {

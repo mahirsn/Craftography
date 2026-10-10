@@ -34,11 +34,66 @@ public final class Shutter {
 	private static long shotAt = -1;
 	private static DynamicTexture preview;
 	private static long previewAt = -1;
+	/** Time the self-timer fires, or -1 when it is not running. */
+	private static long timerEnd = -1;
+	private static int lastBeat;
 
 	private Shutter() {
 	}
 
+	/** Shutter button: with a self-timer set, starts the countdown; pressed again during the countdown, cancels it. */
 	public static void press() {
+		if (timerEnd >= 0) {
+			cancelTimer();
+			return;
+		}
+		int seconds = CameraSettings.get().selfTimer;
+		if (seconds > 0) {
+			timerEnd = Util.getMillis() + seconds * 1000L;
+			lastBeat = Integer.MAX_VALUE;
+			tick();
+			return;
+		}
+		shoot();
+	}
+
+	public static void cancelTimer() {
+		timerEnd = -1;
+	}
+
+	public static boolean timerRunning() {
+		return timerEnd >= 0;
+	}
+
+	/** Milliseconds left on the self-timer. */
+	private static long timerLeft() {
+		return timerEnd - Util.getMillis();
+	}
+
+	/** Beat length of the self-timer lamp and beep: one second, half a second in the last two seconds. */
+	private static long beatMs(long left) {
+		return left > 2000 ? 1000 : 500;
+	}
+
+	/** Called every client tick: beeps on each beat of the countdown and takes the photo at the end. */
+	public static void tick() {
+		if (timerEnd < 0) return;
+		long left = timerLeft();
+		if (left <= 0) {
+			timerEnd = -1;
+			shoot();
+			return;
+		}
+		long beat = beatMs(left);
+		// Beats left in the current phase; the offset keeps the one-second and half-second phases apart.
+		int index = (int) ((left + beat - 1) / beat) + (beat == 500 ? 0 : 100);
+		if (index != lastBeat) {
+			lastBeat = index;
+			Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING.value(), 2f, 0.35f));
+		}
+	}
+
+	private static void shoot() {
 		if (pending) return;
 		pending = true;
 		shotAt = Util.getMillis();
@@ -96,9 +151,24 @@ public final class Shutter {
 		});
 	}
 
+	/** Countdown in the middle of the frame and a blinking lamp on the bezel, like a camera's self-timer lamp. */
+	private static void drawTimer(GuiGraphicsExtractor g, Rect f) {
+		long left = Math.max(0, timerLeft()), beat = beatMs(left);
+		boolean lit = left % beat > beat / 2;
+		Draw.camera(g, "icon_lamp", Math.round(f.right()) - 12, Math.round(f.y()) - 7, 5, 5, Draw.argb(1f, lit ? 0xFF3A2A : 0x5A1A14));
+		String text = String.valueOf((left + 999) / 1000);
+		var font = Minecraft.getInstance().font;
+		g.pose().pushMatrix();
+		g.pose().translate((float) (f.x() + f.w() / 2), (float) (f.y() + f.h() / 2));
+		g.pose().scale(4f, 4f);
+		g.text(font, text, -font.width(text) / 2, -font.lineHeight / 2, Draw.argb(0.85f, 0xFFFFFF), true);
+		g.pose().popMatrix();
+	}
+
 	/** Curtain over the frame and the preview in the corner. Drawn by the viewfinder HUD. */
 	public static void draw(GuiGraphicsExtractor g, Rect f) {
 		long now = Util.getMillis();
+		if (timerEnd >= 0) drawTimer(g, f);
 		if (shotAt >= 0 && now - shotAt < CURTAIN_MS) {
 			// Closes in the first half, opens in the second half.
 			double t = (now - shotAt) / (double) CURTAIN_MS;

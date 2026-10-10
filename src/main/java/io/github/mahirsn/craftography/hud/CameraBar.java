@@ -17,7 +17,7 @@ import java.util.Locale;
  */
 public final class CameraBar {
 	public enum Item {
-		ZOOM(49), GUIDE(15), ASPECT(15), WEATHER(15), RESET_ROLL(15), SERVER_TIME(15), MENU(15), SHUTTER(21), TIME(49);
+		ZOOM(49), GUIDE(15), ASPECT(15), WEATHER(15), RESET_ROLL(15), SERVER_TIME(15), TIMER(15), MENU(15), SHUTTER(21), TIME(49);
 
 		public final int width;
 
@@ -104,6 +104,7 @@ public final class CameraBar {
 			case WEATHER -> "weather_" + s.weather.name().toLowerCase(Locale.ROOT);
 			case RESET_ROLL -> "reset_roll";
 			case SERVER_TIME -> "server_time";
+			case TIMER -> s.selfTimer == 0 ? "timer_off" : "timer_" + s.selfTimer;
 			default -> "menu";
 		};
 	}
@@ -114,6 +115,7 @@ public final class CameraBar {
 			case WEATHER -> s.weather != CameraSettings.Weather.SERVER;
 			case RESET_ROLL -> s.roll != 0;
 			case SERVER_TIME -> s.timeOfDay >= 0;
+			case TIMER -> s.selfTimer > 0;
 			default -> false;
 		};
 	}

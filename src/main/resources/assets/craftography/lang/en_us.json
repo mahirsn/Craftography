@@ -38,5 +38,6 @@
 	"craftography.moon.6": "First quarter",
 	"craftography.moon.7": "Waxing gibbous",
 	"craftography.moon.server": "Server moon",
-	"craftography.panel.moon": "Moon"
+	"craftography.panel.moon": "Moon",
+	"key.craftography.timer": "Next self-timer"
 }
