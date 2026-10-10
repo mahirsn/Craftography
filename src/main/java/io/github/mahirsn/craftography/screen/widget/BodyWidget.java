@@ -28,8 +28,6 @@ public class BodyWidget extends Control {
 	public void press(double x, double y) {
 		lastX = x;
 		if (control.click() != null) control.click().run();
-		if (control.part() == io.github.mahirsn.craftography.hud.BodyLayout.Part.ZOOM)
-			control.step().accept(x < area.x() + area.w() / 2 ? -1 : 1);
 	}
 
 	@Override

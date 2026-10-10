@@ -56,7 +56,6 @@ public final class ViewfinderHud {
 		if (ControlsScreen.isOpen() && BodyControls.page() == BodyControls.Page.WORLD) TimeBar.draw(g, lv, visibleDayTicks(s), s.timeOfDay >= 0, p);
 		Shutter.draw(g, f, lv);
 
-		CameraBody.drawSurroundings(g, lv, p);
 		g.pose().pushMatrix();
 		// The camera is raised into view while camera mode opens.
 		g.pose().translate(0, Math.round((1 - p) * g.guiHeight()));

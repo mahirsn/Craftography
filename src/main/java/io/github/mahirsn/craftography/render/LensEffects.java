@@ -18,6 +18,7 @@ import io.github.mahirsn.craftography.CameraMode;
 import io.github.mahirsn.craftography.CameraSettings;
 import io.github.mahirsn.craftography.CraftographyClient;
 import io.github.mahirsn.craftography.util.ExposureMath;
+import io.github.mahirsn.craftography.hud.ViewfinderHud;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -45,11 +46,17 @@ public final class LensEffects {
 	private static final RenderPipeline GRAIN = pipeline("grain", "In");
 	private static final RenderPipeline DOWNSAMPLE = simplePipeline("downsample");
 	private static final RenderPipeline PEAKING = simplePipeline("peaking");
-	private static final int INFO_SIZE = new Std140SizeCalculator().putVec2().putVec2().get();
+	private static final RenderPipeline COMPOSITE = RenderPipeline.builder(RenderPipelines.POST_PROCESSING_SNIPPET)
+		.withLocation(Identifier.fromNamespaceAndPath(CraftographyClient.MOD_ID, "pipeline/viewfinder"))
+		.withVertexShader(Identifier.withDefaultNamespace("core/screenquad"))
+		.withFragmentShader(Identifier.fromNamespaceAndPath(CraftographyClient.MOD_ID, "post/viewfinder"))
+		.withBindGroupLayout(BindGroupLayout.builder().withSampler("InSampler").withSampler("OriginalSampler")
+			.withUniform("SamplerInfo", UniformType.UNIFORM_BUFFER).build()).build();
+	private static final int INFO_SIZE = new Std140SizeCalculator().putVec2().putVec2().putVec4().get();
 	private static final int UBO_SIZE = new Std140SizeCalculator().putMat4f().putVec4().putVec4().putVec4().putVec4().get();
 
 	private static MappableRingBuffer config, samplerInfo;
-	private static TextureTarget scene, depth, history, output, small;
+	private static TextureTarget scene, depth, history, output, small, untreated;
 	private static boolean historyValid;
 	private static long lastFrameNanos;
 	private static int frame;
@@ -106,6 +113,31 @@ public final class LensEffects {
 			return small;
 		});
 		if (CameraSettings.get().peaking) simplePass("Craftography focus peaking", PEAKING, copyOfMain(main), main, FilterMode.NEAREST);
+		restoreSurroundings(main);
+	}
+
+	/** Restore the untouched world outside the animated LCD, after all photo and live-view processing. */
+	private static void restoreSurroundings(RenderTarget main) {
+		if (untreated == null) return;
+		var window = Minecraft.getInstance().getWindow();
+		var lcd = ViewfinderHud.liveView(window.getGuiScaledWidth(), window.getGuiScaledHeight()).scale(window.getGuiScale());
+		TextureTarget processed = copyOfMain(main);
+		if (samplerInfo == null) samplerInfo = new MappableRingBuffer(() -> "Craftography sampler info", 130, INFO_SIZE);
+		try (GpuBufferSlice.MappedView view = samplerInfo.currentBuffer().map(false, true)) {
+			Std140Builder.intoBuffer(view.data()).putVec2(main.width, main.height).putVec2(main.width, main.height)
+				.putVec4((float) lcd.x() / main.width, 1 - (float) lcd.bottom() / main.height,
+					(float) lcd.right() / main.width, 1 - (float) lcd.y() / main.height);
+		}
+		try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Craftography LCD composite", main.getColorTextureView(), Optional.empty())) {
+			pass.setPipeline(COMPOSITE);
+			RenderSystem.bindDefaultUniforms(pass);
+			pass.setUniform("SamplerInfo", samplerInfo.currentBuffer());
+			var sampler = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST);
+			pass.bindTexture("InSampler", processed.getColorTextureView(), sampler);
+			pass.bindTexture("OriginalSampler", untreated.getColorTextureView(), sampler);
+			pass.draw(3, 1, 0, 0);
+		}
+		samplerInfo.rotate();
 	}
 
 	private static TextureTarget copyOfMain(RenderTarget main) {
@@ -168,8 +200,10 @@ public final class LensEffects {
 		double frameSeconds = lastFrameNanos == 0 ? 1 / 60.0 : Math.min(0.25, (now - lastFrameNanos) / 1e9);
 		lastFrameNanos = now;
 		writeConfig(main, frameSeconds);
+		untreated = fit(untreated, "untreated surroundings", main, false);
 
 		CommandEncoder encoder = RenderSystem.getDevice().createCommandEncoder();
+		encoder.copyTextureToTexture(main.getColorTexture(), untreated.getColorTexture(), 0, 0, 0, 0, 0, main.width, main.height);
 		encoder.copyTextureToTexture(main.getColorTexture(), scene.getColorTexture(), 0, 0, 0, 0, 0, main.width, main.height);
 		var linear = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR);
 		var nearest = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST);

@@ -24,7 +24,7 @@ public final class BodyLayout {
 		lcd = rect(88, 114, 214, 121);
 		body = rect(53, 31, 385, 222);
 		grip = rect(422, 197, 20, 73);
-		parts.put(Part.ZOOM, rect(89, 86, 54, 14));
+		parts.put(Part.ZOOM, rect(103, 75, 32, 32));
 		parts.put(Part.SHUTTER, rect(333, 86, 20, 17));
 		parts.put(Part.TOP_LCD, rect(277, 83, 45, 13));
 		// Each page reuses the DSLR's top encoders, large rear wheel and lower buttons.

@@ -23,13 +23,6 @@ public final class CameraBody {
 	private static final int PRINT = 0xD6DAD8;
 	private CameraBody() { }
 
-	public static void drawSurroundings(GuiGraphicsExtractor g, Rect lcd, float alpha) {
-		int c = Draw.argb(0.65f * alpha, 0x000000);
-		Draw.rect(g, 0, 0, g.guiWidth(), lcd.y(), c);
-		Draw.rect(g, 0, lcd.bottom(), g.guiWidth(), g.guiHeight(), c);
-		Draw.rect(g, 0, lcd.y(), lcd.x(), lcd.bottom(), c);
-		Draw.rect(g, lcd.right(), lcd.y(), g.guiWidth(), lcd.bottom(), c);
-	}
 	private static void text(GuiGraphicsExtractor g, BodyLayout l, String text, double x, double y, int color) {
 		g.text(Minecraft.getInstance().font, text, (int) (l.x + x * l.scale), (int) (l.y + y * l.scale), Draw.argb(1f, color), false);
 	}
@@ -38,22 +31,22 @@ public final class CameraBody {
 		CameraSettings s = CameraSettings.get();
 		Draw.camera(g, "body/camcorder", l.x, l.y, (int) Math.round(480 * l.scale), (int) Math.round(270 * l.scale), -1);
 		Rect zoom = l.get(Part.ZOOM), release = l.get(Part.SHUTTER);
-		Draw.camera(g, "body/zoom_rocker" + (hovered == Part.ZOOM ? "_hl" : ""), zoom.x(), zoom.y(), (int) zoom.w(), (int) zoom.h(), -1);
-		text(g, l, "W", 94, 88, PRINT); text(g, l, "T", 129, 88, PRINT);
+		g.pose().pushMatrix();
+		g.pose().translate((float) (zoom.x() + zoom.w() / 2), (float) (zoom.y() + zoom.h() / 2));
+		g.pose().rotate((float) (Math.log(s.focalLength / 35.0) * 0.7));
+		Draw.camera(g, "body/zoom_rocker" + (hovered == Part.ZOOM ? "_hl" : ""), -zoom.w() / 2, -zoom.h() / 2, (int) zoom.w(), (int) zoom.h(), -1);
+		g.pose().popMatrix();
 		Draw.camera(g, "body/capture_cap" + (hovered == Part.SHUTTER ? "_hl" : ""), release.x(), release.y(), (int) release.w(), (int) release.h(), -1);
-		text(g, l, "SNAP", 328, 76, PRINT);
-		text(g, l, "CRAFTOGRAPHY", 87, 245, 0xB5BDC1);
-
-		text(g, l, pageLabel(), 278, 85, 0x99C593);
+		Draw.camera(g, "body/icon_capture", release.x() + 5, release.y() + 4, 10, 8, Draw.argb(1f, PRINT));
 		// Six small physical mode keys sit beside the LCD.
 		for (Page page : Page.values()) {
 			Rect r = l.pageButton(page.ordinal());
 			Draw.camera(g, "body/button" + (page == BodyControls.page() ? "_on" : ""), r.x(), r.y(), (int) r.w(), (int) r.h(), -1);
-			String label = switch (page) {
-				case EXPOSURE -> "EXP"; case COLOUR -> "WB"; case FOCUS -> "AF";
-				case FRAME -> "Q"; case WORLD -> "CLK"; case DRIVE -> "DR";
+			String icon = switch (page) {
+				case EXPOSURE -> "exposure"; case COLOUR -> "kelvin"; case FOCUS -> "focus";
+				case FRAME -> "frame"; case WORLD -> "clock"; case DRIVE -> "drive";
 			};
-			g.text(font, label, (int) (r.x() + (r.w() - font.width(label)) / 2), (int) r.y() + 3, Draw.argb(1f, page == BodyControls.page() ? AMBER : PRINT), false);
+			Draw.camera(g, "body/icon_" + icon, r.x() + (r.w() - 11) / 2, r.y() + (r.h() - 9) / 2, 11, 9, Draw.argb(1f, page == BodyControls.page() ? AMBER : PRINT));
 		}
 		Rect lcd = l.lcd;
 		// The DSLR has its own deep black LCD surround in the housing sprite.
@@ -92,7 +85,6 @@ public final class CameraBody {
 		}
 	}
 
-	private static String pageLabel() { return BodyControls.page().label; }
 	private static String label(Part p) {
 		return switch (p) {
 			case ISO -> "ISO"; case APERTURE -> "IRIS"; case SHUTTER_SPEED -> "SPEED";
@@ -112,16 +104,12 @@ public final class CameraBody {
 		} else {
 			Draw.camera(g, "body/button" + (c.lit().getAsBoolean() ? "_on" : "") + (hover ? "_hl" : ""), r.x(), r.y(), (int) r.w(), (int) r.h(), -1);
 		}
-		String engraved = switch (c.part()) {
-			case APERTURE -> "Av"; case SHUTTER_SPEED -> "Tv";
-			case FOCUS_MODE -> CameraSettings.get().autofocus ? "AF" : "MF";
-			default -> label(c.part());
-		};
-		if (font.width(engraved) <= r.w() - 2) {
-			g.text(font, engraved, (int) (r.x() + (r.w() - font.width(engraved)) / 2), (int) (r.y() + (r.h() - 8) / 2), Draw.argb(1f, hover ? AMBER : PRINT), false);
-		} else if (c.icon() != null) {
-			Draw.camera(g, "body/icon_" + c.icon().get(), r.x() + r.w() / 2 - 5, r.y() + r.h() / 2 - 4, 11, 9, Draw.argb(1f, PRINT));
-		}
+		String icon = c.icon() == null ? switch (c.part()) {
+			case ISO -> "iso"; case APERTURE -> "iris"; case SHUTTER_SPEED -> "speed";
+			case KELVIN -> "kelvin"; case TINT -> "tint"; case FOCUS, FOCUS_MODE -> "focus";
+			default -> "frame";
+		} : c.icon().get();
+		Draw.camera(g, "body/icon_" + icon, r.x() + r.w() / 2 - 5, r.y() + r.h() / 2 - 4, 11, 9, Draw.argb(1f, hover ? AMBER : PRINT));
 		if (hover && c.value() != null) {
 			String readout = label(c.part()) + "  " + c.value().get().getString();
 			readout = font.plainSubstrByWidth(readout, (int) l.lcd.w() - 12);
