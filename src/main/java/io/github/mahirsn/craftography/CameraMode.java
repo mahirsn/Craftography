@@ -5,7 +5,7 @@ import net.minecraft.util.Util;
 
 /** Whether camera mode is on, plus the open/close transition. */
 public final class CameraMode {
-	private static final float DURATION_MS = 350f;
+	private static final float DURATION_MS = 250f;
 
 	private static boolean open;
 	private static long changedAt;

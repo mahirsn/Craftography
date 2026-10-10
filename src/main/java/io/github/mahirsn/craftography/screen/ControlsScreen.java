@@ -169,6 +169,9 @@ public class ControlsScreen extends Screen {
 
 	@Override
 	public boolean mouseReleased(MouseButtonEvent event) {
+		if (event.button() != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
+		if (dragging instanceof BodyWidget w) w.release();
+		io.github.mahirsn.craftography.hud.HardwareMotion.release();
 		dragging = null;
 		return true;
 	}
@@ -226,6 +229,7 @@ public class ControlsScreen extends Screen {
 	@Override
 	public void removed() {
 		hovered = null;
+		io.github.mahirsn.craftography.hud.HardwareMotion.release();
 		CameraSettings.save();
 	}
 }

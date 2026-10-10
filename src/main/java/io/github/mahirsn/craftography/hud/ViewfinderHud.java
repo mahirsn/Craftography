@@ -25,10 +25,10 @@ public final class ViewfinderHud {
 	private ViewfinderHud() {
 	}
 
-	/** The live view in GUI units, including the open/close animation (it grows from the whole screen). */
+	/** The live view in GUI units, including the camera’s rise from the bottom. */
 	public static Rect liveView(double width, double height) {
-		Rect full = new Rect(0, 0, width, height);
-		return full.lerp(BodyLayout.of(width, height).lcd, CameraMode.progress());
+		Rect lcd = BodyLayout.of(width, height).lcd;
+		return new Rect(lcd.x(), lcd.y() + Math.round((1 - CameraMode.progress()) * height), lcd.w(), lcd.h());
 	}
 
 	/** Frame rectangle in GUI units, including the open/close animation. */
@@ -68,8 +68,17 @@ public final class ViewfinderHud {
 		Font font = Minecraft.getInstance().font;
 		double cx = f.x() + f.w() / 2, cy = f.y() + f.h() / 2;
 		boolean dof = LensEffects.depthOfFieldAvailable();
-		int color = Draw.argb(0.85f * alpha, s.autofocus && dof ? 0x7CFC64 : 0xFFFFFF);
-		if (s.autofocus) Draw.sprite(g, "af", cx - 6.5, cy - 4.5, 13, 9, color);
+		int color = Draw.argb(0.85f * alpha, s.autofocus && dof ? 0xBCD6C4 : 0xFFFFFF);
+		double acquire = HardwareMotion.acquisition();
+		double radius = 1 + (1 - acquire) * .65;
+		if (s.autofocus || HardwareMotion.halfPress()) {
+			double rx = 6.5 * radius, ry = 4.5 * radius;
+			for (int dx : new int[]{-1, 1}) for (int dy : new int[]{-1, 1}) {
+				double xx = cx + dx * rx, yy = cy + dy * ry;
+				Draw.line(g, xx, yy, xx - dx * 3, yy, color);
+				Draw.line(g, xx, yy, xx, yy - dy * 2.5, color);
+			}
+		}
 		String text = dof ? ExposureMath.formatFocus(Autofocus.distance()) : Component.translatable("craftography.dof.off_short").getString();
 		g.text(font, text, (int) Math.round(cx - font.width(text) / 2.0), (int) (cy + 7), color, true);
 	}
@@ -77,10 +86,10 @@ public final class ViewfinderHud {
 	/** Luminance histogram in the top left of the live view. */
 	private static void histogram(GuiGraphicsExtractor g, Rect lv, float alpha) {
 		float[] bins = Meter.histogram();
-		int w = Meter.BINS, h = 28;
-		int x = (int) lv.x() + 6, y = (int) lv.y() + 20;
-		Draw.rect(g, x - 1, y - 1, x + w + 1, y + h + 1, Draw.argb(0.5f * alpha, 0x000000));
-		int bar = Draw.argb(0.85f * alpha, 0xFFFFFF);
+		int w = Meter.BINS, h = 20;
+		int x = (int) lv.x() + 8, y = (int) lv.y() + 38;
+		Draw.rect(g, x - 1, y - 1, x + w + 1, y + h + 1, Draw.argb(0.25f * alpha, 0x000000));
+		int bar = Draw.argb(0.5f * alpha, 0xFFFFFF);
 		for (int i = 0; i < w; i++) {
 			int bh = Math.round(bins[i] * h);
 			if (bh > 0) g.fill(x + i, y + h - bh, x + i + 1, y + h, bar);

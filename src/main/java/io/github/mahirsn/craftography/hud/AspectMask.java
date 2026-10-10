@@ -7,7 +7,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /** The frame rectangle inside the live view and the mask around it. The guides and the shutter crop use the same rectangle. */
 public final class AspectMask {
-	private static final int CORNER_SIZE = 8;
+	private static final int CORNER_SIZE = 5;
 
 	private AspectMask() {
 	}
@@ -34,7 +34,7 @@ public final class AspectMask {
 		Draw.rect(g, area.x(), f.y(), f.x(), f.bottom(), mask);
 		Draw.rect(g, f.right(), f.y(), area.right(), f.bottom(), mask);
 
-		// Corner marks: one sprite (top-left), turned by 90 degree steps for the other corners.
+		// Hairline corner marks, rotated for each corner; clear of the LCD status row.
 		int c = Draw.argb(lineAlpha, 0xFFFFFF);
 		double x1 = f.x() + 2, y1 = f.y() + 2, x2 = f.right() - 2, y2 = f.bottom() - 2;
 		corner(g, x1, y1, 0, c);
@@ -47,7 +47,8 @@ public final class AspectMask {
 		g.pose().pushMatrix();
 		g.pose().translate((float) x, (float) y);
 		g.pose().rotate((float) (Math.PI / 2 * quarterTurns));
-		Draw.sprite(g, "corner", 0, 0, CORNER_SIZE, CORNER_SIZE, color);
+		Draw.line(g, 0, 0, CORNER_SIZE, 0, color);
+		Draw.line(g, 0, 0, 0, CORNER_SIZE, color);
 		g.pose().popMatrix();
 	}
 }

@@ -42,7 +42,11 @@ public final class BodyControls {
 	}
 	private static Page page = Page.EXPOSURE;
 	public static Page page() { return page; }
-	public static void setPage(Page next) { page = next; }
+	private static Page previous = Page.EXPOSURE;
+	private static long pageAt;
+	public static Page previousPage() { return previous; }
+	public static float pageFade() { return (float) Math.clamp((net.minecraft.util.Util.getMillis() - pageAt) / 140.0, 0, 1); }
+	public static void setPage(Page next) { if (next != page) { previous = page; page = next; pageAt = net.minecraft.util.Util.getMillis(); } }
 
 	public enum Kind {
 		/** Lens ring: drag sideways or scroll; double-click resets. */

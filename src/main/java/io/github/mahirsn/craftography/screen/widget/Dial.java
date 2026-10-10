@@ -43,10 +43,12 @@ public class Dial extends Control {
 
 	@Override
 	public void draw(GuiGraphicsExtractor g, boolean hovered) {
-		// The sprite is a 47x25 half circle of radius 22 with its center at (23, 23).
-		int tint = Draw.argb(hovered ? 0.9f : 0.6f, hovered ? 0xFFB000 : 0xFFFFFF);
-		Draw.sprite(g, "dial", cx - 23 * r / 22, cy - 23 * r / 22, (int) Math.round(47 * r / 22), (int) Math.round(25 * r / 22), tint);
+		int tint = Draw.argb(hovered ? 0.75f : 0.35f, 0xD6DAD8);
+		for (int i = 0; i < 32; i++) {
+			double a = Math.PI + i * Math.PI / 32, b = a + Math.PI / 32;
+			Draw.line(g, cx + Math.cos(a) * r, cy + Math.sin(a) * r, cx + Math.cos(b) * r, cy + Math.sin(b) * r, tint);
+		}
 		double rad = Math.toRadians(get.getAsDouble());
-		Draw.line(g, cx + Math.sin(rad) * (r - 5), cy - Math.cos(rad) * (r - 5), cx + Math.sin(rad) * (r + 3), cy - Math.cos(rad) * (r + 3), Draw.argb(1f, 0xFFB000));
+		Draw.line(g, cx + Math.sin(rad) * (r - 5), cy - Math.cos(rad) * (r - 5), cx + Math.sin(rad) * (r + 3), cy - Math.cos(rad) * (r + 3), Draw.argb(1f, 0xD6DAD8));
 	}
 }

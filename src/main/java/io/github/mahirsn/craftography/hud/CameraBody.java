@@ -5,117 +5,139 @@ import io.github.mahirsn.craftography.capture.Shutter;
 import io.github.mahirsn.craftography.hud.BodyControls.Control;
 import io.github.mahirsn.craftography.hud.BodyControls.Page;
 import io.github.mahirsn.craftography.hud.BodyLayout.Part;
-import io.github.mahirsn.craftography.render.LensEffects;
+import io.github.mahirsn.craftography.render.Meter;
 import io.github.mahirsn.craftography.util.Draw;
 import io.github.mahirsn.craftography.util.ExposureMath;
 import io.github.mahirsn.craftography.util.Rect;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.player.PlayerModelType;
-import net.minecraft.world.entity.player.PlayerSkin;
 
-/** First-person rear camera housing. Hardware keys and wheels are drawn where they are actually hit-tested. */
+/** High-resolution rear housing, with independently animated physical hardware. */
 public final class CameraBody {
-	static final int AMBER = 0xFFB000;
+	static final int AMBER = 0xD8A261;
 	private static final int PRINT = 0xD6DAD8;
 	private CameraBody() { }
 
-	private static void text(GuiGraphicsExtractor g, BodyLayout l, String text, double x, double y, int color) {
-		g.text(Minecraft.getInstance().font, text, (int) (l.x + x * l.scale), (int) (l.y + y * l.scale), Draw.argb(1f, color), false);
+	private static void engraving(GuiGraphicsExtractor g, BodyLayout l, String text, double cx, double y, int color) {
+		Font font = Minecraft.getInstance().font;
+		float size = (float)(l.scale * .58);
+		g.pose().pushMatrix();
+		g.pose().translate((float)cx, (float)y);
+		g.pose().scale(size, size);
+		g.text(font,text,-font.width(text)/2,0,color,false);
+		g.pose().popMatrix();
 	}
 	public static void draw(GuiGraphicsExtractor g, BodyLayout l, Part hovered) {
 		Font font = Minecraft.getInstance().font;
 		CameraSettings s = CameraSettings.get();
-		Draw.camera(g, "body/camcorder", l.x, l.y, (int) Math.round(480 * l.scale), (int) Math.round(270 * l.scale), -1);
-		Rect zoom = l.get(Part.ZOOM), release = l.get(Part.SHUTTER);
-		g.pose().pushMatrix();
-		g.pose().translate((float) (zoom.x() + zoom.w() / 2), (float) (zoom.y() + zoom.h() / 2));
-		g.pose().rotate((float) (Math.log(s.focalLength / 35.0) * 0.7));
-		Draw.camera(g, "body/zoom_rocker" + (hovered == Part.ZOOM ? "_hl" : ""), -zoom.w() / 2, -zoom.h() / 2, (int) zoom.w(), (int) zoom.h(), -1);
-		g.pose().popMatrix();
-		Draw.camera(g, "body/capture_cap" + (hovered == Part.SHUTTER ? "_hl" : ""), release.x(), release.y(), (int) release.w(), (int) release.h(), -1);
-		Draw.camera(g, "body/icon_capture", release.x() + 5, release.y() + 4, 10, 8, Draw.argb(1f, PRINT));
-		// Six small physical mode keys sit beside the LCD.
+		Draw.camera(g, "body/camcorder", l.x, l.y, (int) Math.round(480*l.scale), (int) Math.round(270*l.scale), -1);
+		wheel(g, l.get(Part.ZOOM), Part.ZOOM, hovered == Part.ZOOM, 1);
+		Rect zoom=l.get(Part.ZOOM);
+		engraving(g,l,"W / T",zoom.x()+zoom.w()/2,zoom.y()+zoom.h()/2-2*l.scale,Draw.argb(.65f,PRINT));
+		Rect release = l.get(Part.SHUTTER);
+		button(g, release, Part.SHUTTER, hovered == Part.SHUTTER, false, 1, l.scale);
+		// A recessed segmented selector. Its narrow highlight slides between modes.
+		double mode = HardwareMotion.pagePosition();
+		Rect active = l.pageButton(0);
+		Draw.rect(g, active.x()+mode*41*l.scale+3, active.bottom()-2, active.x()+mode*41*l.scale+active.w()-3, active.bottom()-1, 0xFFCBD0D6);
 		for (Page page : Page.values()) {
 			Rect r = l.pageButton(page.ordinal());
-			Draw.camera(g, "body/button" + (page == BodyControls.page() ? "_on" : ""), r.x(), r.y(), (int) r.w(), (int) r.h(), -1);
-			String icon = switch (page) {
-				case EXPOSURE -> "exposure"; case COLOUR -> "kelvin"; case FOCUS -> "focus";
-				case FRAME -> "frame"; case WORLD -> "clock"; case DRIVE -> "drive";
-			};
-			Draw.camera(g, "body/icon_" + icon, r.x() + (r.w() - 11) / 2, r.y() + (r.h() - 9) / 2, 11, 9, Draw.argb(1f, page == BodyControls.page() ? AMBER : PRINT));
+			String name = page.label;
+			engraving(g,l,name,r.x()+r.w()/2,r.y()+4*l.scale,Draw.argb(page == BodyControls.page() ? .95f : .45f, PRINT));
 		}
+		float fade = BodyControls.pageFade();
+		if (fade < 1) for (Part part : BodyControls.previousPage().parts) hardware(g,l,BodyControls.get(part),false,1-fade);
+		for (Part part : BodyControls.page().parts) hardware(g,l,BodyControls.get(part),part == hovered,fade);
 		Rect lcd = l.lcd;
-		// The DSLR has its own deep black LCD surround in the housing sprite.
-		for (Part part : BodyControls.page().parts) hardware(g, l, BodyControls.get(part), part == hovered);
-		// Readouts are on the camera's LCD, while the picture remains inside the display.
-		String info = Math.round(s.focalLength) + "mm  " + ExposureMath.formatAperture(s.aperture) + "  " + ExposureMath.formatShutter(s.shutter) + "  ISO " + s.iso;
-		boolean clockBar = io.github.mahirsn.craftography.screen.ControlsScreen.isOpen() && BodyControls.page() == Page.WORLD;
-		int infoX = clockBar ? (int) l.lcd.right() - font.width(info) - 5 : (int) l.lcd.x() + 5;
-		int infoY = clockBar ? (int) l.lcd.y() + 18 : (int) l.lcd.bottom() - 11;
-		g.text(font, info, infoX, infoY, Draw.argb(0.9f, PRINT), true);
-		rightArm(g, l);
-		String state = Shutter.timerRunning() ? "TIMER " + Shutter.timerSeconds() + "s" : "STBY";
-		g.text(font, state, (int) l.lcd.x() + 5, (int) l.lcd.y() + 5, Draw.argb(1f, Shutter.timerLampLit() ? 0xFF6557 : PRINT), true);
-		if (!LensEffects.depthOfFieldAvailable()) g.text(font, "DOF OFF", (int) l.lcd.right() - font.width("DOF OFF") - 5, (int) l.lcd.y() + 5, Draw.argb(1f, AMBER), true);
-	}
-	private static void rightArm(GuiGraphicsExtractor g, BodyLayout l) {
-		var player = Minecraft.getInstance().player;
-		if (player == null) return;
-		PlayerSkin skin = player.getSkin();
-		Identifier texture = skin.body().texturePath();
-		int armW = skin.model() == PlayerModelType.SLIM ? 3 : 4;
-		// As wide as the grip. The texture is flipped so the hand (the bottom of the arm texture) holds the grip and
-		// the arm leaves the screen at the bottom.
-		int scale = 5, w = armW * scale, h = 12 * scale;
-		int x = (int) l.grip.right() - w + 2, y = (int) l.grip.y() + 16;
-		int side = 6;
-		// Skin layout of the right arm (row v 20..32, sleeve layer v 36..48): outer side, front, inner side (4 wide), back.
-		int inner = 44 + armW, back = 48 + armW;
-		g.blit(RenderPipelines.GUI_TEXTURED, texture, x - side, y, inner, 32, side, h, 4, -12, 64, 64, Draw.argb(1f, 0x8A8A8A));
-		g.blit(RenderPipelines.GUI_TEXTURED, texture, x - side, y, inner, 48, side, h, 4, -12, 64, 64, Draw.argb(1f, 0x8A8A8A));
-		g.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, back, 32, w, h, armW, -12, 64, 64, -1);
-		g.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, back, 48, w, h, armW, -12, 64, 64, -1);
-		// The arm goes down out of the light.
-		for (int i = 0; i < 12; i++) {
-			g.fill(x - side, y + h / 2 + i * 2, x + w, y + h / 2 + i * 2 + 2, Draw.argb(i * 0.035f, 0x000000));
+		Draw.camera(g,"body/glass",lcd.x(),lcd.y(),(int)lcd.w(),(int)lcd.h(),-1);
+		String info = Math.round(s.focalLength)+"mm  "+ExposureMath.formatAperture(s.aperture)+"  "+ExposureMath.formatShutter(s.shutter)+"  ISO"+s.iso;
+		float infoScale=(float)Math.min(1,(lcd.w()-16)/font.width(info));
+		g.pose().pushMatrix();
+		g.pose().translate((float)lcd.x()+8,(float)lcd.bottom()-16);
+		g.pose().scale(infoScale,infoScale);
+		g.text(font,info,0,0,Draw.argb(.9f,PRINT),true);
+		g.pose().popMatrix();
+		String state = Shutter.timerRunning() ? "TIMER "+Shutter.timerSeconds()+"s" : "STBY" + (s.selfTimer > 0 ? "  " + s.selfTimer + "s" : "");
+		g.text(font,state,(int)lcd.x()+8,(int)lcd.y()+8,Draw.argb(1f,Shutter.timerRunning()?AMBER:PRINT),true);
+		String pageName = BodyControls.page().label;
+		g.text(font,pageName,(int)lcd.right()-font.width(pageName)-8,(int)lcd.y()+8,Draw.argb(fade,PRINT),true);
+		if (Shutter.timerRunning()) {
+			float pulse=(float)(.35+.65*(.5+.5*Math.sin(net.minecraft.util.Util.getMillis()/120.0)));
+			Draw.rect(g,release.right()+4,release.y()+6,release.right()+6,release.y()+8,Draw.argb(pulse,AMBER));
 		}
+		ruler(g,l);
 	}
 
 	private static String label(Part p) {
-		return switch (p) {
+		return switch(p) {
 			case ISO -> "ISO"; case APERTURE -> "IRIS"; case SHUTTER_SPEED -> "SPEED";
 			case NOISE -> "GRAIN"; case HISTOGRAM -> "HIST"; case KELVIN -> "WB"; case TINT -> "TINT";
-			case FOCUS -> "FOCUS"; case FOCUS_MODE -> "AF / MF"; case PEAKING -> "PEAK";
+			case FOCUS -> "FOCUS"; case FOCUS_MODE -> "AF/MF"; case PEAKING -> "PEAK";
 			case ASPECT -> "ASPECT"; case GUIDE -> "GUIDE"; case LEVEL -> "LEVEL"; case MASK -> "MASK"; case GRID -> "GRID";
-			case TIME -> "CLOCK"; case WEATHER -> "WEATHER"; case MOON -> "MOON"; case SERVER_TIME -> "RESET"; case LOCK -> "LOCK";
+			case TIME -> "CLOCK"; case WEATHER -> "SKY"; case MOON -> "MOON"; case SERVER_TIME -> "RESET"; case LOCK -> "LOCK";
 			case TIMER -> "TIMER"; case TRIPOD -> "TRIPOD"; case PREVIEW -> "PLAY";
 			default -> "";
 		};
 	}
-	private static void hardware(GuiGraphicsExtractor g, BodyLayout l, Control c, boolean hover) {
-		Rect r = l.get(c.part());
-		Font font = Minecraft.getInstance().font;
-		if (c.step() != null || r.h() / l.scale >= 28) {
-			Draw.camera(g, "body/control_dial" + (hover ? "_hl" : ""), r.x(), r.y(), (int) r.w(), (int) r.h(), -1);
-		} else {
-			Draw.camera(g, "body/button" + (c.lit().getAsBoolean() ? "_on" : "") + (hover ? "_hl" : ""), r.x(), r.y(), (int) r.w(), (int) r.h(), -1);
-		}
-		String icon = c.icon() == null ? switch (c.part()) {
+	private static void wheel(GuiGraphicsExtractor g, Rect r, Part p, boolean hover, float alpha) {
+		Draw.camera(g,"body/control_dial"+(hover?"_hl":""),r.x(),r.y(),(int)r.w(),(int)r.h(),Draw.argb(alpha,0xFFFFFF));
+		g.pose().pushMatrix();
+		g.pose().translate((float)(r.x()+r.w()/2),(float)(r.y()+r.h()/2));
+		g.pose().rotate((float)(HardwareMotion.position(p)*Math.PI/8));
+		Draw.camera(g,"body/control_marks",-r.w()/2,-r.h()/2,(int)r.w(),(int)r.h(),Draw.argb(alpha,0xFFFFFF));
+		g.pose().popMatrix();
+	}
+	private static void button(GuiGraphicsExtractor g, Rect r, Part p, boolean hover, boolean lit, float alpha, double scale) {
+		double inset=HardwareMotion.inset(p)*1.5;
+		Draw.camera(g,"body/"+(p==Part.SHUTTER?"capture_cap":r.h()/scale>=28?"round_button":"button")+(lit?"_on":"")+(hover?"_hl":""),r.x()+inset/2,r.y()+inset,(int)(r.w()-inset),(int)(r.h()-inset),Draw.argb(alpha,inset>.2?0xC0C0C0:0xFFFFFF));
+	}
+	private static void hardware(GuiGraphicsExtractor g, BodyLayout l, Control c, boolean hover, float alpha) {
+		Rect r=l.get(c.part());
+		Font font=Minecraft.getInstance().font;
+		if(c.step()!=null) wheel(g,r,c.part(),hover,alpha);
+		else button(g,r,c.part(),hover,c.lit().getAsBoolean(),alpha,l.scale);
+		String icon=c.icon()==null?switch(c.part()) {
 			case ISO -> "iso"; case APERTURE -> "iris"; case SHUTTER_SPEED -> "speed";
-			case KELVIN -> "kelvin"; case TINT -> "tint"; case FOCUS, FOCUS_MODE -> "focus";
+			case KELVIN -> "kelvin"; case TINT -> "tint"; case FOCUS,FOCUS_MODE -> "focus"; case TIME -> "clock";
 			default -> "frame";
-		} : c.icon().get();
-		Draw.camera(g, "body/icon_" + icon, r.x() + r.w() / 2 - 5, r.y() + r.h() / 2 - 4, 11, 9, Draw.argb(1f, hover ? AMBER : PRINT));
-		if (hover && c.value() != null) {
-			String readout = label(c.part()) + "  " + c.value().get().getString();
-			readout = font.plainSubstrByWidth(readout, (int) l.lcd.w() - 12);
-			int xx = (int) l.lcd.x() + 5, yy = (int) l.lcd.y() + 17;
-			Draw.rect(g, xx - 2, yy - 2, xx + font.width(readout) + 2, yy + 10, 0xCC101318);
-			g.text(font, readout, xx, yy, Draw.argb(1f, PRINT), false);
+		}:c.icon().get();
+		Draw.camera(g,"body/icon_"+icon,r.x()+r.w()/2-5,r.y()+r.h()/2-4+HardwareMotion.inset(c.part()),11,9,Draw.argb(alpha*.8f,PRINT));
+		String name=label(c.part());
+		if (r.y() < l.y + 215*l.scale) engraving(g,l,name,r.x()+r.w()/2,r.bottom()+3*l.scale,Draw.argb(alpha*.6f,PRINT));
+		if(hover&&c.value()!=null) {
+			String readout=name+"  "+c.value().get().getString();
+			readout=font.plainSubstrByWidth(readout,(int)l.lcd.w()-24);
+			int xx=(int)l.lcd.x()+8, yy=(int)l.lcd.y()+24;
+			Draw.rect(g,xx-3,yy-3,xx+font.width(readout)+3,yy+11,0xB0101318);
+			g.text(font,readout,xx,yy,Draw.argb(alpha,PRINT),false);
 		}
+	}
+	/** Scales move beneath a fixed needle; labels fade naturally at the ends. */
+	private static void ruler(GuiGraphicsExtractor g, BodyLayout l) {
+		Page page=BodyControls.page();
+		Part p=page==Page.COLOUR?Part.KELVIN:page==Page.FOCUS?Part.FOCUS:null;
+		boolean ev=page==Page.EXPOSURE;
+		if(p==null&&!ev)return;
+		Rect lcd=l.lcd;
+		Font font=Minecraft.getInstance().font;
+		double cx=lcd.x()+lcd.w()/2, yy=lcd.bottom()-30;
+		double radius=Math.min(75,lcd.w()/2-16);
+		double value=ev?HardwareMotion.exposurePosition(Double.isFinite(Meter.level())?Meter.level():0):HardwareMotion.position(p);
+		int base=(int)Math.floor(value);
+		double spacing=ev?10:8;
+		for(int i=base-10;i<=base+10;i++) {
+			double xx=cx+(i-value)*spacing;
+			double a=Math.max(0,1-Math.abs(xx-cx)/radius)*.55*BodyControls.pageFade();
+			if(a<=0)continue;
+			boolean major=i% (ev?4:5)==0;
+			Draw.line(g,xx,yy,xx,yy+(major?4:2),Draw.argb((float)a,PRINT));
+			if(major) {
+				String text=ev?Integer.toString(i/4):p==Part.KELVIN?Integer.toString(i*100):ExposureMath.formatFocus(Math.pow(1.2,i));
+				if(ev&&Math.abs(i)>12)continue;
+				g.text(font,text,(int)(xx-font.width(text)/2),(int)yy-10,Draw.argb((float)a,PRINT),false);
+			}
+		}
+		Draw.line(g,cx,yy-2,cx,yy+5,Draw.argb(.8f*BodyControls.pageFade(),PRINT));
 	}
 }

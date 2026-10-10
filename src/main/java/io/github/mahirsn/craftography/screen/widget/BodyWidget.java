@@ -9,11 +9,11 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
  * control's functions, which change {@code CameraSettings}. The HUD draws the control, highlighted on hover.
  */
 public class BodyWidget extends Control {
-	/** GUI units of sideways drag per step on a ring, dial or wheel. */
+	/** GUI units of vertical or sideways drag per step on a ring, dial or wheel. */
 	private static final double DRAG_STEP = 6;
 
 	private final BodyControls.Control control;
-	private double lastX;
+	private double lastX, lastY;
 
 	public BodyWidget(Rect area, BodyControls.Control control) {
 		super(area);
@@ -26,16 +26,20 @@ public class BodyWidget extends Control {
 
 	@Override
 	public void press(double x, double y) {
-		lastX = x;
+		lastX = x; lastY = y;
+		io.github.mahirsn.craftography.hud.HardwareMotion.press(control.part());
+		if (control.part() == io.github.mahirsn.craftography.hud.BodyLayout.Part.SHUTTER) return;
 		if (control.click() != null) control.click().run();
 	}
 
 	@Override
 	public void drag(double x, double y) {
 		if (control.step() == null) return;
-		int steps = (int) ((x - lastX) / DRAG_STEP);
+		double delta = Math.abs(y - lastY) > Math.abs(x - lastX) ? lastY - y : x - lastX;
+		int steps = (int) (delta / DRAG_STEP);
 		if (steps == 0) return;
-		lastX += steps * DRAG_STEP;
+		if (Math.abs(y - lastY) > Math.abs(x - lastX)) lastY -= steps * DRAG_STEP;
+		else lastX += steps * DRAG_STEP;
 		control.step().accept(steps);
 	}
 
@@ -51,6 +55,10 @@ public class BodyWidget extends Control {
 	@Override
 	public void reset() {
 		if (control.reset() != null) control.reset().run();
+	}
+
+	public void release() {
+		if (control.part() == io.github.mahirsn.craftography.hud.BodyLayout.Part.SHUTTER) control.click().run();
 	}
 
 	@Override

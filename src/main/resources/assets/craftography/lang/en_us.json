@@ -64,7 +64,7 @@
 	"craftography.focus.manual_at": "MF %s",
 	"craftography.dof.off": "Depth of field is off while a shader pack is in use: the pack does not give the camera the depth of the scene.",
 	"craftography.dof.off_short": "DOF OFF",
-	"craftography.hint.turn": "Drag sideways or scroll to turn. Double-click: default",
+	"craftography.hint.turn": "Drag vertically or scroll to turn. Double-click: default",
 	"craftography.hint.press": "Click to change",
 	"craftography.hint.switch": "Click to flip",
 	"craftography.tab.exposure": "Exposure",

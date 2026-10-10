@@ -21,12 +21,12 @@ public final class BodyLayout {
 		scale = Math.min(width / DESIGN_WIDTH, height / DESIGN_HEIGHT);
 		x = (width - DESIGN_WIDTH * scale) / 2;
 		y = (height - DESIGN_HEIGHT * scale) / 2;
-		lcd = rect(88, 114, 214, 121);
+		lcd = rect(76, 106, 244, 137);
 		body = rect(53, 31, 385, 222);
 		grip = rect(422, 197, 20, 73);
-		parts.put(Part.ZOOM, rect(103, 75, 32, 32));
-		parts.put(Part.SHUTTER, rect(333, 86, 20, 17));
-		parts.put(Part.TOP_LCD, rect(277, 83, 45, 13));
+		parts.put(Part.ZOOM, rect(108, 52, 32, 32));
+		parts.put(Part.SHUTTER, rect(394, 77, 20, 17));
+		parts.put(Part.TOP_LCD, rect(277, 73, 45, 13));
 		// Each page reuses the DSLR's top encoders, large rear wheel and lower buttons.
 		double[][] hardware = {{338, 110, 31, 29}, {344, 158, 52, 52}, {384, 113, 31, 29}, {343, 223, 28, 22}, {386, 223, 28, 22}};
 		for (BodyControls.Page page : BodyControls.Page.values()) {
@@ -37,7 +37,7 @@ public final class BodyLayout {
 	public Rect rect(double dx, double dy, double w, double h) {
 		return new Rect(x + dx * scale, y + dy * scale, w * scale, h * scale);
 	}
-	public Rect pageButton(int index) { return rect(310, 115 + index * 21, 23, 16); }
+	public Rect pageButton(int index) { return rect(76 + index * 41, 87, 40, 14); }
 	public Rect get(Part part) { return parts.get(part); }
 	public static BodyLayout of(double width, double height) { return new BodyLayout(width, height); }
 }

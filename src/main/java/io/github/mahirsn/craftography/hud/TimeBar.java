@@ -9,7 +9,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /** 24 hour bar under the frame. Left end = 06:00 (tick 0), then noon, 18:00, midnight, back to 06:00. */
 public final class TimeBar {
-	private static final int GOLD = 0xFFB000, BLUE = 0x4A7BD0;
+	private static final int GOLD = 0xD8A261, BLUE = 0x8496AC;
 	// Bands in day ticks (05:00 = 23000, 06:00 = 0, 18:00 = 12000).
 	private static final int[][] GOLDEN = {{0, 1000}, {11000, 12500}};
 	private static final int[][] BLUE_HOUR = {{23000, 24000}, {12500, 13500}};
@@ -21,7 +21,7 @@ public final class TimeBar {
 	/** Bar line rectangle (height 0) at the bottom of the live view, in GUI units. Also used to drag the handle. */
 	public static Rect bar(Rect liveView) {
 		double w = liveView.w() - 40;
-		return new Rect(liveView.x() + 20, liveView.bottom() - 8, w, 0);
+		return new Rect(liveView.x() + 20, liveView.bottom() - 31, w, 0);
 	}
 
 	/** Day tick under a mouse x position, snapped to 10 ticks. */
@@ -33,7 +33,7 @@ public final class TimeBar {
 	public static void draw(GuiGraphicsExtractor g, Rect liveView, int dayTicks, boolean overridden, float alpha) {
 		Font font = Minecraft.getInstance().font;
 		Rect bar = bar(liveView);
-		Draw.rect(g, liveView.x(), bar.y() - 15, liveView.right(), liveView.bottom(), Draw.argb(0.45f * alpha, 0x000000));
+		Draw.rect(g, liveView.x(), bar.y() - 15, liveView.right(), bar.y() + 6, Draw.argb(0.45f * alpha, 0x000000));
 		double y = bar.y();
 		Draw.line(g, bar.x(), y, bar.right(), y, Draw.argb(alpha * 0.5f, 0xFFFFFF));
 		band(g, bar, GOLDEN, Draw.argb(alpha * 0.8f, GOLD));

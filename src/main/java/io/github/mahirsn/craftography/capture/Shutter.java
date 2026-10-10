@@ -96,6 +96,7 @@ public final class Shutter {
 
 	private static void shoot() {
 		if (pending) return;
+		io.github.mahirsn.craftography.hud.HardwareMotion.acquire();
 		pending = true;
 		shotAt = Util.getMillis();
 		Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.9f, 0.6f));
@@ -171,12 +172,9 @@ public final class Shutter {
 	public static void draw(GuiGraphicsExtractor g, Rect f, Rect liveView) {
 		long now = Util.getMillis();
 		if (shotAt >= 0 && now - shotAt < CURTAIN_MS) {
-			// Closes in the first half, opens in the second half.
 			double t = (now - shotAt) / (double) CURTAIN_MS;
-			double cover = (t < 0.5 ? t * 2 : (1 - t) * 2) * f.h() / 2;
-			int black = Draw.argb(1f, 0x000000);
-			Draw.rect(g, f.x(), f.y(), f.right(), f.y() + cover, black);
-			Draw.rect(g, f.x(), f.bottom() - cover, f.right(), f.bottom(), black);
+			if (t < .5) Draw.rect(g, liveView.x(), liveView.y(), liveView.right(), liveView.bottom(), Draw.argb(1f, 0x020304));
+			else Draw.rect(g, liveView.x(), liveView.y(), liveView.right(), liveView.bottom(), Draw.argb((float)((1-t)*.22), 0xFFFFFF));
 		}
 		if (preview != null && previewAt >= 0 && now - previewAt < PREVIEW_MS) {
 			NativeImage px = preview.getPixels();

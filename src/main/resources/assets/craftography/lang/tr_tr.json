@@ -64,7 +64,7 @@
 	"craftography.focus.manual_at": "MF %s",
 	"craftography.dof.off": "Bir shader paketi açıkken alan derinliği kapalıdır: paket sahnenin derinliğini kameraya vermez.",
 	"craftography.dof.off_short": "ALAN DER. KAPALI",
-	"craftography.hint.turn": "Çevirmek için yana sürükle ya da kaydır. Çift tık: varsayılan",
+	"craftography.hint.turn": "Çevirmek için dikey sürükle ya da kaydır. Çift tık: varsayılan",
 	"craftography.hint.press": "Değiştirmek için tıkla",
 	"craftography.hint.switch": "Çevirmek için tıkla"
 }
