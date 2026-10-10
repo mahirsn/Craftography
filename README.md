@@ -14,7 +14,11 @@ the time, weather and moon phase you pick are visual only.
   Mouse sensitivity follows the zoom.
 - Camera roll from -90° to +90° with a horizon level.
 - Client-side time of day bar with golden and blue hour bands, visual weather and moon phase.
-- Hold-to-open control panel with sliders, a roll dial and selectors.
+- Pixel-art camera body: a bezel around the frame and a row of camera buttons under it.
+- Interactive mode: a free cursor and a button for every camera action, plus a settings sheet with sliders,
+  a roll dial and selectors. The same sheet opens while the control panel key is held.
+- Tripod: the camera stays where you set it down, and you can walk into the shot.
+- Self-timer: 3 or 10 seconds, with a beep and a blinking lamp.
 - Shutter that saves a PNG cropped to the frame, without HUD, to `screenshots/craftography/`.
 - Settings are saved in `config/craftography.json`. The HUD sprites can be changed with a resource pack
   (`assets/craftography/textures/gui/sprites/viewfinder/`).
@@ -22,19 +26,26 @@ the time, weather and moon phase you pick are visual only.
 
 ## Controls
 
-Only camera mode has a default key. Bind the rest in Options > Controls > Craftography.
+Only F7, F8 and F9 have default keys. Bind the rest in Options > Controls > Craftography.
 
 | Key | Action |
 |---|---|
 | F7 | Camera mode on/off |
+| F8 | Interactive mode on/off (camera mode only; Esc also closes it) |
+| F9 | Tripod: set the camera down here, or give it back to the player (camera mode only) |
 | Scroll | Zoom (Shift: fine) |
 | Alt + Scroll | Roll (Shift: fine) |
 | Ctrl + Scroll | Time of day, 100 ticks per step (Shift: 10) |
 | Middle click | Reset lens to 35 mm |
-| Unbound | Shutter, control panel (hold), next guide, next aspect ratio, next weather, reset roll, back to server time |
+| Unbound | Shutter, control panel (hold), next guide, next aspect ratio, next weather, next self-timer, reset roll, back to server time |
 
 A key you bind works only in camera mode. While camera mode is on, a vanilla key on the same key is blocked.
-In the control panel, drag a control or scroll over it. Double-click a slider, the dial or the time bar to reset it.
+In interactive mode the player does not move or look around. Click a camera button, or scroll over it. Drag the lens
+and time plates sideways, or scroll over them. The menu button opens the settings sheet. Drag a control or scroll over
+it; double-click a slider, the dial, the time bar or a plate to reset it.
+
+To take a photo of yourself: press F9, walk into the frame, set the self-timer and press the shutter. Without a bound
+shutter key, open interactive mode and click the shutter button.
 
 ## Install
 
