@@ -49,5 +49,6 @@
 	"craftography.button.timer": "Zamanlayıcı",
 	"craftography.button.timer.seconds": "%s sn",
 	"craftography.button.menu": "Ayarlar",
-	"craftography.button.shutter.cancel": "Geri sayım sürüyor. İptal için yeniden tıkla."
+	"craftography.button.shutter.cancel": "Geri sayım sürüyor. İptal için yeniden tıkla.",
+	"key.craftography.tripod": "Tripod"
 }

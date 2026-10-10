@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.github.mahirsn.craftography.CameraMode;
 import io.github.mahirsn.craftography.CraftographyClient;
+import io.github.mahirsn.craftography.Tripod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.input.MouseButtonInfo;
@@ -48,7 +49,8 @@ public abstract class MouseHandlerMixin {
 	/** Lower mouse sensitivity in proportion to the zoom, and follow the roll. */
 	@WrapOperation(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;turn(DD)V"))
 	private void craftography$scaleTurn(LocalPlayer player, double xo, double yo, Operation<Void> original) {
-		if (CameraMode.isActive()) {
+		// On a tripod the mouse turns the player, not the camera: no zoom or roll correction.
+		if (CameraMode.isActive() && !Tripod.isActive()) {
 			double base = Math.toRadians(minecraft.options.fov().get()) / 2;
 			double current = Math.toRadians(minecraft.gameRenderer.mainCamera().getFov()) / 2;
 			double factor = Math.tan(current) / Math.tan(base);

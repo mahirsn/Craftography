@@ -49,5 +49,6 @@
 	"craftography.button.timer": "Self-timer",
 	"craftography.button.timer.seconds": "%s s",
 	"craftography.button.menu": "Settings",
-	"craftography.button.shutter.cancel": "Counting down. Click again to cancel."
+	"craftography.button.shutter.cancel": "Counting down. Click again to cancel.",
+	"key.craftography.tripod": "Tripod"
 }

@@ -1,6 +1,7 @@
 package io.github.mahirsn.craftography.hud;
 
 import io.github.mahirsn.craftography.CameraSettings;
+import io.github.mahirsn.craftography.Tripod;
 import io.github.mahirsn.craftography.util.Draw;
 import io.github.mahirsn.craftography.util.Rect;
 import io.github.mahirsn.craftography.util.TimeMath;
@@ -17,7 +18,7 @@ import java.util.Locale;
  */
 public final class CameraBar {
 	public enum Item {
-		ZOOM(49), GUIDE(15), ASPECT(15), WEATHER(15), RESET_ROLL(15), SERVER_TIME(15), TIMER(15), MENU(15), SHUTTER(21), TIME(49);
+		ZOOM(49), GUIDE(15), ASPECT(15), WEATHER(15), RESET_ROLL(15), SERVER_TIME(15), TIMER(15), TRIPOD(15), MENU(15), SHUTTER(21), TIME(49);
 
 		public final int width;
 
@@ -105,6 +106,7 @@ public final class CameraBar {
 			case RESET_ROLL -> "reset_roll";
 			case SERVER_TIME -> "server_time";
 			case TIMER -> s.selfTimer == 0 ? "timer_off" : "timer_" + s.selfTimer;
+			case TRIPOD -> "tripod";
 			default -> "menu";
 		};
 	}
@@ -116,6 +118,7 @@ public final class CameraBar {
 			case RESET_ROLL -> s.roll != 0;
 			case SERVER_TIME -> s.timeOfDay >= 0;
 			case TIMER -> s.selfTimer > 0;
+			case TRIPOD -> Tripod.isActive();
 			default -> false;
 		};
 	}

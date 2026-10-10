@@ -7,6 +7,7 @@ import io.github.mahirsn.craftography.CameraSettings.Aspect;
 import io.github.mahirsn.craftography.CameraSettings.Guide;
 import io.github.mahirsn.craftography.CameraSettings.Weather;
 import io.github.mahirsn.craftography.CraftographyClient;
+import io.github.mahirsn.craftography.Tripod;
 import io.github.mahirsn.craftography.capture.Shutter;
 import io.github.mahirsn.craftography.hud.CameraBar;
 import io.github.mahirsn.craftography.hud.AspectMask;
@@ -184,6 +185,8 @@ public class ControlsScreen extends Screen {
 				case TIMER -> BarButton.button(area, paint, () -> tooltip("craftography.button.timer", CraftographyClient.timerKey,
 					s.selfTimer == 0 ? Component.translatable("options.off") : Component.translatable("craftography.button.timer.seconds", s.selfTimer)),
 					() -> CraftographyClient.change(CameraSettings::cycleTimer));
+				case TRIPOD -> BarButton.button(area, paint, () -> tooltip("key.craftography.tripod", CraftographyClient.tripodKey,
+					Component.translatable(Tripod.isActive() ? "options.on" : "options.off")), Tripod::toggle);
 				case MENU -> BarButton.button(area, paint, () -> tooltip("craftography.button.menu", CraftographyClient.panelKey, null),
 					() -> sheetOpen = !sheetOpen);
 				case SHUTTER -> BarButton.button(area, paint, () -> tooltip("key.craftography.shutter", CraftographyClient.shutterKey,

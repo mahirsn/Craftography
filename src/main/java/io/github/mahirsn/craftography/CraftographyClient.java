@@ -36,6 +36,7 @@ public class CraftographyClient implements ClientModInitializer {
 	public static KeyMapping panelKey;
 	public static KeyMapping shutterKey;
 	public static KeyMapping timerKey;
+	public static KeyMapping tripodKey;
 
 	/**
 	 * Keys that only work in camera mode, with their actions. Vanilla keys bound to the same key are blocked while
@@ -56,6 +57,7 @@ public class CraftographyClient implements ClientModInitializer {
 		panelKey = cameraKey("panel", GLFW.GLFW_KEY_UNKNOWN, () -> openScreen(true));
 		shutterKey = cameraKey("shutter", GLFW.GLFW_KEY_UNKNOWN, Shutter::press);
 		timerKey = cameraKey("timer", GLFW.GLFW_KEY_UNKNOWN, () -> change(CameraSettings::cycleTimer));
+		tripodKey = cameraKey("tripod", GLFW.GLFW_KEY_F9, Tripod::toggle);
 
 		ClientTickEvents.START_CLIENT_TICK.register(CraftographyClient::onTick);
 	}
@@ -97,13 +99,18 @@ public class CraftographyClient implements ClientModInitializer {
 		if (mc.level == null || mc.player == null) {
 			CameraMode.reset();
 			Shutter.cancelTimer();
+			Tripod.release();
 			return;
 		}
 		while (toggleKey.consumeClick()) {
 			CameraMode.toggle();
 		}
 		boolean open = CameraMode.isOpen();
-		if (!open) Shutter.cancelTimer();
+		if (!open) {
+			Shutter.cancelTimer();
+			Tripod.release();
+		}
+		Tripod.tick(mc);
 		for (Map.Entry<KeyMapping, Runnable> e : CAMERA_KEYS.entrySet()) {
 			while (e.getKey().consumeClick()) {
 				// Not in camera mode: the click is dropped.
