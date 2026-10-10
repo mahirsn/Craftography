@@ -2,6 +2,7 @@ package io.github.mahirsn.craftography;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mahirsn.craftography.util.LensMath;
+import io.github.mahirsn.craftography.util.TimeMath;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -24,6 +25,8 @@ public class CraftographyClient implements ClientModInitializer {
 	public static KeyMapping guideKey;
 	public static KeyMapping aspectKey;
 	public static KeyMapping resetRollKey;
+	public static KeyMapping serverTimeKey;
+	public static KeyMapping weatherKey;
 
 	/** Keys that only work in camera mode; vanilla keys bound to the same key are blocked while camera mode is on. */
 	private static List<KeyMapping> cameraKeys;
@@ -35,7 +38,9 @@ public class CraftographyClient implements ClientModInitializer {
 		guideKey = register("guide", GLFW.GLFW_KEY_G);
 		aspectKey = register("aspect", GLFW.GLFW_KEY_B);
 		resetRollKey = register("reset_roll", GLFW.GLFW_KEY_R);
-		cameraKeys = List.of(guideKey, aspectKey, resetRollKey);
+		serverTimeKey = register("server_time", GLFW.GLFW_KEY_T);
+		weatherKey = register("weather", GLFW.GLFW_KEY_Y);
+		cameraKeys = List.of(guideKey, aspectKey, resetRollKey, serverTimeKey, weatherKey);
 
 		ClientTickEvents.START_CLIENT_TICK.register(CraftographyClient::onTick);
 	}
@@ -75,6 +80,14 @@ public class CraftographyClient implements ClientModInitializer {
 			CameraSettings.get().roll = 0;
 			changed = true;
 		}
+		while (serverTimeKey.consumeClick()) {
+			CameraSettings.get().timeOfDay = -1;
+			changed = true;
+		}
+		while (weatherKey.consumeClick()) {
+			CameraSettings.get().cycleWeather();
+			changed = true;
+		}
 		if (changed) CameraSettings.save();
 		blockVanillaKeys(mc);
 	}
@@ -87,6 +100,10 @@ public class CraftographyClient implements ClientModInitializer {
 		return isDown(GLFW.GLFW_KEY_LEFT_ALT) || isDown(GLFW.GLFW_KEY_RIGHT_ALT);
 	}
 
+	static boolean ctrlDown() {
+		return isDown(GLFW.GLFW_KEY_LEFT_CONTROL) || isDown(GLFW.GLFW_KEY_RIGHT_CONTROL);
+	}
+
 	static boolean shiftDown() {
 		return isDown(GLFW.GLFW_KEY_LEFT_SHIFT) || isDown(GLFW.GLFW_KEY_RIGHT_SHIFT);
 	}
@@ -94,7 +111,10 @@ public class CraftographyClient implements ClientModInitializer {
 	/** Mouse wheel in camera mode. {@code amount} is positive when scrolling up. */
 	public static void onScroll(double amount) {
 		CameraSettings s = CameraSettings.get();
-		if (altDown()) {
+		if (ctrlDown()) {
+			int start = s.timeOfDay >= 0 ? s.timeOfDay : TimeMath.dayTicks(CameraMode.serverClockTicks);
+			s.timeOfDay = TimeMath.dayTicks(start + Math.round(amount * (shiftDown() ? 10 : 100)));
+		} else if (altDown()) {
 			s.addRoll(amount * (shiftDown() ? 0.1 : 1));
 		} else {
 			s.focalLength = LensMath.zoom(s.focalLength, shiftDown() ? amount / 4 : amount);

@@ -10,5 +10,11 @@
 	"craftography.guide.diagonals": "Diagonals",
 	"craftography.guide.quarters": "Quarters",
 	"craftography.aspect.free": "Free",
-	"key.craftography.reset_roll": "Reset roll"
+	"key.craftography.reset_roll": "Reset roll",
+	"key.craftography.server_time": "Back to server time",
+	"key.craftography.weather": "Next weather",
+	"craftography.weather.server": "Server weather",
+	"craftography.weather.clear": "Clear",
+	"craftography.weather.rain": "Rain",
+	"craftography.weather.thunder": "Thunder"
 }

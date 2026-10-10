@@ -3,6 +3,7 @@ package io.github.mahirsn.craftography;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.github.mahirsn.craftography.util.LensMath;
+import io.github.mahirsn.craftography.util.TimeMath;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.IOException;
@@ -42,6 +43,14 @@ public final class CameraSettings {
 
 	public static final double MAX_ROLL = 90;
 
+	public enum Weather {
+		SERVER, CLEAR, RAIN, THUNDER;
+
+		public String translationKey() {
+			return "craftography.weather." + name().toLowerCase(java.util.Locale.ROOT);
+		}
+	}
+
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("craftography.json");
 	private static CameraSettings instance = new CameraSettings();
@@ -53,6 +62,11 @@ public final class CameraSettings {
 	public double focalLength = LensMath.DEFAULT_MM;
 	/** Camera roll in degrees, positive = clockwise. */
 	public double roll = 0;
+	/** Time of day the client sees, in day ticks, or -1 for the server time. */
+	public int timeOfDay = -1;
+	public Weather weather = Weather.SERVER;
+	/** Keep the time and weather override after camera mode closes. */
+	public boolean lockTimeWeather = false;
 
 	public static CameraSettings get() {
 		return instance;
@@ -84,6 +98,8 @@ public final class CameraSettings {
 		if (guide == null) guide = Guide.THIRDS;
 		maskOpacity = clamp(maskOpacity, 0f, 1f);
 		guideOpacity = clamp(guideOpacity, 0f, 1f);
+		if (weather == null) weather = Weather.SERVER;
+		if (timeOfDay < -1 || timeOfDay >= TimeMath.DAY) timeOfDay = -1;
 		roll = Double.isNaN(roll) ? 0 : Math.max(-MAX_ROLL, Math.min(MAX_ROLL, roll));
 		focalLength = Double.isNaN(focalLength) ? LensMath.DEFAULT_MM : LensMath.clamp(focalLength);
 		return this;
@@ -98,6 +114,16 @@ public final class CameraSettings {
 		double next = Math.max(-MAX_ROLL, Math.min(MAX_ROLL, roll + degrees));
 		if (roll != 0 && (Math.signum(next) != Math.signum(roll) || Math.abs(next) < 0.25)) next = 0;
 		roll = next;
+	}
+
+	/** Whether the time and weather settings apply now. */
+	public boolean overridesApply() {
+		return CameraMode.isActive() || lockTimeWeather;
+	}
+
+	public void cycleWeather() {
+		Weather[] values = Weather.values();
+		weather = values[(weather.ordinal() + 1) % values.length];
 	}
 
 	public void cycleAspect() {

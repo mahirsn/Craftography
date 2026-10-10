@@ -11,6 +11,9 @@ public final class CameraMode {
 	private static long changedAt;
 	private static float fromProgress;
 
+	/** Last overworld clock value received from the server, before any override. */
+	public static volatile long serverClockTicks;
+
 	// Smoothed values that follow the settings.
 	private static double focalLength = Double.NaN;
 	private static double roll;

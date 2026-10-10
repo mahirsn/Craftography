@@ -10,5 +10,11 @@
 	"craftography.guide.diagonals": "Köşegenler",
 	"craftography.guide.quarters": "Dörtlü bölme",
 	"craftography.aspect.free": "Serbest",
-	"key.craftography.reset_roll": "Eğimi sıfırla"
+	"key.craftography.reset_roll": "Eğimi sıfırla",
+	"key.craftography.server_time": "Sunucu saatine dön",
+	"key.craftography.weather": "Sonraki hava",
+	"craftography.weather.server": "Sunucu havası",
+	"craftography.weather.clear": "Açık",
+	"craftography.weather.rain": "Yağmur",
+	"craftography.weather.thunder": "Fırtına"
 }
