@@ -16,7 +16,6 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
-import java.util.Locale;
 
 /** First-person rear camera housing. Hardware keys and wheels are drawn where they are actually hit-tested. */
 public final class CameraBody {
@@ -40,27 +39,27 @@ public final class CameraBody {
 		Draw.camera(g, "body/camcorder", l.x, l.y, (int) Math.round(480 * l.scale), (int) Math.round(270 * l.scale), -1);
 		Rect zoom = l.get(Part.ZOOM), release = l.get(Part.SHUTTER);
 		Draw.camera(g, "body/zoom_rocker" + (hovered == Part.ZOOM ? "_hl" : ""), zoom.x(), zoom.y(), (int) zoom.w(), (int) zoom.h(), -1);
-		text(g, l, "W", 215, 70, PRINT); text(g, l, "T", 250, 70, PRINT);
+		text(g, l, "W", 94, 88, PRINT); text(g, l, "T", 129, 88, PRINT);
 		Draw.camera(g, "body/capture_cap" + (hovered == Part.SHUTTER ? "_hl" : ""), release.x(), release.y(), (int) release.w(), (int) release.h(), -1);
-		text(g, l, "SNAP", 274, 53, PRINT);
-		text(g, l, "CRAFTOGRAPHY", 166, 59, 0xB5BDC1);
+		text(g, l, "SNAP", 328, 76, PRINT);
+		text(g, l, "CRAFTOGRAPHY", 87, 245, 0xB5BDC1);
 
-		text(g, l, pageLabel(), 334, 65, 0x99C593);
-		// The six small physical mode keys live in the LCD's lower bezel, not in a floating settings panel.
+		text(g, l, pageLabel(), 278, 85, 0x99C593);
+		// Six small physical mode keys sit beside the LCD.
 		for (Page page : Page.values()) {
 			Rect r = l.pageButton(page.ordinal());
 			Draw.camera(g, "body/button" + (page == BodyControls.page() ? "_on" : ""), r.x(), r.y(), (int) r.w(), (int) r.h(), -1);
 			String label = switch (page) {
-				case EXPOSURE -> "EXP"; case COLOUR -> "WB"; case FOCUS -> "FOC";
-				case FRAME -> "FRM"; case WORLD -> "TIME"; case DRIVE -> "DRV";
+				case EXPOSURE -> "EXP"; case COLOUR -> "WB"; case FOCUS -> "AF";
+				case FRAME -> "Q"; case WORLD -> "CLK"; case DRIVE -> "DR";
 			};
 			g.text(font, label, (int) (r.x() + (r.w() - font.width(label)) / 2), (int) r.y() + 3, Draw.argb(1f, page == BodyControls.page() ? AMBER : PRINT), false);
 		}
 		Rect lcd = l.lcd;
-		Draw.camera(g, "body/bezel", lcd.x() - 8, lcd.y() - 8, (int) lcd.w() + 16, (int) lcd.h() + 16, -1);
+		// The DSLR has its own deep black LCD surround in the housing sprite.
 		for (Part part : BodyControls.page().parts) hardware(g, l, BodyControls.get(part), part == hovered);
 		// Readouts are on the camera's LCD, while the picture remains inside the display.
-		String info = Math.round(s.focalLength) + "mm  " + ExposureMath.formatAperture(s.aperture) + "  " + ExposureMath.formatShutter(s.shutter);
+		String info = Math.round(s.focalLength) + "mm  " + ExposureMath.formatAperture(s.aperture) + "  " + ExposureMath.formatShutter(s.shutter) + "  ISO " + s.iso;
 		boolean clockBar = io.github.mahirsn.craftography.screen.ControlsScreen.isOpen() && BodyControls.page() == Page.WORLD;
 		int infoX = clockBar ? (int) l.lcd.right() - font.width(info) - 5 : (int) l.lcd.x() + 5;
 		int infoY = clockBar ? (int) l.lcd.y() + 18 : (int) l.lcd.bottom() - 11;
@@ -108,18 +107,27 @@ public final class CameraBody {
 	private static void hardware(GuiGraphicsExtractor g, BodyLayout l, Control c, boolean hover) {
 		Rect r = l.get(c.part());
 		Font font = Minecraft.getInstance().font;
-		g.text(font, label(c.part()), (int) r.x(), (int) r.y(), Draw.argb(1f, 0xA7B0B5), false);
-		if (c.step() != null) {
-			Draw.camera(g, "body/wheel" + (hover ? "_hl" : ""), r.x(), r.y() + 21, (int) r.w(), 6, -1);
-			String value = c.value().get().getString().replace("ISO ", "").replace(" (server)", "");
-			value = font.plainSubstrByWidth(value, (int) r.w());
-			Draw.rect(g, r.x() - 1, r.y() + 9, r.right() + 1, r.y() + 19, 0xFF111916);
-			g.text(font, value, (int) r.x(), (int) r.y() + 10, Draw.argb(1f, hover ? AMBER : 0xA9C8A5), false);
-		} else if (c.kind() == BodyControls.Kind.SWITCH) {
-			Draw.camera(g, "body/switch_" + (CameraSettings.get().autofocus ? "af" : "mf") + (hover ? "_hl" : ""), r.x(), r.y() + 11, (int) r.w(), (int) (12 * l.scale), -1);
+		if (c.step() != null || r.h() / l.scale >= 28) {
+			Draw.camera(g, "body/control_dial" + (hover ? "_hl" : ""), r.x(), r.y(), (int) r.w(), (int) r.h(), -1);
 		} else {
-			Draw.camera(g, "body/button" + (c.lit().getAsBoolean() ? "_on" : "") + (hover ? "_hl" : ""), r.x() + r.w() / 2 - 10, r.y() + 11, 20, 16, -1);
-			if (c.icon() != null) Draw.camera(g, "body/icon_" + c.icon().get(), r.x() + r.w() / 2 - 5, r.y() + 15, 11, 9, Draw.argb(1f, PRINT));
+			Draw.camera(g, "body/button" + (c.lit().getAsBoolean() ? "_on" : "") + (hover ? "_hl" : ""), r.x(), r.y(), (int) r.w(), (int) r.h(), -1);
+		}
+		String engraved = switch (c.part()) {
+			case APERTURE -> "Av"; case SHUTTER_SPEED -> "Tv";
+			case FOCUS_MODE -> CameraSettings.get().autofocus ? "AF" : "MF";
+			default -> label(c.part());
+		};
+		if (font.width(engraved) <= r.w() - 2) {
+			g.text(font, engraved, (int) (r.x() + (r.w() - font.width(engraved)) / 2), (int) (r.y() + (r.h() - 8) / 2), Draw.argb(1f, hover ? AMBER : PRINT), false);
+		} else if (c.icon() != null) {
+			Draw.camera(g, "body/icon_" + c.icon().get(), r.x() + r.w() / 2 - 5, r.y() + r.h() / 2 - 4, 11, 9, Draw.argb(1f, PRINT));
+		}
+		if (hover && c.value() != null) {
+			String readout = label(c.part()) + "  " + c.value().get().getString();
+			readout = font.plainSubstrByWidth(readout, (int) l.lcd.w() - 12);
+			int xx = (int) l.lcd.x() + 5, yy = (int) l.lcd.y() + 17;
+			Draw.rect(g, xx - 2, yy - 2, xx + font.width(readout) + 2, yy + 10, 0xCC101318);
+			g.text(font, readout, xx, yy, Draw.argb(1f, PRINT), false);
 		}
 	}
 }

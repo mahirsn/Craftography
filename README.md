@@ -8,8 +8,8 @@ the time, weather and moon phase you pick are visual only.
 
 ## Features
 
-- A retro pixel-art camera seen from behind in your hand: a boxy grey body, receding lens barrel, rear
-  eyepiece, raised LCD bezel, W/T zoom rocker and red capture button. Your hand holds the right grip while you look into the LCD.
+- A pixel-art DSLR seen from behind in your hand: a black sculpted body, raised optical viewfinder,
+  hinged LCD, textured rubber grip and circular rear control wheel. Your hand holds the right grip while you look into the LCD.
 - Exposure in real stops: ISO 100-12800, aperture f/1.4-f/22 and shutter speed 1/4000-1 s. The defaults
   (ISO 100, f/5.6, 1/125) leave the game's picture as it is. A centre-weighted light meter and a histogram help.
 - White balance in kelvin (2500-10000 K) with a green-magenta tint.
@@ -22,8 +22,8 @@ the time, weather and moon phase you pick are visual only.
 - Lens from 10 mm to 200 mm (full-frame, vertical FOV). Mouse sensitivity follows the zoom.
 - Camera roll from -90° to +90° with an electronic level.
 - Client-side time of day, visual weather and moon phase.
-- F8 frees the cursor to use the camera's physical controls. Six mode keys on the LCD bezel select Exposure,
-  White balance, Focus, Frame, Time/weather or Timer/tripod. The rear wheels and switches show that mode's settings.
+- F8 frees the cursor to use the camera's physical controls. Six mode keys beside the LCD select Exposure,
+  White balance, Focus, Frame, Time/weather or Timer/tripod. The rear dials and buttons adjust that mode's settings; hover a control to read its value.
   Buttons, wheels, keys and the time bar all read the same values.
 - Tripod: the camera stays where you set it down, and you can walk into the shot.
 - Self-timer: 3 or 10 seconds, with a beep and a blinking lamp.
@@ -51,7 +51,7 @@ Only F7, F8 and F9 have default keys. Bind the rest in Options > Controls > Craf
 
 A key you bind works only in camera mode. While camera mode is on, a vanilla key on the same key is blocked.
 
-In interactive mode the player does not move or look around. Click a mode key on the lower LCD bezel, then drag
+In interactive mode the player does not move or look around. Click a mode key beside the LCD, then drag
 or scroll the rear wheels and click the physical switches/buttons. Double-click a wheel to reset it.
 Click W/T to zoom out/in, or use the wheel over the rocker. Press the red SNAP button to take a photo.
 The LCD time bar and horizon level can also be dragged. F8 or Esc returns to aiming the camera.
@@ -73,5 +73,5 @@ The jar is written to `build/libs/`.
 
 ## License
 
-MIT. The LCD surround sprite is adapted from [Exposure](https://github.com/mortuusars/Exposure) by
+MIT. The included legacy LCD surround sprite is adapted from [Exposure](https://github.com/mortuusars/Exposure) by
 mortuusars (MIT); see `THIRD_PARTY_NOTICES.md`.

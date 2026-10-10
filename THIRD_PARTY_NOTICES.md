@@ -2,7 +2,7 @@
 
 ## Exposure
 
-The camcorder LCD surround sprite of Craftography is adapted from Exposure by mortuusars
+The included legacy LCD surround sprite of Craftography is adapted from Exposure by mortuusars
 (https://github.com/mortuusars/Exposure, branch `1.21.1`). Exposure is published under the MIT license, which
 covers its code and its assets.
 
@@ -10,7 +10,7 @@ Adapted file, in `src/main/resources/assets/craftography/textures/gui/sprites/bo
 
 | Craftography file | Exposure source (`common/src/main/resources/assets/exposure/textures/gui/`) | Change |
 |---|---|---|
-| `bezel.png` | `viewfinder/viewfinder.png` | border halved, centre removed, nine-sliced; used as the camcorder LCD surround |
+| `bezel.png` | `viewfinder/viewfinder.png` | border halved, centre removed, nine-sliced; retained as a legacy LCD surround |
 
 All other sprites of Craftography (camera body, lens, dials, buttons, icons) are original.
 

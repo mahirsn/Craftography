@@ -21,22 +21,23 @@ public final class BodyLayout {
 		scale = Math.min(width / DESIGN_WIDTH, height / DESIGN_HEIGHT);
 		x = (width - DESIGN_WIDTH * scale) / 2;
 		y = (height - DESIGN_HEIGHT * scale) / 2;
-		lcd = rect(92, 100, 224, 114);
-		body = rect(78, 47, 321, 207);
-		grip = rect(374, 169, 30, 101);
-		parts.put(Part.ZOOM, rect(210, 68, 54, 14));
-		parts.put(Part.SHUTTER, rect(280, 65, 20, 17));
-		parts.put(Part.TOP_LCD, rect(331, 64, 47, 12));
-		// Each page shares the same five physical control positions on the rear body.
+		lcd = rect(88, 114, 214, 121);
+		body = rect(53, 31, 385, 222);
+		grip = rect(422, 197, 20, 73);
+		parts.put(Part.ZOOM, rect(89, 86, 54, 14));
+		parts.put(Part.SHUTTER, rect(333, 86, 20, 17));
+		parts.put(Part.TOP_LCD, rect(277, 83, 45, 13));
+		// Each page reuses the DSLR's top encoders, large rear wheel and lower buttons.
+		double[][] hardware = {{338, 110, 31, 29}, {344, 158, 52, 52}, {384, 113, 31, 29}, {343, 223, 28, 22}, {386, 223, 28, 22}};
 		for (BodyControls.Page page : BodyControls.Page.values()) {
 			Part[] row = page.parts;
-			for (int i = 0; i < row.length; i++) parts.put(row[i], rect(334, 77 + 35 * i, 39, 31));
+			for (int i = 0; i < row.length; i++) parts.put(row[i], rect(hardware[i][0], hardware[i][1], hardware[i][2], hardware[i][3]));
 		}
 	}
 	public Rect rect(double dx, double dy, double w, double h) {
 		return new Rect(x + dx * scale, y + dy * scale, w * scale, h * scale);
 	}
-	public Rect pageButton(int index) { return rect(91 + index * 37, 227, 32, 14); }
+	public Rect pageButton(int index) { return rect(310, 115 + index * 21, 23, 16); }
 	public Rect get(Part part) { return parts.get(part); }
 	public static BodyLayout of(double width, double height) { return new BodyLayout(width, height); }
 }
