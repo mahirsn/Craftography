@@ -38,14 +38,14 @@ public class CraftographyClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		CameraSettings.load();
-		toggleKey = register("toggle", GLFW.GLFW_KEY_V);
-		guideKey = register("guide", GLFW.GLFW_KEY_G);
-		aspectKey = register("aspect", GLFW.GLFW_KEY_B);
-		resetRollKey = register("reset_roll", GLFW.GLFW_KEY_R);
-		serverTimeKey = register("server_time", GLFW.GLFW_KEY_T);
-		weatherKey = register("weather", GLFW.GLFW_KEY_Y);
-		panelKey = register("panel", GLFW.GLFW_KEY_TAB);
-		shutterKey = register("shutter", GLFW.GLFW_KEY_SPACE);
+		toggleKey = register("toggle", GLFW.GLFW_KEY_F7);
+		guideKey = register("guide", GLFW.GLFW_KEY_UNKNOWN);
+		aspectKey = register("aspect", GLFW.GLFW_KEY_UNKNOWN);
+		resetRollKey = register("reset_roll", GLFW.GLFW_KEY_UNKNOWN);
+		serverTimeKey = register("server_time", GLFW.GLFW_KEY_UNKNOWN);
+		weatherKey = register("weather", GLFW.GLFW_KEY_UNKNOWN);
+		panelKey = register("panel", GLFW.GLFW_KEY_UNKNOWN);
+		shutterKey = register("shutter", GLFW.GLFW_KEY_UNKNOWN);
 		cameraKeys = List.of(guideKey, aspectKey, resetRollKey, serverTimeKey, weatherKey, panelKey, shutterKey);
 
 		ClientTickEvents.START_CLIENT_TICK.register(CraftographyClient::onTick);

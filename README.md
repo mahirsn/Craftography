@@ -22,23 +22,18 @@ the time, weather and moon phase you pick are visual only.
 
 ## Controls
 
-All keys can be changed in Options > Controls > Craftography.
+Only camera mode has a default key. Bind the rest in Options > Controls > Craftography.
 
 | Key | Action |
 |---|---|
-| V | Camera mode on/off |
+| F7 | Camera mode on/off |
 | Scroll | Zoom (Shift: fine) |
 | Alt + Scroll | Roll (Shift: fine) |
 | Ctrl + Scroll | Time of day, 100 ticks per step (Shift: 10) |
 | Middle click | Reset lens to 35 mm |
-| R | Reset roll |
-| G | Next composition guide |
-| B | Next aspect ratio |
-| Y | Next weather |
-| T | Back to server time |
-| Tab (hold) | Control panel |
-| Space | Shutter |
+| Unbound | Shutter, control panel (hold), next guide, next aspect ratio, next weather, reset roll, back to server time |
 
+A key you bind works only in camera mode. While camera mode is on, a vanilla key on the same key is blocked.
 In the control panel, drag a control or scroll over it. Double-click a slider, the dial or the time bar to reset it.
 
 ## Install
