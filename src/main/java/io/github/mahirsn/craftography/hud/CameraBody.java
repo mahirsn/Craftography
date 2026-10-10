@@ -182,7 +182,12 @@ public final class CameraBody {
 		g.disableScissor();
 		// Index mark: amber line on the ring's near edge.
 		g.fill((int) cx, (int) r.bottom() - 2, (int) cx + 1, (int) r.bottom(), Draw.argb(1f, AMBER));
-		if (part == Part.FOCUS && s.autofocus) g.text(font, "AF", (int) r.right() - 4 - font.width("AF"), textY, Draw.argb(1f, AMBER), false);
+		if (part == Part.FOCUS && s.autofocus) {
+			// The AF mark sits on its own patch of the ring, over the scale.
+			int ax = (int) r.right() - 4 - font.width("AF");
+			g.fill(ax - 2, (int) r.y() + 1, (int) r.right() - 2, (int) r.bottom() - 1, Draw.argb(1f, 0x1A1918));
+			g.text(font, "AF", ax, textY, Draw.argb(1f, AMBER), false);
+		}
 	}
 
 	private static void icon(GuiGraphicsExtractor g, String name, double x, double y, int color) {
