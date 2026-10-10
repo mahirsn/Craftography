@@ -102,9 +102,12 @@ public class ControlsScreen extends Screen {
 			List.of(Component.translatable("options.off"), Component.translatable("options.on")),
 			() -> s.lockTimeWeather ? 1 : 0, i -> s.lockTimeWeather = i == 1, null));
 		y += ROW;
-		double half = (w - 12) / 2;
-		controls.add(opacity(new Rect(x, y, half, ROW - 6), "craftography.panel.mask_opacity", () -> s.maskOpacity, v -> s.maskOpacity = v, 0.75f));
-		controls.add(opacity(new Rect(x + half + 12, y, half, ROW - 6), "craftography.panel.guide_opacity", () -> s.guideOpacity, v -> s.guideOpacity = v, 0.45f));
+		double third = (w - 24) / 3;
+		controls.add(opacity(new Rect(x, y, third, ROW - 6), "craftography.panel.mask_opacity", () -> s.maskOpacity, v -> s.maskOpacity = v, 0.75f));
+		controls.add(opacity(new Rect(x + third + 12, y, third, ROW - 6), "craftography.panel.guide_opacity", () -> s.guideOpacity, v -> s.guideOpacity = v, 0.45f));
+		controls.add(new SegmentedSelector(new Rect(x + 2 * (third + 12), y, third, ROW - 4), Component.translatable("craftography.panel.preview"),
+			List.of(Component.translatable("options.off"), Component.translatable("options.on")),
+			() -> s.showPreview ? 1 : 0, i -> s.showPreview = i == 1, null));
 	}
 
 	private interface FloatSetter {

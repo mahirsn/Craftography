@@ -25,5 +25,9 @@
 	"craftography.panel.lock": "Keep after closing",
 	"craftography.panel.mask_opacity": "Mask",
 	"craftography.panel.guide_opacity": "Guide lines",
-	"craftography.panel.server": "Server"
+	"craftography.panel.server": "Server",
+	"key.craftography.shutter": "Shutter",
+	"craftography.hint.shoot": "[%s] shoot",
+	"craftography.panel.preview": "Preview",
+	"craftography.shutter.failed": "Craftography: could not save the photo (%s)"
 }

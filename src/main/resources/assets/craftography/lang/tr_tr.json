@@ -25,5 +25,9 @@
 	"craftography.panel.lock": "Kapatınca koru",
 	"craftography.panel.mask_opacity": "Maske",
 	"craftography.panel.guide_opacity": "Kılavuz çizgisi",
-	"craftography.panel.server": "Sunucu"
+	"craftography.panel.server": "Sunucu",
+	"key.craftography.shutter": "Deklanşör",
+	"craftography.hint.shoot": "[%s] çek",
+	"craftography.panel.preview": "Önizleme",
+	"craftography.shutter.failed": "Craftography: fotoğraf kaydedilemedi (%s)"
 }

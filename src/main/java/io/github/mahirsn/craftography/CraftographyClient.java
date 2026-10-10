@@ -1,6 +1,7 @@
 package io.github.mahirsn.craftography;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import io.github.mahirsn.craftography.capture.Shutter;
 import io.github.mahirsn.craftography.screen.ControlsScreen;
 import io.github.mahirsn.craftography.util.LensMath;
 import io.github.mahirsn.craftography.util.TimeMath;
@@ -29,6 +30,7 @@ public class CraftographyClient implements ClientModInitializer {
 	public static KeyMapping serverTimeKey;
 	public static KeyMapping weatherKey;
 	public static KeyMapping panelKey;
+	public static KeyMapping shutterKey;
 
 	/** Keys that only work in camera mode; vanilla keys bound to the same key are blocked while camera mode is on. */
 	private static List<KeyMapping> cameraKeys;
@@ -43,7 +45,8 @@ public class CraftographyClient implements ClientModInitializer {
 		serverTimeKey = register("server_time", GLFW.GLFW_KEY_T);
 		weatherKey = register("weather", GLFW.GLFW_KEY_Y);
 		panelKey = register("panel", GLFW.GLFW_KEY_TAB);
-		cameraKeys = List.of(guideKey, aspectKey, resetRollKey, serverTimeKey, weatherKey, panelKey);
+		shutterKey = register("shutter", GLFW.GLFW_KEY_SPACE);
+		cameraKeys = List.of(guideKey, aspectKey, resetRollKey, serverTimeKey, weatherKey, panelKey, shutterKey);
 
 		ClientTickEvents.START_CLIENT_TICK.register(CraftographyClient::onTick);
 	}
@@ -90,6 +93,9 @@ public class CraftographyClient implements ClientModInitializer {
 		while (weatherKey.consumeClick()) {
 			CameraSettings.get().cycleWeather();
 			changed = true;
+		}
+		while (shutterKey.consumeClick()) {
+			Shutter.press();
 		}
 		while (panelKey.consumeClick()) {
 			if (mc.gui.screen() == null) mc.gui.setScreen(new ControlsScreen());

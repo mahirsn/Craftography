@@ -1,6 +1,7 @@
 package io.github.mahirsn.craftography.hud;
 
 import io.github.mahirsn.craftography.CameraSettings;
+import io.github.mahirsn.craftography.CraftographyClient;
 import io.github.mahirsn.craftography.util.Draw;
 import io.github.mahirsn.craftography.util.Rect;
 import io.github.mahirsn.craftography.util.TimeMath;
@@ -37,5 +38,7 @@ public final class InfoStrip {
 		x += font.width(weather) + 10;
 		Component guide = Component.translatable(s.guide.translationKey());
 		g.text(font, guide, x, bottom, white, false);
+		Component hint = Component.translatable("craftography.hint.shoot", CraftographyClient.shutterKey.getTranslatedKeyMessage());
+		g.text(font, hint, right - font.width(hint), bottom, white, false);
 	}
 }

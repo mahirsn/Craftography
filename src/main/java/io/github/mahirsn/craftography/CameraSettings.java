@@ -67,6 +67,8 @@ public final class CameraSettings {
 	public Weather weather = Weather.SERVER;
 	/** Keep the time and weather override after camera mode closes. */
 	public boolean lockTimeWeather = false;
+	/** Show a small preview of the photo for two seconds after the shot. */
+	public boolean showPreview = true;
 
 	public static CameraSettings get() {
 		return instance;

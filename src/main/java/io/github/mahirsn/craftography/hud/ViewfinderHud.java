@@ -2,6 +2,7 @@ package io.github.mahirsn.craftography.hud;
 
 import io.github.mahirsn.craftography.CameraMode;
 import io.github.mahirsn.craftography.CameraSettings;
+import io.github.mahirsn.craftography.capture.Shutter;
 import io.github.mahirsn.craftography.util.Rect;
 import io.github.mahirsn.craftography.util.TimeMath;
 import net.minecraft.client.DeltaTracker;
@@ -35,5 +36,6 @@ public final class ViewfinderHud {
 		int time = visibleDayTicks(s);
 		TimeBar.draw(g, f, time, s.timeOfDay >= 0, p);
 		InfoStrip.draw(g, f, s, mm, time, p);
+		Shutter.draw(g, f);
 	}
 }
