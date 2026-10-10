@@ -2,6 +2,7 @@ package io.github.mahirsn.craftography;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.github.mahirsn.craftography.util.LensMath;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.IOException;
@@ -47,6 +48,7 @@ public final class CameraSettings {
 	public Guide guide = Guide.THIRDS;
 	public float maskOpacity = 0.75f;
 	public float guideOpacity = 0.45f;
+	public double focalLength = LensMath.DEFAULT_MM;
 
 	public static CameraSettings get() {
 		return instance;
@@ -78,6 +80,7 @@ public final class CameraSettings {
 		if (guide == null) guide = Guide.THIRDS;
 		maskOpacity = clamp(maskOpacity, 0f, 1f);
 		guideOpacity = clamp(guideOpacity, 0f, 1f);
+		focalLength = Double.isNaN(focalLength) ? LensMath.DEFAULT_MM : LensMath.clamp(focalLength);
 		return this;
 	}
 

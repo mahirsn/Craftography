@@ -1,6 +1,7 @@
 package io.github.mahirsn.craftography;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import io.github.mahirsn.craftography.util.LensMath;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -70,6 +71,27 @@ public class CraftographyClient implements ClientModInitializer {
 		}
 		if (changed) CameraSettings.save();
 		blockVanillaKeys(mc);
+	}
+
+	static boolean isDown(int key) {
+		return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), key);
+	}
+
+	static boolean shiftDown() {
+		return isDown(GLFW.GLFW_KEY_LEFT_SHIFT) || isDown(GLFW.GLFW_KEY_RIGHT_SHIFT);
+	}
+
+	/** Mouse wheel in camera mode. {@code amount} is positive when scrolling up. */
+	public static void onScroll(double amount) {
+		CameraSettings s = CameraSettings.get();
+		double notches = shiftDown() ? amount / 4 : amount;
+		s.focalLength = LensMath.zoom(s.focalLength, notches);
+		CameraSettings.save();
+	}
+
+	public static void onMiddleClick() {
+		CameraSettings.get().focalLength = LensMath.DEFAULT_MM;
+		CameraSettings.save();
 	}
 
 	/** Stops vanilla actions that share a key with a camera key (for example G = quick actions). */

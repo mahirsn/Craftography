@@ -15,7 +15,7 @@ public final class InfoStrip {
 	private InfoStrip() {
 	}
 
-	public static void draw(GuiGraphicsExtractor g, Rect f, CameraSettings s, float alpha) {
+	public static void draw(GuiGraphicsExtractor g, Rect f, CameraSettings s, double mm, float alpha) {
 		Font font = Minecraft.getInstance().font;
 		int white = Draw.argb(alpha, WHITE), amber = Draw.argb(alpha, AMBER);
 		int top = (int) Math.max(2, f.y() - font.lineHeight - 2);
@@ -23,7 +23,8 @@ public final class InfoStrip {
 		int right = (int) Math.min(g.guiWidth() - 4, f.right());
 
 		g.text(font, "CRAFTOGRAPHY", left, top, white, false);
-		String lens = s.aspect == CameraSettings.Aspect.FREE ? "" : s.aspect.label;
+		String aspect = s.aspect == CameraSettings.Aspect.FREE ? Component.translatable("craftography.aspect.free").getString() : s.aspect.label;
+		String lens = aspect + "   " + Math.round(mm) + "mm";
 		g.text(font, lens, right - font.width(lens), top, amber, false);
 
 		int bottom = g.guiHeight() - font.lineHeight - 3;

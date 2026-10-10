@@ -11,6 +11,10 @@ public final class CameraMode {
 	private static long changedAt;
 	private static float fromProgress;
 
+	// Smoothed values that follow the settings.
+	private static double focalLength = Double.NaN;
+	private static long lastSmoothNanos;
+
 	private CameraMode() {
 	}
 
@@ -42,6 +46,20 @@ public final class CameraMode {
 		fromProgress = rawProgress();
 		open = value;
 		changedAt = Util.getMillis();
+	}
+
+	/** Lens focal length eased toward the setting, in mm. Smoothed in log space so zoom feels the same at every length. */
+	public static double focalLength() {
+		double target = CameraSettings.get().focalLength;
+		long now = System.nanoTime();
+		double seconds = Math.min(0.25, (now - lastSmoothNanos) / 1e9);
+		lastSmoothNanos = now;
+		if (Double.isNaN(focalLength)) {
+			focalLength = target;
+		} else {
+			focalLength = Math.exp(Easing.approach(Math.log(focalLength), Math.log(target), 12, seconds));
+		}
+		return focalLength;
 	}
 
 	/** Closes immediately, without animation (for example when leaving the world). */

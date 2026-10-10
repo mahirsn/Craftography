@@ -3,7 +3,9 @@
 	"package": "io.github.mahirsn.craftography.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"HudMixin"
+		"CameraMixin",
+		"HudMixin",
+		"MouseHandlerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

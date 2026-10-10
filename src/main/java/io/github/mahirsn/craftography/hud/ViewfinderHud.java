@@ -23,6 +23,8 @@ public final class ViewfinderHud {
 		Rect f = currentFrame(g.guiWidth(), g.guiHeight());
 		AspectMask.draw(g, f, s.maskOpacity * p, 0.9f * p);
 		GuideOverlay.draw(g, f, s.guide, s.guideOpacity * p);
-		InfoStrip.draw(g, f, s, p);
+		double mm = CameraMode.focalLength();
+		ZoomScale.draw(g, f, mm, p);
+		InfoStrip.draw(g, f, s, mm, p);
 	}
 }
