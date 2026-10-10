@@ -111,6 +111,7 @@ public class CraftographyClient implements ClientModInitializer {
 			Tripod.release();
 		}
 		Tripod.tick(mc);
+		Autofocus.tick(mc);
 		for (Map.Entry<KeyMapping, Runnable> e : CAMERA_KEYS.entrySet()) {
 			while (e.getKey().consumeClick()) {
 				// Not in camera mode: the click is dropped.

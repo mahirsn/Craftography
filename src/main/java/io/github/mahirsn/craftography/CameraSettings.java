@@ -2,6 +2,7 @@ package io.github.mahirsn.craftography;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.github.mahirsn.craftography.util.ExposureMath;
 import io.github.mahirsn.craftography.util.LensMath;
 import io.github.mahirsn.craftography.util.TimeMath;
 import net.fabricmc.loader.api.FabricLoader;
@@ -76,6 +77,26 @@ public final class CameraSettings {
 
 	private static final int[] TIMERS = {0, 3, 10};
 
+	// Exposure: the defaults (ISO 100, f/5.6, 1/125 s, 6500 K) leave the game's picture unchanged.
+	public int iso = ExposureMath.DEFAULT_ISO;
+	public double aperture = ExposureMath.DEFAULT_APERTURE;
+	/** Shutter speed in seconds. */
+	public double shutter = ExposureMath.DEFAULT_SHUTTER;
+	/** White balance colour temperature in kelvin. */
+	public int kelvin = ExposureMath.DEFAULT_KELVIN;
+	/** White balance tint, positive = magenta, negative = green. */
+	public int tint = 0;
+	/** Autofocus on the frame centre; off = manual focus at {@link #focusDistance}. */
+	public boolean autofocus = true;
+	/** Manual focus distance in metres; {@link ExposureMath#FOCUS_INFINITY} = infinity. */
+	public double focusDistance = ExposureMath.FOCUS_INFINITY;
+	/** Sensor noise that grows with ISO. */
+	public boolean noise = true;
+	/** Histogram in the live view. */
+	public boolean histogram = false;
+	/** Focus peaking in the live view (never in the photo). */
+	public boolean peaking = false;
+
 	public static CameraSettings get() {
 		return instance;
 	}
@@ -109,6 +130,12 @@ public final class CameraSettings {
 		if (weather == null) weather = Weather.SERVER;
 		if (moonPhase < -1 || moonPhase > 7) moonPhase = -1;
 		if (java.util.Arrays.stream(TIMERS).noneMatch(t -> t == selfTimer)) selfTimer = 0;
+		iso = ExposureMath.ISO[ExposureMath.nearest(ExposureMath.ISO, iso)];
+		aperture = ExposureMath.APERTURE[ExposureMath.nearest(ExposureMath.APERTURE, aperture > 0 ? aperture : ExposureMath.DEFAULT_APERTURE)];
+		shutter = ExposureMath.SHUTTER[ExposureMath.nearest(ExposureMath.SHUTTER, shutter > 0 ? shutter : ExposureMath.DEFAULT_SHUTTER)];
+		kelvin = Math.clamp(kelvin, ExposureMath.MIN_KELVIN, ExposureMath.MAX_KELVIN);
+		tint = Math.clamp(tint, -ExposureMath.MAX_TINT, ExposureMath.MAX_TINT);
+		focusDistance = Double.isNaN(focusDistance) ? ExposureMath.FOCUS_INFINITY : Math.clamp(focusDistance, ExposureMath.MIN_FOCUS, ExposureMath.FOCUS_INFINITY);
 		if (timeOfDay < -1 || timeOfDay >= TimeMath.DAY) timeOfDay = -1;
 		roll = Double.isNaN(roll) ? 0 : Math.max(-MAX_ROLL, Math.min(MAX_ROLL, roll));
 		focalLength = Double.isNaN(focalLength) ? LensMath.DEFAULT_MM : LensMath.clamp(focalLength);
