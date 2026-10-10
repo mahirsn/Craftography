@@ -32,7 +32,7 @@ public final class CameraBody {
 		Font font = Minecraft.getInstance().font;
 		CameraSettings s = CameraSettings.get();
 		Draw.camera(g, "body/camcorder", l.x, l.y, (int) Math.round(480*l.scale), (int) Math.round(270*l.scale), -1);
-		wheel(g, l.get(Part.ZOOM), Part.ZOOM, hovered == Part.ZOOM, 1);
+		wheel(g, l.get(Part.ZOOM), Part.ZOOM, hovered == Part.ZOOM, 1, l.scale);
 		Rect zoom=l.get(Part.ZOOM);
 		engraving(g,l,"W / T",zoom.x()+zoom.w()/2,zoom.y()+zoom.h()/2-2*l.scale,Draw.argb(.65f,PRINT));
 		Rect release = l.get(Part.SHUTTER);
@@ -80,22 +80,25 @@ public final class CameraBody {
 			default -> "";
 		};
 	}
-	private static void wheel(GuiGraphicsExtractor g, Rect r, Part p, boolean hover, float alpha) {
-		Draw.camera(g,"body/control_dial"+(hover?"_hl":""),r.x(),r.y(),(int)r.w(),(int)r.h(),Draw.argb(alpha,0xFFFFFF));
+	private static void wheel(GuiGraphicsExtractor g, Rect r, Part p, boolean hover, float alpha, double scale) {
+		// Pixel art is drawn at its native size: small dials have their own sprites instead of a shrunk big one.
+		String size=r.h()/scale<40?"_small":"";
+		Draw.camera(g,"body/control_dial"+size+(hover?"_hl":""),r.x(),r.y(),(int)r.w(),(int)r.h(),Draw.argb(alpha,0xFFFFFF));
 		g.pose().pushMatrix();
 		g.pose().translate((float)(r.x()+r.w()/2),(float)(r.y()+r.h()/2));
 		g.pose().rotate((float)(HardwareMotion.position(p)*Math.PI/8));
-		Draw.camera(g,"body/control_marks",-r.w()/2,-r.h()/2,(int)r.w(),(int)r.h(),Draw.argb(alpha,0xFFFFFF));
+		Draw.camera(g,"body/control_marks"+size,-r.w()/2,-r.h()/2,(int)r.w(),(int)r.h(),Draw.argb(alpha,0xFFFFFF));
 		g.pose().popMatrix();
 	}
 	private static void button(GuiGraphicsExtractor g, Rect r, Part p, boolean hover, boolean lit, float alpha, double scale) {
-		double inset=HardwareMotion.inset(p)*1.5;
-		Draw.camera(g,"body/"+(p==Part.SHUTTER?"capture_cap":r.h()/scale>=28?"round_button":"button")+(lit?"_on":"")+(hover?"_hl":""),r.x()+inset/2,r.y()+inset,(int)(r.w()-inset),(int)(r.h()-inset),Draw.argb(alpha,inset>.2?0xC0C0C0:0xFFFFFF));
+		// Pressed: the button sinks one texel instead of shrinking, so its pixel art keeps its shape.
+		double inset=HardwareMotion.inset(p)*scale;
+		Draw.camera(g,"body/"+(p==Part.SHUTTER?"capture_cap":r.h()/scale>=40?"round_button_big":r.h()/scale>=28?"round_button":"button")+(lit?"_on":"")+(hover?"_hl":""),r.x(),r.y()+inset,(int)r.w(),(int)r.h(),Draw.argb(alpha,inset>.2?0xC0C0C0:0xFFFFFF));
 	}
 	private static void hardware(GuiGraphicsExtractor g, BodyLayout l, Control c, boolean hover, float alpha) {
 		Rect r=l.get(c.part());
 		Font font=Minecraft.getInstance().font;
-		if(c.step()!=null) wheel(g,r,c.part(),hover,alpha);
+		if(c.step()!=null) wheel(g,r,c.part(),hover,alpha,l.scale);
 		else button(g,r,c.part(),hover,c.lit().getAsBoolean(),alpha,l.scale);
 		String icon=c.icon()==null?switch(c.part()) {
 			case ISO -> "iso"; case APERTURE -> "iris"; case SHUTTER_SPEED -> "speed";
