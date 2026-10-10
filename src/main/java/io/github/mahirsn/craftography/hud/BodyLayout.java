@@ -24,10 +24,10 @@ public final class BodyLayout {
 		lcd = rect(76, 106, 244, 137);
 		body = rect(53, 31, 385, 222);
 		grip = rect(422, 197, 20, 73);
-		parts.put(Part.ZOOM, rect(108, 52, 32, 32));
-		parts.put(Part.SHUTTER, rect(394, 77, 20, 17));
-		parts.put(Part.TOP_LCD, rect(277, 73, 45, 13));
-		// Each page reuses the DSLR's top encoders, large rear wheel and lower buttons.
+		parts.put(Part.ZOOM, rect(290, 50, 32, 32));
+		parts.put(Part.SHUTTER, rect(336, 58, 20, 17));
+		parts.put(Part.TOP_LCD, rect(360, 70, 40, 12));
+		// Zoom, record and the small display sit on the camcorder's top face; each page reuses the dials on its rear panel.
 		double[][] hardware = {{338, 110, 31, 29}, {344, 158, 52, 52}, {384, 113, 31, 29}, {343, 223, 28, 22}, {386, 223, 28, 22}};
 		for (BodyControls.Page page : BodyControls.Page.values()) {
 			Part[] row = page.parts;
