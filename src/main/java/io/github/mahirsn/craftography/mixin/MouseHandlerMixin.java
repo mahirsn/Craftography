@@ -45,15 +45,18 @@ public abstract class MouseHandlerMixin {
 		}
 	}
 
-	/** Lower mouse sensitivity in proportion to the zoom. */
+	/** Lower mouse sensitivity in proportion to the zoom, and follow the roll. */
 	@WrapOperation(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;turn(DD)V"))
 	private void craftography$scaleTurn(LocalPlayer player, double xo, double yo, Operation<Void> original) {
 		if (CameraMode.isActive()) {
 			double base = Math.toRadians(minecraft.options.fov().get()) / 2;
 			double current = Math.toRadians(minecraft.gameRenderer.mainCamera().getFov()) / 2;
 			double factor = Math.tan(current) / Math.tan(base);
-			xo *= factor;
-			yo *= factor;
+			// Turn in image space: with the camera rolled, moving the mouse right still pans the picture right.
+			double a = Math.toRadians(CameraMode.roll()), cos = Math.cos(a), sin = Math.sin(a);
+			double x = xo * cos - yo * sin, y = xo * sin + yo * cos;
+			xo = x * factor;
+			yo = y * factor;
 		}
 		original.call(player, xo, yo);
 	}

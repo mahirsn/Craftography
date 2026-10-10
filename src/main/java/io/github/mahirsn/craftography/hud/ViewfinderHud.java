@@ -25,6 +25,7 @@ public final class ViewfinderHud {
 		GuideOverlay.draw(g, f, s.guide, s.guideOpacity * p);
 		double mm = CameraMode.focalLength();
 		ZoomScale.draw(g, f, mm, p);
+		LevelGauge.draw(g, f, CameraSettings.get().roll, p);
 		InfoStrip.draw(g, f, s, mm, p);
 	}
 }

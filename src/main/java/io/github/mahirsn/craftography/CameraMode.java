@@ -13,6 +13,7 @@ public final class CameraMode {
 
 	// Smoothed values that follow the settings.
 	private static double focalLength = Double.NaN;
+	private static double roll;
 	private static long lastSmoothNanos;
 
 	private CameraMode() {
@@ -50,16 +51,28 @@ public final class CameraMode {
 
 	/** Lens focal length eased toward the setting, in mm. Smoothed in log space so zoom feels the same at every length. */
 	public static double focalLength() {
-		double target = CameraSettings.get().focalLength;
+		smooth();
+		return focalLength;
+	}
+
+	/** Roll eased toward the setting and scaled by the open/close transition, in degrees. */
+	public static double roll() {
+		smooth();
+		return roll * progress();
+	}
+
+	private static void smooth() {
+		CameraSettings s = CameraSettings.get();
 		long now = System.nanoTime();
 		double seconds = Math.min(0.25, (now - lastSmoothNanos) / 1e9);
 		lastSmoothNanos = now;
 		if (Double.isNaN(focalLength)) {
-			focalLength = target;
+			focalLength = s.focalLength;
+			roll = s.roll;
 		} else {
-			focalLength = Math.exp(Easing.approach(Math.log(focalLength), Math.log(target), 12, seconds));
+			focalLength = Math.exp(Easing.approach(Math.log(focalLength), Math.log(s.focalLength), 12, seconds));
+			roll = Easing.approach(roll, s.roll, 12, seconds);
 		}
-		return focalLength;
 	}
 
 	/** Closes immediately, without animation (for example when leaving the world). */

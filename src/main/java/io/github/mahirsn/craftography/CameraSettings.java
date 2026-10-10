@@ -40,6 +40,8 @@ public final class CameraSettings {
 		}
 	}
 
+	public static final double MAX_ROLL = 90;
+
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("craftography.json");
 	private static CameraSettings instance = new CameraSettings();
@@ -49,6 +51,8 @@ public final class CameraSettings {
 	public float maskOpacity = 0.75f;
 	public float guideOpacity = 0.45f;
 	public double focalLength = LensMath.DEFAULT_MM;
+	/** Camera roll in degrees, positive = clockwise. */
+	public double roll = 0;
 
 	public static CameraSettings get() {
 		return instance;
@@ -80,12 +84,20 @@ public final class CameraSettings {
 		if (guide == null) guide = Guide.THIRDS;
 		maskOpacity = clamp(maskOpacity, 0f, 1f);
 		guideOpacity = clamp(guideOpacity, 0f, 1f);
+		roll = Double.isNaN(roll) ? 0 : Math.max(-MAX_ROLL, Math.min(MAX_ROLL, roll));
 		focalLength = Double.isNaN(focalLength) ? LensMath.DEFAULT_MM : LensMath.clamp(focalLength);
 		return this;
 	}
 
 	private static float clamp(float v, float min, float max) {
 		return Float.isNaN(v) ? min : Math.max(min, Math.min(max, v));
+	}
+
+	/** Changes the roll; crossing or landing near 0 stops at exactly 0 (level). */
+	public void addRoll(double degrees) {
+		double next = Math.max(-MAX_ROLL, Math.min(MAX_ROLL, roll + degrees));
+		if (roll != 0 && (Math.signum(next) != Math.signum(roll) || Math.abs(next) < 0.25)) next = 0;
+		roll = next;
 	}
 
 	public void cycleAspect() {

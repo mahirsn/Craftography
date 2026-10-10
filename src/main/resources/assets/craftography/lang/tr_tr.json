@@ -9,5 +9,6 @@
 	"craftography.guide.center": "Merkez artısı",
 	"craftography.guide.diagonals": "Köşegenler",
 	"craftography.guide.quarters": "Dörtlü bölme",
-	"craftography.aspect.free": "Serbest"
+	"craftography.aspect.free": "Serbest",
+	"key.craftography.reset_roll": "Eğimi sıfırla"
 }

@@ -23,6 +23,7 @@ public class CraftographyClient implements ClientModInitializer {
 	public static KeyMapping toggleKey;
 	public static KeyMapping guideKey;
 	public static KeyMapping aspectKey;
+	public static KeyMapping resetRollKey;
 
 	/** Keys that only work in camera mode; vanilla keys bound to the same key are blocked while camera mode is on. */
 	private static List<KeyMapping> cameraKeys;
@@ -33,7 +34,8 @@ public class CraftographyClient implements ClientModInitializer {
 		toggleKey = register("toggle", GLFW.GLFW_KEY_V);
 		guideKey = register("guide", GLFW.GLFW_KEY_G);
 		aspectKey = register("aspect", GLFW.GLFW_KEY_B);
-		cameraKeys = List.of(guideKey, aspectKey);
+		resetRollKey = register("reset_roll", GLFW.GLFW_KEY_R);
+		cameraKeys = List.of(guideKey, aspectKey, resetRollKey);
 
 		ClientTickEvents.START_CLIENT_TICK.register(CraftographyClient::onTick);
 	}
@@ -69,12 +71,20 @@ public class CraftographyClient implements ClientModInitializer {
 			CameraSettings.get().cycleAspect();
 			changed = true;
 		}
+		while (resetRollKey.consumeClick()) {
+			CameraSettings.get().roll = 0;
+			changed = true;
+		}
 		if (changed) CameraSettings.save();
 		blockVanillaKeys(mc);
 	}
 
 	static boolean isDown(int key) {
 		return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), key);
+	}
+
+	static boolean altDown() {
+		return isDown(GLFW.GLFW_KEY_LEFT_ALT) || isDown(GLFW.GLFW_KEY_RIGHT_ALT);
 	}
 
 	static boolean shiftDown() {
@@ -84,8 +94,11 @@ public class CraftographyClient implements ClientModInitializer {
 	/** Mouse wheel in camera mode. {@code amount} is positive when scrolling up. */
 	public static void onScroll(double amount) {
 		CameraSettings s = CameraSettings.get();
-		double notches = shiftDown() ? amount / 4 : amount;
-		s.focalLength = LensMath.zoom(s.focalLength, notches);
+		if (altDown()) {
+			s.addRoll(amount * (shiftDown() ? 0.1 : 1));
+		} else {
+			s.focalLength = LensMath.zoom(s.focalLength, shiftDown() ? amount / 4 : amount);
+		}
 		CameraSettings.save();
 	}
 

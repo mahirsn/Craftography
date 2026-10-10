@@ -9,5 +9,6 @@
 	"craftography.guide.center": "Center cross",
 	"craftography.guide.diagonals": "Diagonals",
 	"craftography.guide.quarters": "Quarters",
-	"craftography.aspect.free": "Free"
+	"craftography.aspect.free": "Free",
+	"key.craftography.reset_roll": "Reset roll"
 }
