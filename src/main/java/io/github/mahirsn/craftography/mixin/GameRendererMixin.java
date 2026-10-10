@@ -18,6 +18,7 @@ public abstract class GameRendererMixin {
 	private void craftography$capture(CallbackInfo ci) {
 		LensEffects.apply(((GameRenderer) (Object) this).mainRenderTarget());
 		if (Shutter.isPending()) Shutter.capture();
+		LensEffects.liveView(((GameRenderer) (Object) this).mainRenderTarget());
 	}
 
 	/** Keeps the level depth for depth of field before vanilla clears it for the hand. */

@@ -43,10 +43,13 @@ import java.util.Optional;
 public final class LensEffects {
 	private static final RenderPipeline LENS = pipeline("lens", "Scene", "Depth", "History");
 	private static final RenderPipeline GRAIN = pipeline("grain", "In");
+	private static final RenderPipeline DOWNSAMPLE = simplePipeline("downsample");
+	private static final RenderPipeline PEAKING = simplePipeline("peaking");
+	private static final int INFO_SIZE = new Std140SizeCalculator().putVec2().putVec2().get();
 	private static final int UBO_SIZE = new Std140SizeCalculator().putMat4f().putVec4().putVec4().putVec4().putVec4().get();
 
-	private static MappableRingBuffer config;
-	private static TextureTarget scene, depth, history, output;
+	private static MappableRingBuffer config, samplerInfo;
+	private static TextureTarget scene, depth, history, output, small;
 	private static boolean historyValid;
 	private static long lastFrameNanos;
 	private static int frame;
@@ -64,6 +67,56 @@ public final class LensEffects {
 			.withFragmentShader(Identifier.fromNamespaceAndPath(CraftographyClient.MOD_ID, "post/" + name))
 			.withBindGroupLayout(layout.build())
 			.build();
+	}
+
+	/** A one-input pass with vanilla's SamplerInfo uniform (output and input size). */
+	private static RenderPipeline simplePipeline(String name) {
+		return RenderPipeline.builder(RenderPipelines.POST_PROCESSING_SNIPPET)
+			.withLocation(Identifier.fromNamespaceAndPath(CraftographyClient.MOD_ID, "pipeline/" + name))
+			.withVertexShader(Identifier.withDefaultNamespace("core/screenquad"))
+			.withFragmentShader(Identifier.fromNamespaceAndPath(CraftographyClient.MOD_ID, "post/" + name))
+			.withBindGroupLayout(BindGroupLayout.builder().withSampler("InSampler").withUniform("SamplerInfo", UniformType.UNIFORM_BUFFER).build())
+			.build();
+	}
+
+	private static void simplePass(String label, RenderPipeline pipeline, TextureTarget in, RenderTarget out, FilterMode filter) {
+		if (samplerInfo == null) samplerInfo = new MappableRingBuffer(() -> "Craftography sampler info", 130, INFO_SIZE);
+		try (GpuBufferSlice.MappedView view = samplerInfo.currentBuffer().map(false, true)) {
+			Std140Builder.intoBuffer(view.data()).putVec2(out.width, out.height).putVec2(in.width, in.height);
+		}
+		try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> label, out.getColorTextureView(), Optional.empty())) {
+			pass.setPipeline(pipeline);
+			RenderSystem.bindDefaultUniforms(pass);
+			pass.setUniform("SamplerInfo", samplerInfo.currentBuffer());
+			pass.bindTexture("InSampler", in.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
+			pass.draw(3, 1, 0, 0);
+		}
+		samplerInfo.rotate();
+	}
+
+	/**
+	 * Called after a photo is taken and before the GUI: live-view aids that must not be in the photo (focus
+	 * peaking), and the light meter, which reads the picture as the photo would be.
+	 */
+	public static void liveView(RenderTarget main) {
+		if (!CameraMode.isActive()) return;
+		Meter.request(() -> {
+			small = fitSize(small, "meter", Meter.WIDTH, Meter.HEIGHT);
+			simplePass("Craftography meter", DOWNSAMPLE, copyOfMain(main), small, FilterMode.LINEAR);
+			return small;
+		});
+		if (CameraSettings.get().peaking) simplePass("Craftography focus peaking", PEAKING, copyOfMain(main), main, FilterMode.NEAREST);
+	}
+
+	private static TextureTarget copyOfMain(RenderTarget main) {
+		scene = fit(scene, "scene", main, false);
+		RenderSystem.getDevice().createCommandEncoder().copyTextureToTexture(main.getColorTexture(), scene.getColorTexture(), 0, 0, 0, 0, 0, main.width, main.height);
+		return scene;
+	}
+
+	private static TextureTarget fitSize(TextureTarget target, String name, int width, int height) {
+		if (target == null) return new TextureTarget("Craftography " + name, width, height, false, GpuFormat.RGBA8_UNORM);
+		return target;
 	}
 
 	/** True while a shader pack draws the level (Iris), found without a compile-time dependency. */
