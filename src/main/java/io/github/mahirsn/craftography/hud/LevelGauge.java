@@ -30,7 +30,7 @@ public final class LevelGauge {
 	public static void draw(GuiGraphicsExtractor g, Rect f, double roll, float alpha) {
 		Font font = Minecraft.getInstance().font;
 		boolean level = Math.abs(roll) < LEVEL;
-		int color = Draw.argb(alpha, level ? CameraBody.AMBER : 0xFFFFFF);
+		int color = Draw.argb(alpha, level ? 0xFFC85A : 0xFFFFFF);
 		int dim = Draw.argb(alpha * 0.45f, 0xFFFFFF);
 		double r = RADIUS;
 		double cx = centerX(f), cy = centerY(f);

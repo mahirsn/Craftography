@@ -8,14 +8,13 @@ the time, weather and moon phase you pick are visual only.
 
 ## Features
 
-- Camera mode shows a pixel-art camera held in your hands, seen from behind: lens barrel with zoom, focus and
-  aperture rings, top plate with time, ISO and shutter speed dials, a status LCD and the shutter release, and the
-  rear buttons and wheels. The live view is on the rear LCD.
+- A full-screen camcorder viewfinder with thin corner marks and small readouts for the lens, exposure,
+  white balance, focus, time and tripod. The centre stays clear for composing the shot.
 - Exposure in real stops: ISO 100-12800, aperture f/1.4-f/22 and shutter speed 1/4000-1 s. The defaults
   (ISO 100, f/5.6, 1/125) leave the game's picture as it is. A centre-weighted light meter and a histogram help.
 - White balance in kelvin (2500-10000 K) with a green-magenta tint.
 - Depth of field from the focal length, aperture and focus distance (thin-lens model), with autofocus on the frame
-  centre or manual focus on the focus ring.
+  centre or manual focus in the Focus tab.
 - A shutter slower than a frame blurs motion. Sensor noise grows with ISO (can be turned off).
 - Focus peaking and the histogram are shown in the live view only, never in the photo.
 - Aspect ratio masks: 16:9, 3:2, 4:3, 1:1, 4:5, 9:16, 2.39:1 and free. Composition guides: rule of thirds, phi grid,
@@ -23,7 +22,8 @@ the time, weather and moon phase you pick are visual only.
 - Lens from 10 mm to 200 mm (full-frame, vertical FOV). Mouse sensitivity follows the zoom.
 - Camera roll from -90° to +90° with an electronic level.
 - Client-side time of day, visual weather and moon phase.
-- Interactive mode: a free cursor to turn, press and flip every control on the camera.
+- F8 opens a pixel-art settings panel docked to the right, with six tabs: Exposure, Colour, Focus, Frame,
+  Time/weather and Timer/tripod. Buttons, sliders, keys and scroll all read the same settings.
 - Tripod: the camera stays where you set it down, and you can walk into the shot.
 - Self-timer: 3 or 10 seconds, with a beep and a blinking lamp.
 - Shutter that saves a PNG cropped to the frame, without HUD, to `screenshots/craftography/`. The photo shows the
@@ -50,12 +50,13 @@ Only F7, F8 and F9 have default keys. Bind the rest in Options > Controls > Craf
 
 A key you bind works only in camera mode. While camera mode is on, a vanilla key on the same key is blocked.
 
-In interactive mode the player does not move or look around. Hover a control to see what it does and its value.
-Drag a ring, dial or wheel sideways or scroll over it; double-click it for the default. Click a button to change it.
-In the live view, drag the time bar or the roll dial.
+In interactive mode the player does not move or look around. Click a tab, drag or scroll a slider,
+use the arrows to change a setting, or click Shutter to take a photo. Double-click a slider to reset it.
+Scroll the panel labels to reach more settings on smaller screens. Outside the panel, the usual scroll shortcuts
+still work. Tab selects a setting and the arrow keys adjust it. F8 or Esc closes the panel.
 
 To take a photo of yourself: press F9, walk into the frame, set the self-timer and press the shutter. Without a bound
-shutter key, open interactive mode and click the shutter release.
+shutter key, open interactive mode and click Shutter in the panel.
 
 ## Install
 
@@ -71,5 +72,5 @@ The jar is written to `build/libs/`.
 
 ## License
 
-MIT. The rear LCD surround sprite is adapted from [Exposure](https://github.com/mortuusars/Exposure) by
+MIT. The tab and arrow sprites are adapted from [Exposure](https://github.com/mortuusars/Exposure) by
 mortuusars (MIT); see `THIRD_PARTY_NOTICES.md`.

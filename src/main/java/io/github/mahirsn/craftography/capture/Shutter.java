@@ -5,7 +5,8 @@ import io.github.mahirsn.craftography.CameraMode;
 import io.github.mahirsn.craftography.CameraSettings;
 import io.github.mahirsn.craftography.CraftographyClient;
 import io.github.mahirsn.craftography.hud.AspectMask;
-import io.github.mahirsn.craftography.hud.BodyLayout;
+import io.github.mahirsn.craftography.hud.ViewfinderHud;
+import io.github.mahirsn.craftography.screen.ControlsScreen;
 import io.github.mahirsn.craftography.util.Draw;
 import io.github.mahirsn.craftography.util.Rect;
 import net.minecraft.client.Minecraft;
@@ -114,8 +115,7 @@ public final class Shutter {
 		long mm = Math.round(CameraMode.focalLength());
 		Screenshot.takeScreenshot(mc.gameRenderer.mainRenderTarget(), image -> {
 			// The live view in window pixels, then the frame inside it: the same rectangles the HUD draws.
-			var window = mc.getWindow();
-			Rect lcd = BodyLayout.of(window.getGuiScaledWidth(), window.getGuiScaledHeight()).lcd.scale(window.getGuiScale());
+			Rect lcd = ViewfinderHud.liveView(image.getWidth(), image.getHeight());
 			Rect r = AspectMask.frame(lcd, aspect);
 			int x = (int) Math.round(r.x()), y = (int) Math.round(r.y());
 			int w = Math.min((int) Math.round(r.w()), image.getWidth() - x), h = Math.min((int) Math.round(r.h()), image.getHeight() - y);
@@ -155,29 +155,21 @@ public final class Shutter {
 		});
 	}
 
-	/** Whether the self-timer lamp on the body is lit now: it blinks with the countdown beat. */
+	/** Whether the self-timer lamp in the viewfinder is lit now: it blinks with the countdown beat. */
 	public static boolean timerLampLit() {
 		if (timerEnd < 0) return false;
 		long left = Math.max(0, timerLeft()), beat = beatMs(left);
 		return left % beat > beat / 2;
 	}
 
-	/** Countdown in the middle of the frame. */
-	private static void drawTimer(GuiGraphicsExtractor g, Rect f) {
-		long left = Math.max(0, timerLeft());
-		String text = String.valueOf((left + 999) / 1000);
-		var font = Minecraft.getInstance().font;
-		g.pose().pushMatrix();
-		g.pose().translate((float) (f.x() + f.w() / 2), (float) (f.y() + f.h() / 2));
-		g.pose().scale(4f, 4f);
-		g.text(font, text, -font.width(text) / 2, -font.lineHeight / 2, Draw.argb(0.85f, 0xFFFFFF), true);
-		g.pose().popMatrix();
+	/** Rounded-up remaining seconds for the small viewfinder countdown. */
+	public static long timerSeconds() {
+		return timerRunning() ? (Math.max(0, timerLeft()) + 999) / 1000 : 0;
 	}
 
 	/** Curtain over the frame and the preview in the corner. Drawn by the viewfinder HUD. */
 	public static void draw(GuiGraphicsExtractor g, Rect f, Rect liveView) {
 		long now = Util.getMillis();
-		if (timerEnd >= 0) drawTimer(g, f);
 		if (shotAt >= 0 && now - shotAt < CURTAIN_MS) {
 			// Closes in the first half, opens in the second half.
 			double t = (now - shotAt) / (double) CURTAIN_MS;
@@ -189,8 +181,14 @@ public final class Shutter {
 		if (preview != null && previewAt >= 0 && now - previewAt < PREVIEW_MS) {
 			NativeImage px = preview.getPixels();
 			if (px == null) return;
-			int w = PREVIEW_WIDTH, h = Math.round((float) px.getHeight() * w / px.getWidth());
-			int x = (int) liveView.right() - w - 6, y = (int) liveView.y() + 6;
+			int w = Math.min(PREVIEW_WIDTH, (int) liveView.w() / 3);
+			int h = Math.round((float) px.getHeight() * w / px.getWidth());
+			if (h > liveView.h() / 3) {
+				h = (int) liveView.h() / 3;
+				w = Math.max(1, Math.round((float) px.getWidth() * h / px.getHeight()));
+			}
+			int x = ControlsScreen.isOpen() ? 12 : (int) liveView.right() - w - 12;
+			int y = (int) liveView.y() + 30;
 			float fade = Math.min(1f, (PREVIEW_MS - (now - previewAt)) / 300f);
 			g.blit(RenderPipelines.GUI_TEXTURED, PREVIEW, x, y, 0, 0, w, h, px.getWidth(), px.getHeight(), px.getWidth(), px.getHeight(), Draw.argb(fade, 0xFFFFFF));
 			int line = Draw.argb(fade, 0xFFFFFF);

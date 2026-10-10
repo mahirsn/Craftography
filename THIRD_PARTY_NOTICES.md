@@ -2,18 +2,18 @@
 
 ## Exposure
 
-The rear LCD surround sprite of Craftography is adapted from Exposure by mortuusars
-(https://github.com/mortuusars/Exposure, branch `1.21.1`). Exposure is published under the MIT license, which
-covers its code and its assets.
+Craftography's tab and arrow sprites are adapted from Exposure by mortuusars
+(https://github.com/mortuusars/Exposure, branch `1.21.1`). Exposure is published under the MIT license.
 
-Adapted file, in `src/main/resources/assets/craftography/textures/gui/sprites/body/`:
+Adapted files, under `src/main/resources/assets/craftography/textures/gui/sprites/ui/`:
 
-| Craftography file | Exposure source (`common/src/main/resources/assets/exposure/textures/gui/`) | Change |
+| Craftography file | Exposure source (`common/src/main/resources/assets/exposure/textures/gui/sprites/`) | Change |
 |---|---|---|
-| `bezel.png` | `viewfinder/viewfinder.png` | border halved, centre removed, nine-sliced; used as the rear LCD surround |
+| `tab.png`, `tab_hl.png`, `tab_selected.png` | `camera_controls/composition_guide/none.png`, `none_highlighted.png`, `none_disabled.png` | icon removed; used for settings tabs |
+| `arrow_prev.png`, `arrow_prev_hl.png` | `widgets/previous_button.png`, `previous_button_highlighted.png` | used for previous values |
+| `arrow_next.png`, `arrow_next_hl.png` | `widgets/next_button.png`, `next_button_highlighted.png` | used for next values |
 
-The engraved text colours on the camera body (`#2B2622` with a `#7A736C` line under it) are Exposure's default
-viewfinder font colours. All other sprites of Craftography (camera body, lens, dials, buttons, icons) are original.
+All other active UI sprites (panel, sliders, icons and viewfinder marks) are original.
 
 ```
 MIT License
