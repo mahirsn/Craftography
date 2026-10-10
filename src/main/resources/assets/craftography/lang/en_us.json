@@ -25,9 +25,18 @@
 	"craftography.panel.lock": "Keep after closing",
 	"craftography.panel.mask_opacity": "Mask",
 	"craftography.panel.guide_opacity": "Guide lines",
-	"craftography.panel.server": "Server",
 	"key.craftography.shutter": "Shutter",
 	"craftography.hint.shoot": "[%s] shoot",
 	"craftography.panel.preview": "Preview",
-	"craftography.shutter.failed": "Craftography: could not save the photo (%s)"
+	"craftography.shutter.failed": "Craftography: could not save the photo (%s)",
+	"craftography.moon.0": "Full moon",
+	"craftography.moon.1": "Waning gibbous",
+	"craftography.moon.2": "Third quarter",
+	"craftography.moon.3": "Waning crescent",
+	"craftography.moon.4": "New moon",
+	"craftography.moon.5": "Waxing crescent",
+	"craftography.moon.6": "First quarter",
+	"craftography.moon.7": "Waxing gibbous",
+	"craftography.moon.server": "Server moon",
+	"craftography.panel.moon": "Moon"
 }

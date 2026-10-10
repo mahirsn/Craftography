@@ -65,6 +65,8 @@ public final class CameraSettings {
 	/** Time of day the client sees, in day ticks, or -1 for the server time. */
 	public int timeOfDay = -1;
 	public Weather weather = Weather.SERVER;
+	/** Moon phase the client sees (0 = full moon ... 7), or -1 for the server's. */
+	public int moonPhase = -1;
 	/** Keep the time and weather override after camera mode closes. */
 	public boolean lockTimeWeather = false;
 	/** Show a small preview of the photo for two seconds after the shot. */
@@ -101,6 +103,7 @@ public final class CameraSettings {
 		maskOpacity = clamp(maskOpacity, 0f, 1f);
 		guideOpacity = clamp(guideOpacity, 0f, 1f);
 		if (weather == null) weather = Weather.SERVER;
+		if (moonPhase < -1 || moonPhase > 7) moonPhase = -1;
 		if (timeOfDay < -1 || timeOfDay >= TimeMath.DAY) timeOfDay = -1;
 		roll = Double.isNaN(roll) ? 0 : Math.max(-MAX_ROLL, Math.min(MAX_ROLL, roll));
 		focalLength = Double.isNaN(focalLength) ? LensMath.DEFAULT_MM : LensMath.clamp(focalLength);

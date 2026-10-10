@@ -9,7 +9,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 public final class AspectMask {
 	// Margins as a fraction of the screen, so the frame has the same proportions in GUI units and window pixels.
 	static final double SIDE = 0.07, TOP = 0.08, BOTTOM = 0.17;
-	private static final double CORNER = 10;
+	private static final int CORNER_SIZE = 8;
 
 	private AspectMask() {
 	}
@@ -38,16 +38,20 @@ public final class AspectMask {
 		Draw.rect(g, 0, f.y(), f.x(), f.bottom(), mask);
 		Draw.rect(g, f.right(), f.y(), w, f.bottom(), mask);
 
+		// Corner marks: one sprite (top-left), turned by 90 degree steps for the other corners.
 		int c = Draw.argb(lineAlpha, 0xFFFFFF);
-		double len = Math.min(CORNER, Math.min(f.w(), f.h()) / 4);
 		double x1 = f.x() + 2, y1 = f.y() + 2, x2 = f.right() - 2, y2 = f.bottom() - 2;
-		Draw.line(g, x1, y1, x1 + len, y1, c);
-		Draw.line(g, x1, y1, x1, y1 + len, c);
-		Draw.line(g, x2, y1, x2 - len, y1, c);
-		Draw.line(g, x2, y1, x2, y1 + len, c);
-		Draw.line(g, x1, y2, x1 + len, y2, c);
-		Draw.line(g, x1, y2, x1, y2 - len, c);
-		Draw.line(g, x2, y2, x2 - len, y2, c);
-		Draw.line(g, x2, y2, x2, y2 - len, c);
+		corner(g, x1, y1, 0, c);
+		corner(g, x2, y1, 1, c);
+		corner(g, x2, y2, 2, c);
+		corner(g, x1, y2, 3, c);
+	}
+
+	private static void corner(GuiGraphicsExtractor g, double x, double y, int quarterTurns, int color) {
+		g.pose().pushMatrix();
+		g.pose().translate((float) x, (float) y);
+		g.pose().rotate((float) (Math.PI / 2 * quarterTurns));
+		Draw.sprite(g, "corner", 0, 0, CORNER_SIZE, CORNER_SIZE, color);
+		g.pose().popMatrix();
 	}
 }

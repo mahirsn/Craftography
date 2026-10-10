@@ -8,7 +8,6 @@ import io.github.mahirsn.craftography.CameraSettings.Guide;
 import io.github.mahirsn.craftography.CameraSettings.Weather;
 import io.github.mahirsn.craftography.CraftographyClient;
 import io.github.mahirsn.craftography.hud.AspectMask;
-import io.github.mahirsn.craftography.hud.GuideOverlay;
 import io.github.mahirsn.craftography.hud.LevelGauge;
 import io.github.mahirsn.craftography.hud.TimeBar;
 import io.github.mahirsn.craftography.hud.ViewfinderHud;
@@ -91,23 +90,37 @@ public class ControlsScreen extends Screen {
 		controls.add(new SegmentedSelector(new Rect(x, y, w, ROW - 4), Component.translatable("craftography.panel.guide"),
 			Arrays.stream(guides).map(gd -> (Component) Component.translatable(gd.translationKey())).toList(),
 			() -> s.guide.ordinal(), i -> s.guide = guides[i],
-			(g, i, box, color) -> GuideOverlay.icon(g, box, guides[i], color)));
+			(g, i, box, color) -> icon(g, "guide_" + guides[i].name().toLowerCase(java.util.Locale.ROOT), box, 16, 11, color)));
 		y += ROW;
 		Weather[] weathers = Weather.values();
-		double lockW = w * 0.3;
-		controls.add(new SegmentedSelector(new Rect(x, y, w - lockW - 8, ROW - 4), Component.translatable("craftography.panel.weather"),
-			Arrays.stream(weathers).map(wt -> (Component) Component.translatable(wt == Weather.SERVER ? "craftography.panel.server" : wt.translationKey())).toList(),
-			() -> s.weather.ordinal(), i -> s.weather = weathers[i], null));
-		controls.add(new SegmentedSelector(new Rect(x + w - lockW, y, lockW, ROW - 4), Component.translatable("craftography.panel.lock"),
-			List.of(Component.translatable("options.off"), Component.translatable("options.on")),
-			() -> s.lockTimeWeather ? 1 : 0, i -> s.lockTimeWeather = i == 1, null));
+		double weatherW = w * 0.35;
+		controls.add(new SegmentedSelector(new Rect(x, y, weatherW, ROW - 4), Component.translatable("craftography.panel.weather"),
+			Arrays.stream(weathers).map(wt -> (Component) Component.translatable(wt.translationKey())).toList(),
+			() -> s.weather.ordinal(), i -> s.weather = weathers[i],
+			(g, i, box, color) -> icon(g, "weather_" + weathers[i].name().toLowerCase(java.util.Locale.ROOT), box, 11, 11, color)));
+		List<Component> moons = new ArrayList<>();
+		moons.add(Component.translatable("craftography.moon.server"));
+		for (int p = 0; p < TimeMath.MOON_PHASES; p++) moons.add(Component.translatable("craftography.moon." + p));
+		controls.add(new SegmentedSelector(new Rect(x + weatherW + 12, y, w - weatherW - 12, ROW - 4), Component.translatable("craftography.panel.moon"),
+			moons, () -> s.moonPhase + 1, i -> s.moonPhase = i - 1,
+			(g, i, box, color) -> icon(g, i == 0 ? "weather_server" : "moon_" + (i - 1), box, 11, 11, color)));
 		y += ROW;
-		double third = (w - 24) / 3;
-		controls.add(opacity(new Rect(x, y, third, ROW - 6), "craftography.panel.mask_opacity", () -> s.maskOpacity, v -> s.maskOpacity = v, 0.75f));
-		controls.add(opacity(new Rect(x + third + 12, y, third, ROW - 6), "craftography.panel.guide_opacity", () -> s.guideOpacity, v -> s.guideOpacity = v, 0.45f));
-		controls.add(new SegmentedSelector(new Rect(x + 2 * (third + 12), y, third, ROW - 4), Component.translatable("craftography.panel.preview"),
-			List.of(Component.translatable("options.off"), Component.translatable("options.on")),
-			() -> s.showPreview ? 1 : 0, i -> s.showPreview = i == 1, null));
+		double half = (w - 12) / 2;
+		controls.add(opacity(new Rect(x, y, half, ROW - 6), "craftography.panel.mask_opacity", () -> s.maskOpacity, v -> s.maskOpacity = v, 0.75f));
+		controls.add(opacity(new Rect(x + half + 12, y, half, ROW - 6), "craftography.panel.guide_opacity", () -> s.guideOpacity, v -> s.guideOpacity = v, 0.45f));
+		y += ROW;
+		List<Component> offOn = List.of(Component.translatable("options.off"), Component.translatable("options.on"));
+		controls.add(new SegmentedSelector(new Rect(x, y, half, ROW - 4), Component.translatable("craftography.panel.lock"),
+			offOn, () -> s.lockTimeWeather ? 1 : 0, i -> s.lockTimeWeather = i == 1, null));
+		controls.add(new SegmentedSelector(new Rect(x + half + 12, y, half, ROW - 4), Component.translatable("craftography.panel.preview"),
+			offOn, () -> s.showPreview ? 1 : 0, i -> s.showPreview = i == 1, null));
+	}
+
+	/** Draws a sprite centered in a segment box, at its pixel size if it fits. */
+	private static void icon(GuiGraphicsExtractor g, String name, Rect box, int w, int h, int color) {
+		double scale = Math.min(1, Math.min(box.w() / w, box.h() / h));
+		int sw = (int) Math.round(w * scale), sh = (int) Math.round(h * scale);
+		io.github.mahirsn.craftography.util.Draw.sprite(g, name, Math.round(box.x() + (box.w() - sw) / 2), Math.round(box.y() + (box.h() - sh) / 2), sw, sh, color);
 	}
 
 	private interface FloatSetter {
@@ -139,6 +152,10 @@ public class ControlsScreen extends Screen {
 		if (laidOutFor != CameraSettings.get().aspect) layout();
 		Control hovered = dragging != null ? dragging : at(mouseX, mouseY);
 		for (Control c : controls) c.draw(g, c == hovered);
+		if (dragging == null && hovered instanceof SegmentedSelector selector) {
+			Component label = selector.hoveredLabel(mouseX);
+			if (label != null) g.setTooltipForNextFrame(font, label, mouseX, mouseY);
+		}
 	}
 
 	@Override

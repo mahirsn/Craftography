@@ -22,7 +22,7 @@ public abstract class ClientClockManagerMixin {
 		if (!definition.is(WorldClocks.OVERWORLD)) return ticks;
 		CameraMode.serverClockTicks = ticks;
 		CameraSettings s = CameraSettings.get();
-		if (s.timeOfDay < 0 || !s.overridesApply()) return ticks;
-		return TimeMath.withDayTicks(ticks, s.timeOfDay);
+		if (s.timeOfDay < 0 && s.moonPhase < 0 || !s.overridesApply()) return ticks;
+		return TimeMath.visible(ticks, s.timeOfDay, s.moonPhase);
 	}
 }

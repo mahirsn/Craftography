@@ -25,9 +25,18 @@
 	"craftography.panel.lock": "Kapatınca koru",
 	"craftography.panel.mask_opacity": "Maske",
 	"craftography.panel.guide_opacity": "Kılavuz çizgisi",
-	"craftography.panel.server": "Sunucu",
 	"key.craftography.shutter": "Deklanşör",
 	"craftography.hint.shoot": "[%s] çek",
 	"craftography.panel.preview": "Önizleme",
-	"craftography.shutter.failed": "Craftography: fotoğraf kaydedilemedi (%s)"
+	"craftography.shutter.failed": "Craftography: fotoğraf kaydedilemedi (%s)",
+	"craftography.moon.0": "Dolunay",
+	"craftography.moon.1": "Küçülen şişkin ay",
+	"craftography.moon.2": "Son dördün",
+	"craftography.moon.3": "Küçülen hilal",
+	"craftography.moon.4": "Yeni ay",
+	"craftography.moon.5": "Büyüyen hilal",
+	"craftography.moon.6": "İlk dördün",
+	"craftography.moon.7": "Büyüyen şişkin ay",
+	"craftography.moon.server": "Sunucu ayı",
+	"craftography.panel.moon": "Ay"
 }

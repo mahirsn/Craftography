@@ -48,6 +48,9 @@ public final class TimeBar {
 			g.text(font, label, (int) Math.round(x - font.width(label) / 2.0), (int) (y - 3 - font.lineHeight), dim, false);
 		}
 
+		Draw.sprite(g, "sun", bar.x() - 12, y - 3, 7, 7, dim);
+		Draw.sprite(g, "moon", bar.right() + 5, y - 3, 7, 7, dim);
+
 		int handle = Draw.argb(alpha, overridden ? InfoStrip.AMBER : InfoStrip.WHITE);
 		double hx = x(bar, dayTicks);
 		Draw.rect(g, hx - 1, y - 4, hx + 1, y + 4, handle);

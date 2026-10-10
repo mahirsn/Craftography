@@ -39,6 +39,6 @@ public final class InfoStrip {
 		Component guide = Component.translatable(s.guide.translationKey());
 		g.text(font, guide, x, bottom, white, false);
 		Component hint = Component.translatable("craftography.hint.shoot", CraftographyClient.shutterKey.getTranslatedKeyMessage());
-		g.text(font, hint, right - font.width(hint), bottom, white, false);
+		if (x + font.width(guide) + 10 + font.width(hint) <= right) g.text(font, hint, right - font.width(hint), bottom, white, false);
 	}
 }

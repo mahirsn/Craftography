@@ -40,15 +40,6 @@ public final class GuideOverlay {
 		}
 	}
 
-	/** Small picture of a guide, for the panel's guide selector. */
-	public static void icon(GuiGraphicsExtractor g, Rect box, Guide guide, int color) {
-		Draw.line(g, box.x(), box.y(), box.right(), box.y(), color);
-		Draw.line(g, box.x(), box.bottom(), box.right(), box.bottom(), color);
-		Draw.line(g, box.x(), box.y(), box.x(), box.bottom(), color);
-		Draw.line(g, box.right(), box.y(), box.right(), box.bottom(), color);
-		lines(g, box, guide, color);
-	}
-
 	/** Two vertical and two horizontal lines at {@code t} and {@code 1 - t} of the frame. */
 	private static void grid(GuiGraphicsExtractor g, Rect f, double t, int c) {
 		for (double p : new double[]{t, 1 - t}) {

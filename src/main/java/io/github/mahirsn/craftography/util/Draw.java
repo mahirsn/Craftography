@@ -2,10 +2,24 @@ package io.github.mahirsn.craftography.util;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 
 /** Hairline drawing in GUI coordinates: lines are drawn in window pixels so they stay thin at every GUI scale. */
 public final class Draw {
 	private Draw() {
+	}
+
+	/** A pixel-art sprite from assets/craftography/textures/gui/sprites/viewfinder, tinted with {@code color}. */
+	public static Identifier sprite(String name) {
+		return Identifier.fromNamespaceAndPath("craftography", "viewfinder/" + name);
+	}
+
+	public static void sprite(GuiGraphicsExtractor g, String name, double x, double y, int w, int h, int color) {
+		g.pose().pushMatrix();
+		g.pose().translate((float) x, (float) y);
+		g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite(name), 0, 0, w, h, color);
+		g.pose().popMatrix();
 	}
 
 	public static int argb(float alpha, int rgb) {

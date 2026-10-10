@@ -55,6 +55,15 @@ public class SegmentedSelector extends Control {
 		}
 	}
 
+	/** Label of the segment under the mouse, for a tooltip on icon segments. */
+	public Component hoveredLabel(double x) {
+		if (icon == null) return null;
+		for (int i = 0; i < labels.size(); i++) {
+			if (x >= edges[i] && x < edges[i + 1]) return labels.get(i);
+		}
+		return null;
+	}
+
 	@Override
 	public void scroll(double amount, boolean fine) {
 		int n = labels.size();
@@ -76,7 +85,7 @@ public class SegmentedSelector extends Control {
 			boolean on = i == selected;
 			int color = on ? amber : white;
 			if (icon != null) {
-				icon.draw(g, i, new Rect(b.x() + 3, b.y() + 1, b.w() - 6, b.h() - 3), color);
+				icon.draw(g, i, new Rect(b.x() + 1, b.y() + 1, b.w() - 2, b.h() - 3), color);
 			} else {
 				Component label = labels.get(i);
 				g.text(font, label, (int) Math.round(b.x() + (b.w() - font.width(label)) / 2), (int) (b.y() + 2), color, true);
