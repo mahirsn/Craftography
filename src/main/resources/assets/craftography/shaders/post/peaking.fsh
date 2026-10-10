@@ -24,6 +24,6 @@ void main() {
     float gx = luma(texCoord + vec2(t.x, 0.0)) - luma(texCoord - vec2(t.x, 0.0));
     float gy = luma(texCoord + vec2(0.0, t.y)) - luma(texCoord - vec2(0.0, t.y));
     vec3 c = texture(InSampler, texCoord).rgb;
-    float edge = smoothstep(0.16, 0.26, length(vec2(gx, gy)));
+    float edge = smoothstep(0.08, 0.16, length(vec2(gx, gy)));
     fragColor = vec4(mix(c, vec3(1.0, 0.15, 0.1), edge), 1.0);
 }
