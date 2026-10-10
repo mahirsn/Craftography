@@ -8,6 +8,7 @@
 		"GameRendererMixin",
 		"HudMixin",
 		"LevelMixin",
+		"MinecraftMixin",
 		"MouseHandlerMixin"
 	],
 	"injectors": {

@@ -94,6 +94,15 @@ public class CraftographyClient implements ClientModInitializer {
 		return false;
 	}
 
+	/** True in camera mode when {@code key} is bound to a camera action. */
+	public static boolean isCameraKey(InputConstants.Key key) {
+		if (!CameraMode.isOpen()) return false;
+		for (KeyMapping mapping : CAMERA_KEYS.keySet()) {
+			if (!mapping.isUnbound() && mapping.matches(key)) return true;
+		}
+		return false;
+	}
+
 	/** Runs before vanilla handles its key bindings in the same tick. */
 	private static void onTick(Minecraft mc) {
 		if (mc.level == null || mc.player == null) {
