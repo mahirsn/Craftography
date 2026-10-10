@@ -1,6 +1,7 @@
 package io.github.mahirsn.craftography;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import io.github.mahirsn.craftography.screen.ControlsScreen;
 import io.github.mahirsn.craftography.util.LensMath;
 import io.github.mahirsn.craftography.util.TimeMath;
 import net.fabricmc.api.ClientModInitializer;
@@ -27,6 +28,7 @@ public class CraftographyClient implements ClientModInitializer {
 	public static KeyMapping resetRollKey;
 	public static KeyMapping serverTimeKey;
 	public static KeyMapping weatherKey;
+	public static KeyMapping panelKey;
 
 	/** Keys that only work in camera mode; vanilla keys bound to the same key are blocked while camera mode is on. */
 	private static List<KeyMapping> cameraKeys;
@@ -40,7 +42,8 @@ public class CraftographyClient implements ClientModInitializer {
 		resetRollKey = register("reset_roll", GLFW.GLFW_KEY_R);
 		serverTimeKey = register("server_time", GLFW.GLFW_KEY_T);
 		weatherKey = register("weather", GLFW.GLFW_KEY_Y);
-		cameraKeys = List.of(guideKey, aspectKey, resetRollKey, serverTimeKey, weatherKey);
+		panelKey = register("panel", GLFW.GLFW_KEY_TAB);
+		cameraKeys = List.of(guideKey, aspectKey, resetRollKey, serverTimeKey, weatherKey, panelKey);
 
 		ClientTickEvents.START_CLIENT_TICK.register(CraftographyClient::onTick);
 	}
@@ -88,11 +91,14 @@ public class CraftographyClient implements ClientModInitializer {
 			CameraSettings.get().cycleWeather();
 			changed = true;
 		}
+		while (panelKey.consumeClick()) {
+			if (mc.gui.screen() == null) mc.gui.setScreen(new ControlsScreen());
+		}
 		if (changed) CameraSettings.save();
 		blockVanillaKeys(mc);
 	}
 
-	static boolean isDown(int key) {
+	public static boolean isDown(int key) {
 		return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), key);
 	}
 
@@ -104,7 +110,7 @@ public class CraftographyClient implements ClientModInitializer {
 		return isDown(GLFW.GLFW_KEY_LEFT_CONTROL) || isDown(GLFW.GLFW_KEY_RIGHT_CONTROL);
 	}
 
-	static boolean shiftDown() {
+	public static boolean shiftDown() {
 		return isDown(GLFW.GLFW_KEY_LEFT_SHIFT) || isDown(GLFW.GLFW_KEY_RIGHT_SHIFT);
 	}
 

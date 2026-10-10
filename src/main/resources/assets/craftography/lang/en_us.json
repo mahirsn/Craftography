@@ -16,5 +16,14 @@
 	"craftography.weather.server": "Server weather",
 	"craftography.weather.clear": "Clear",
 	"craftography.weather.rain": "Rain",
-	"craftography.weather.thunder": "Thunder"
+	"craftography.weather.thunder": "Thunder",
+	"key.craftography.panel": "Camera controls (hold)",
+	"craftography.panel": "Camera controls",
+	"craftography.panel.aspect": "Aspect ratio",
+	"craftography.panel.guide": "Guide",
+	"craftography.panel.weather": "Weather",
+	"craftography.panel.lock": "Keep after closing",
+	"craftography.panel.mask_opacity": "Mask",
+	"craftography.panel.guide_opacity": "Guide lines",
+	"craftography.panel.server": "Server"
 }

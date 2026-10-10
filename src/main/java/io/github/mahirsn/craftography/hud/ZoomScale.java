@@ -16,8 +16,8 @@ public final class ZoomScale {
 		Font font = Minecraft.getInstance().font;
 		int white = Draw.argb(alpha * 0.85f, InfoStrip.WHITE), dim = Draw.argb(alpha * 0.45f, InfoStrip.WHITE);
 		int amber = Draw.argb(alpha, InfoStrip.AMBER);
-		double x = Math.max(f.x() - 5, font.width("200") + 12);
-		double top = f.y() + 4, bottom = f.bottom() - 4;
+		Rect ruler = ruler(f);
+		double x = ruler.right(), top = ruler.y(), bottom = ruler.bottom();
 
 		Draw.line(g, x, top, x, bottom, dim);
 		for (int v = 10; v <= 200; v += v < 50 ? 5 : v < 100 ? 10 : 25) {
@@ -36,6 +36,17 @@ public final class ZoomScale {
 		for (int i = 0; i <= 3; i++) {
 			Draw.line(g, x + 2 + i, y - 3 + i, x + 2 + i, y + 3 - i, amber);
 		}
+	}
+
+	/** Ruler area: labels on the left, the ruler line on the right edge. The panel drags inside this area. */
+	public static Rect ruler(Rect f) {
+		Font font = Minecraft.getInstance().font;
+		double x = Math.max(f.x() - 5, font.width("200") + 12);
+		double left = x - font.width("200") - 8;
+		// Full-screen frame (Free): keep clear of the title row and of the time bar.
+		boolean full = f.y() < 16;
+		double top = full ? 18 : f.y() + 4, bottom = full ? f.bottom() - 50 : f.bottom() - 4;
+		return new Rect(left, top, x - left, bottom - top);
 	}
 
 	private static double y(double mm, double top, double bottom) {

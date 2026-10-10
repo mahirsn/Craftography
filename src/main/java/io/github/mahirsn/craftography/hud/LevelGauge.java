@@ -13,7 +13,17 @@ public final class LevelGauge {
 	/** Below this roll (degrees) the camera counts as level and the gauge turns amber. */
 	static final double LEVEL = 0.05;
 
+	public static final double RADIUS = 12;
+
 	private LevelGauge() {
+	}
+
+	public static double centerX(Rect f, double screenWidth) {
+		return Math.min(f.right() + 6 + RADIUS, screenWidth - 26);
+	}
+
+	public static double centerY(Rect f) {
+		return f.y() + f.h() / 2;
 	}
 
 	public static void draw(GuiGraphicsExtractor g, Rect f, double roll, float alpha) {
@@ -21,8 +31,8 @@ public final class LevelGauge {
 		boolean level = Math.abs(roll) < LEVEL;
 		int color = Draw.argb(alpha, level ? InfoStrip.AMBER : InfoStrip.WHITE);
 		int dim = Draw.argb(alpha * 0.45f, InfoStrip.WHITE);
-		double r = 12;
-		double cx = Math.min(f.right() + 6 + r, g.guiWidth() - r - 4), cy = f.y() + f.h() / 2;
+		double r = RADIUS;
+		double cx = centerX(f, g.guiWidth()), cy = centerY(f);
 
 		// Fixed marks: the camera's own horizontal axis.
 		Draw.line(g, cx - r - 4, cy, cx - r, cy, dim);

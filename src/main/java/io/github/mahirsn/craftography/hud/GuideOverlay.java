@@ -13,7 +13,15 @@ public final class GuideOverlay {
 	}
 
 	public static void draw(GuiGraphicsExtractor g, Rect f, Guide guide, float alpha) {
-		int c = Draw.argb(alpha, 0xFFFFFF);
+		lines(g, f, guide, Draw.argb(alpha, 0xFFFFFF));
+		// Small center mark, always shown.
+		double cx = f.x() + f.w() / 2, cy = f.y() + f.h() / 2;
+		int dot = Draw.argb(Math.max(alpha, 0.5f), 0xFFFFFF);
+		Draw.line(g, cx - 2, cy, cx + 2, cy, dot);
+		Draw.line(g, cx, cy - 2, cx, cy + 2, dot);
+	}
+
+	private static void lines(GuiGraphicsExtractor g, Rect f, Guide guide, int c) {
 		switch (guide) {
 			case NONE -> {
 			}
@@ -30,11 +38,15 @@ public final class GuideOverlay {
 				Draw.line(g, cx, cy - arm, cx, cy + arm, c);
 			}
 		}
-		// Small center mark, always shown.
-		double cx = f.x() + f.w() / 2, cy = f.y() + f.h() / 2;
-		int dot = Draw.argb(Math.max(alpha, 0.5f), 0xFFFFFF);
-		Draw.line(g, cx - 2, cy, cx + 2, cy, dot);
-		Draw.line(g, cx, cy - 2, cx, cy + 2, dot);
+	}
+
+	/** Small picture of a guide, for the panel's guide selector. */
+	public static void icon(GuiGraphicsExtractor g, Rect box, Guide guide, int color) {
+		Draw.line(g, box.x(), box.y(), box.right(), box.y(), color);
+		Draw.line(g, box.x(), box.bottom(), box.right(), box.bottom(), color);
+		Draw.line(g, box.x(), box.y(), box.x(), box.bottom(), color);
+		Draw.line(g, box.right(), box.y(), box.right(), box.bottom(), color);
+		lines(g, box, guide, color);
 	}
 
 	/** Two vertical and two horizontal lines at {@code t} and {@code 1 - t} of the frame. */

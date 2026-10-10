@@ -16,5 +16,14 @@
 	"craftography.weather.server": "Sunucu havası",
 	"craftography.weather.clear": "Açık",
 	"craftography.weather.rain": "Yağmur",
-	"craftography.weather.thunder": "Fırtına"
+	"craftography.weather.thunder": "Fırtına",
+	"key.craftography.panel": "Kamera ayarları (basılı tut)",
+	"craftography.panel": "Kamera ayarları",
+	"craftography.panel.aspect": "En-boy oranı",
+	"craftography.panel.guide": "Kılavuz",
+	"craftography.panel.weather": "Hava",
+	"craftography.panel.lock": "Kapatınca koru",
+	"craftography.panel.mask_opacity": "Maske",
+	"craftography.panel.guide_opacity": "Kılavuz çizgisi",
+	"craftography.panel.server": "Sunucu"
 }
