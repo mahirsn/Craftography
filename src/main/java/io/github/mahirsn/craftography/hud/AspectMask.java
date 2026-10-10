@@ -1,0 +1,53 @@
+package io.github.mahirsn.craftography.hud;
+
+import io.github.mahirsn.craftography.CameraSettings.Aspect;
+import io.github.mahirsn.craftography.util.Draw;
+import io.github.mahirsn.craftography.util.Rect;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+
+/** The frame rectangle and the mask around it. The guides and the shutter crop use the same rectangle. */
+public final class AspectMask {
+	// Margins as a fraction of the screen, so the frame has the same proportions in GUI units and window pixels.
+	static final double SIDE = 0.07, TOP = 0.08, BOTTOM = 0.17;
+	private static final double CORNER = 10;
+
+	private AspectMask() {
+	}
+
+	/** Largest rectangle with the aspect's ratio that fits inside the screen margins. FREE uses the whole screen. */
+	public static Rect frame(double width, double height, Aspect aspect) {
+		if (aspect.ratio <= 0) return new Rect(0, 0, width, height);
+		double ax = width * SIDE, ay = height * TOP;
+		double aw = width - 2 * ax, ah = height - ay - height * BOTTOM;
+		double fw, fh;
+		if (aw / ah > aspect.ratio) {
+			fh = ah;
+			fw = ah * aspect.ratio;
+		} else {
+			fw = aw;
+			fh = aw / aspect.ratio;
+		}
+		return new Rect(ax + (aw - fw) / 2, ay + (ah - fh) / 2, fw, fh);
+	}
+
+	public static void draw(GuiGraphicsExtractor g, Rect f, float maskAlpha, float lineAlpha) {
+		int w = g.guiWidth(), h = g.guiHeight();
+		int mask = Draw.argb(maskAlpha, 0x000000);
+		Draw.rect(g, 0, 0, w, f.y(), mask);
+		Draw.rect(g, 0, f.bottom(), w, h, mask);
+		Draw.rect(g, 0, f.y(), f.x(), f.bottom(), mask);
+		Draw.rect(g, f.right(), f.y(), w, f.bottom(), mask);
+
+		int c = Draw.argb(lineAlpha, 0xFFFFFF);
+		double len = Math.min(CORNER, Math.min(f.w(), f.h()) / 4);
+		double x1 = f.x() + 2, y1 = f.y() + 2, x2 = f.right() - 2, y2 = f.bottom() - 2;
+		Draw.line(g, x1, y1, x1 + len, y1, c);
+		Draw.line(g, x1, y1, x1, y1 + len, c);
+		Draw.line(g, x2, y1, x2 - len, y1, c);
+		Draw.line(g, x2, y1, x2, y1 + len, c);
+		Draw.line(g, x1, y2, x1 + len, y2, c);
+		Draw.line(g, x1, y2, x1, y2 - len, c);
+		Draw.line(g, x2, y2, x2 - len, y2, c);
+		Draw.line(g, x2, y2, x2, y2 - len, c);
+	}
+}

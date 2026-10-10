@@ -5,10 +5,13 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class CraftographyClient implements ClientModInitializer {
 	public static final String MOD_ID = "craftography";
@@ -17,15 +20,70 @@ public class CraftographyClient implements ClientModInitializer {
 	public static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "main"));
 
 	public static KeyMapping toggleKey;
+	public static KeyMapping guideKey;
+	public static KeyMapping aspectKey;
+
+	/** Keys that only work in camera mode; vanilla keys bound to the same key are blocked while camera mode is on. */
+	private static List<KeyMapping> cameraKeys;
 
 	@Override
 	public void onInitializeClient() {
-		toggleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.craftography.toggle", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, CATEGORY));
+		CameraSettings.load();
+		toggleKey = register("toggle", GLFW.GLFW_KEY_V);
+		guideKey = register("guide", GLFW.GLFW_KEY_G);
+		aspectKey = register("aspect", GLFW.GLFW_KEY_B);
+		cameraKeys = List.of(guideKey, aspectKey);
 
-		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			while (toggleKey.consumeClick()) {
-				LOG.info("Camera mode toggle pressed");
+		ClientTickEvents.START_CLIENT_TICK.register(CraftographyClient::onTick);
+	}
+
+	private static KeyMapping register(String name, int key) {
+		return KeyMappingHelper.registerKeyMapping(new KeyMapping("key.craftography." + name, InputConstants.Type.KEYSYM, key, CATEGORY));
+	}
+
+	/** Runs before vanilla handles its key bindings in the same tick. */
+	private static void onTick(Minecraft mc) {
+		if (mc.level == null || mc.player == null) {
+			CameraMode.reset();
+			return;
+		}
+		while (toggleKey.consumeClick()) {
+			CameraMode.toggle();
+		}
+		if (!CameraMode.isOpen()) {
+			for (KeyMapping key : cameraKeys) {
+				while (key.consumeClick()) {
+					// Not in camera mode: ignore.
+				}
 			}
-		});
+			return;
+		}
+
+		boolean changed = false;
+		while (guideKey.consumeClick()) {
+			CameraSettings.get().cycleGuide();
+			changed = true;
+		}
+		while (aspectKey.consumeClick()) {
+			CameraSettings.get().cycleAspect();
+			changed = true;
+		}
+		if (changed) CameraSettings.save();
+		blockVanillaKeys(mc);
+	}
+
+	/** Stops vanilla actions that share a key with a camera key (for example G = quick actions). */
+	private static void blockVanillaKeys(Minecraft mc) {
+		for (KeyMapping vanilla : mc.options.keyMappings) {
+			if (vanilla.getCategory() == CATEGORY) continue;
+			for (KeyMapping key : cameraKeys) {
+				if (!key.isUnbound() && vanilla.same(key)) {
+					while (vanilla.consumeClick()) {
+						// Drop the click.
+					}
+					if (key.isDown()) vanilla.setDown(false);
+				}
+			}
+		}
 	}
 }

@@ -1,4 +1,12 @@
 {
 	"key.category.craftography.main": "Craftography",
-	"key.craftography.toggle": "Toggle camera mode"
+	"key.craftography.toggle": "Toggle camera mode",
+	"key.craftography.guide": "Next composition guide",
+	"key.craftography.aspect": "Next aspect ratio",
+	"craftography.guide.none": "No guide",
+	"craftography.guide.thirds": "Rule of thirds",
+	"craftography.guide.phi": "Phi grid",
+	"craftography.guide.center": "Center cross",
+	"craftography.guide.diagonals": "Diagonals",
+	"craftography.guide.quarters": "Quarters"
 }

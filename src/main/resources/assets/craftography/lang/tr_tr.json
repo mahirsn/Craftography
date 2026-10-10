@@ -1,0 +1,12 @@
+{
+	"key.category.craftography.main": "Craftography",
+	"key.craftography.toggle": "Kamera modunu aç/kapat",
+	"key.craftography.guide": "Sonraki kompozisyon kılavuzu",
+	"key.craftography.aspect": "Sonraki en-boy oranı",
+	"craftography.guide.none": "Kılavuz yok",
+	"craftography.guide.thirds": "Üçler kuralı",
+	"craftography.guide.phi": "Altın oran",
+	"craftography.guide.center": "Merkez artısı",
+	"craftography.guide.diagonals": "Köşegenler",
+	"craftography.guide.quarters": "Dörtlü bölme"
+}
