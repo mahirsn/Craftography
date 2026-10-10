@@ -1,5 +1,9 @@
 package io.github.mahirsn.craftography.screen.widget;
 
+import net.minecraft.client.Minecraft;
+import io.github.mahirsn.craftography.hud.BodyLayout;
+import io.github.mahirsn.craftography.hud.HardwareMotion;
+
 import io.github.mahirsn.craftography.hud.BodyControls;
 import io.github.mahirsn.craftography.util.Rect;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -20,6 +24,19 @@ public class BodyWidget extends Control {
 		this.control = control;
 	}
 
+	/** Hit targets follow the projected hardware even during the opening animation. */
+	@Override
+	public Rect area() {
+		var window = Minecraft.getInstance().getWindow();
+		return BodyLayout.of(window.getGuiScaledWidth(), window.getGuiScaledHeight()).get(control.part());
+	}
+
+	@Override
+	public boolean contains(double x, double y) {
+		Rect r = area();
+		return x >= r.x() && x < r.right() && y >= r.y() && y < r.bottom();
+	}
+
 	public BodyControls.Control control() {
 		return control;
 	}
@@ -27,8 +44,8 @@ public class BodyWidget extends Control {
 	@Override
 	public void press(double x, double y) {
 		lastX = x; lastY = y;
-		io.github.mahirsn.craftography.hud.HardwareMotion.press(control.part());
-		if (control.part() == io.github.mahirsn.craftography.hud.BodyLayout.Part.SHUTTER) return;
+		HardwareMotion.press(control.part());
+		if (control.part() == BodyLayout.Part.SHUTTER) return;
 		if (control.click() != null) control.click().run();
 	}
 
@@ -58,7 +75,7 @@ public class BodyWidget extends Control {
 	}
 
 	public void release() {
-		if (control.part() == io.github.mahirsn.craftography.hud.BodyLayout.Part.SHUTTER) control.click().run();
+		if (control.part() == BodyLayout.Part.SHUTTER) control.click().run();
 	}
 
 	@Override

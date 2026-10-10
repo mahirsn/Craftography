@@ -1,5 +1,7 @@
 package io.github.mahirsn.craftography.hud;
 
+import io.github.mahirsn.craftography.render.HeldCamcorder;
+
 import io.github.mahirsn.craftography.util.Rect;
 import java.util.EnumMap;
 import java.util.Map;
@@ -21,23 +23,30 @@ public final class BodyLayout {
 		scale = Math.min(width / DESIGN_WIDTH, height / DESIGN_HEIGHT);
 		x = (width - DESIGN_WIDTH * scale) / 2;
 		y = (height - DESIGN_HEIGHT * scale) / 2;
-		lcd = rect(76, 106, 244, 137);
-		body = rect(53, 31, 385, 222);
-		grip = rect(422, 197, 20, 73);
-		parts.put(Part.ZOOM, rect(290, 50, 32, 32));
-		parts.put(Part.SHUTTER, rect(336, 58, 20, 17));
-		parts.put(Part.TOP_LCD, rect(360, 70, 40, 12));
-		// Zoom, record and the small display sit on the camcorder's top face; each page reuses the dials on its rear panel.
-		double[][] hardware = {{338, 110, 31, 29}, {344, 158, 52, 52}, {384, 113, 31, 29}, {343, 223, 28, 22}, {386, 223, 28, 22}};
+		lcd = HeldCamcorder.surface(width,height,21,10,17,-6.5f,6.5f);
+		body = HeldCamcorder.surface(width,height,22,8,18,8,17);
+		grip = body;
+		parts.put(Part.ZOOM, panel(.18,.04,.3,.12));
+		parts.put(Part.SHUTTER, panel(.63,.04,.19,.12));
+		parts.put(Part.TOP_LCD, panel(.38,.02,.2,.08));
+		double[][] hardware={{4.0/18,4.0/20,4.0/18,3.0/20}, {6.0/18,8.0/20,6.0/18,4.0/20},
+			{10.0/18,4.0/20,4.0/18,3.0/20}, {4.0/18,14.0/20,4.0/18,3.0/20}, {10.0/18,14.0/20,4.0/18,3.0/20}};
 		for (BodyControls.Page page : BodyControls.Page.values()) {
-			Part[] row = page.parts;
-			for (int i = 0; i < row.length; i++) parts.put(row[i], rect(hardware[i][0], hardware[i][1], hardware[i][2], hardware[i][3]));
+			for(int i=0;i<page.parts.length;i++) {
+				double[] h=hardware[i];
+				parts.put(page.parts[i],panel(h[0],h[1],h[2],h[3]));
+			}
 		}
 	}
 	public Rect rect(double dx, double dy, double w, double h) {
 		return new Rect(x + dx * scale, y + dy * scale, w * scale, h * scale);
 	}
-	public Rect pageButton(int index) { return rect(76 + index * 41, 87, 40, 14); }
+	private Rect panel(double px,double py,double pw,double ph) {
+		// Texture UV on the east face runs from z=17 to z=8.
+		return HeldCamcorder.surface(width,height,22,
+			(float)(18-(py+ph)*10),(float)(18-py*10),(float)(8+px*9),(float)(8+(px+pw)*9));
+	}
+	public Rect pageButton(int index) { return new Rect(lcd.x()+index*lcd.w()/6,lcd.y()+2,lcd.w()/6,10*scale); }
 	public Rect get(Part part) { return parts.get(part); }
 	public static BodyLayout of(double width, double height) { return new BodyLayout(width, height); }
 }

@@ -20,7 +20,7 @@ public final class LevelGauge {
 
 	/** Inside the live view, at its right edge, like a camera's electronic level. */
 	public static double centerX(Rect liveView) {
-		return liveView.right() - RADIUS - 14;
+		return liveView.right() - (RADIUS + 14)*ViewfinderHud.lcdScale(liveView);
 	}
 
 	public static double centerY(Rect liveView) {

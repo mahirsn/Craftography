@@ -28,8 +28,11 @@ public final class ViewfinderHud {
 	/** The live view in GUI units, including the camera’s rise from the bottom. */
 	public static Rect liveView(double width, double height) {
 		Rect lcd = BodyLayout.of(width, height).lcd;
-		return new Rect(lcd.x(), lcd.y() + Math.round((1 - CameraMode.progress()) * height), lcd.w(), lcd.h());
+		return lcd;
 	}
+
+	/** Fit LCD typography and instruments as a unit, including at large GUI scales. */
+	public static double lcdScale(Rect lcd) { return Math.min(lcd.w()/244, lcd.h()/137); }
 
 	/** Frame rectangle in GUI units, including the open/close animation. */
 	public static Rect currentFrame(double width, double height) {
@@ -45,22 +48,24 @@ public final class ViewfinderHud {
 		CameraSettings s = CameraSettings.get();
 		float p = CameraMode.progress();
 		BodyLayout l = BodyLayout.of(g.guiWidth(), g.guiHeight());
-		Rect lv = liveView(g.guiWidth(), g.guiHeight());
+		Rect projected = liveView(g.guiWidth(), g.guiHeight());
+		double uiScale = lcdScale(projected);
+		g.pose().pushMatrix();
+		g.pose().translate((float)projected.x(), (float)projected.y());
+		g.pose().scale((float)uiScale, (float)uiScale);
+		Rect lv = new Rect(0, 0, projected.w()/uiScale, projected.h()/uiScale);
 		Rect f = AspectMask.frame(lv, s.aspect);
 
 		AspectMask.draw(g, lv, f, s.maskOpacity * p, 0.9f * p);
 		GuideOverlay.draw(g, f, s.guide, s.guideOpacity * p);
 		focusPoint(g, f, s, p);
 		LevelGauge.draw(g, lv, s.roll, p);
-		if (s.histogram) histogram(g, lv, p);
+		if (s.histogram && ControlsScreen.hoveredPart() == null) histogram(g, lv, p);
 		if (ControlsScreen.isOpen() && BodyControls.page() == BodyControls.Page.WORLD) TimeBar.draw(g, lv, visibleDayTicks(s), s.timeOfDay >= 0, p);
 		Shutter.draw(g, f, lv);
 
-		g.pose().pushMatrix();
-		// The camera is raised into view while camera mode opens.
-		g.pose().translate(0, Math.round((1 - p) * g.guiHeight()));
-		CameraBody.draw(g, l, ControlsScreen.hoveredPart());
 		g.pose().popMatrix();
+		CameraBody.draw(g, l, ControlsScreen.hoveredPart());
 	}
 
 	/** Autofocus point in the frame centre with the distance the lens is focused at. */

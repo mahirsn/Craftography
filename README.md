@@ -8,9 +8,9 @@ the time, weather and moon phase you pick are visual only.
 
 ## Features
 
-- An illustrated DSLR rear body with a high-resolution graphite housing, leatherette grip, rubber eyecup,
-  glass LCD and brushed command dials. The camera rises into view; dial ticks rotate with easing,
-  buttons depress, and a segmented mode selector slides between pages.
+- A real 3D camcorder rendered as a client-only held model, with a transparent flip-out LCD showing the live world.
+  The camera rises into a steady, illuminated close-up in 250 ms. LCD overlays and animated rear controls follow
+  the projected model; dial ticks rotate with easing and buttons depress.
 - Exposure in real stops: ISO 100-12800, aperture f/1.4-f/22 and shutter speed 1/4000-1 s. The defaults
   (ISO 100, f/5.6, 1/125) leave the game's picture as it is. A centre-weighted light meter and a histogram help.
 - White balance in kelvin (2500-10000 K) with a green-magenta tint.
@@ -23,7 +23,7 @@ the time, weather and moon phase you pick are visual only.
 - Lens from 10 mm to 200 mm (full-frame, vertical FOV). Mouse sensitivity follows the zoom.
 - Camera roll from -90° to +90° with an electronic level.
 - Client-side time of day, visual weather and moon phase.
-- F8 frees the cursor to use the camera's physical controls. Six mode segments above the LCD select Exposure,
+- F8 frees the cursor to use the camera's physical controls. Six tabs on the LCD select Exposure,
   White balance, Focus, Frame, Time/weather or Timer/tripod. The rear dials and buttons adjust that mode's settings; hover a control to read its value.
   Symbol buttons, wheels, keys and the time bar all read the same values. Lens effects and focus peaking stay inside the LCD; the surrounding world keeps its original image.
 - Tripod: the camera stays where you set it down, and you can walk into the shot.
@@ -52,7 +52,7 @@ Only F7, F8 and F9 have default keys. Bind the rest in Options > Controls > Craf
 
 A key you bind works only in camera mode. While camera mode is on, a vanilla key on the same key is blocked.
 
-In interactive mode the player does not move or look around. Click a mode segment above the LCD, then drag vertically
+In interactive mode the player does not move or look around. Click a tab on the LCD, then drag vertically
 or scroll the rear wheels and click the physical switches/buttons. Double-click a wheel to reset it.
 Drag or scroll the rotary zoom dial. Hold the warm shutter button to half-press for focus; release it to take a photo.
 The LCD time bar and horizon level can also be dragged. F8 or Esc returns to aiming the camera.

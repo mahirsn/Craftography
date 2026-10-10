@@ -1,5 +1,18 @@
 package io.github.mahirsn.craftography.mixin;
 
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Final;
+import net.minecraft.client.renderer.Projection;
+import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import org.joml.Matrix4fc;
+import org.joml.Matrix4f;
+import com.mojang.blaze3d.systems.RenderSystem;
+import io.github.mahirsn.craftography.CameraMode;
+import io.github.mahirsn.craftography.render.HeldCamcorder;
+
 import io.github.mahirsn.craftography.capture.Shutter;
 import io.github.mahirsn.craftography.render.LensEffects;
 import net.minecraft.client.renderer.GameRenderer;
@@ -10,6 +23,31 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
+	@Shadow @Final private Projection hudProjection;
+	@Shadow @Final private SubmitNodeStorage handAndScreenSubmitNodeStorage;
+	@Shadow @Final private FeatureRenderDispatcher featureRenderDispatcher;
+
+	@Inject(method = "extractCamera", at = @At("TAIL"))
+	private void craftography$prepare(DeltaTracker delta, float worldTicks, float entityTicks, CallbackInfo ci) {
+		if (!CameraMode.isActive()) return;
+		var state = ((GameRenderer)(Object)this).gameRenderState();
+		HeldCamcorder.prepare(state.levelRenderState.cameraRenderState,
+			state.windowRenderState.width, state.windowRenderState.height);
+	}
+
+	@Inject(method = "renderItemInHand", at = @At("HEAD"), cancellable = true)
+	private void craftography$held(CameraRenderState state, float delta, Matrix4fc view, CallbackInfo ci) {
+		if (!CameraMode.isActive()) return;
+		if (state.isPanoramicMode || HeldCamcorder.isHudHidden()) { ci.cancel(); return; }
+		var stack = RenderSystem.getModelViewStack();
+		stack.pushMatrix().identity();
+		var renderer = ((GameRenderer)(Object)this).itemInHandRenderer;
+		HeldCamcorder.submit(renderer, handAndScreenSubmitNodeStorage, hudProjection.getMatrix(new Matrix4f()));
+		featureRenderDispatcher.renderAllFeatures(handAndScreenSubmitNodeStorage);
+		stack.popMatrix();
+		ci.cancel();
+	}
+
 	/**
 	 * After the level (and any shader pack pass) is drawn and before the GUI: runs the lens effects, then takes a
 	 * requested photo, so the photo is exactly what the viewfinder shows.

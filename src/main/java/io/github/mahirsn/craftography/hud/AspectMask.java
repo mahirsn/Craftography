@@ -37,8 +37,11 @@ public final class AspectMask {
 		// Hairline corner marks, rotated for each corner; clear of the LCD status row.
 		int c = Draw.argb(lineAlpha, 0xFFFFFF);
 		double x1 = f.x() + 2, y1 = f.y() + 2, x2 = f.right() - 2, y2 = f.bottom() - 2;
-		corner(g, x1, y1, 0, c);
-		corner(g, x2, y1, 1, c);
+		// The upper LCD now contains tabs and a status row; do not put crop marks over them.
+		if (y1 > area.y() + 28) {
+			corner(g, x1, y1, 0, c);
+			corner(g, x2, y1, 1, c);
+		}
 		corner(g, x2, y2, 2, c);
 		corner(g, x1, y2, 3, c);
 	}

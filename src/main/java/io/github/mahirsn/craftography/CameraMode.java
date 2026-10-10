@@ -38,7 +38,7 @@ public final class CameraMode {
 
 	/** Eased transition value, 0 = closed, 1 = fully open. */
 	public static float progress() {
-		return Easing.inOutCubic(rawProgress());
+		return Easing.outCubic(rawProgress());
 	}
 
 	public static void toggle() {

@@ -65,7 +65,7 @@ public class ControlsScreen extends Screen {
 		for (BodyControls.Control c : BodyControls.all()) controls.add(new BodyWidget(l.get(c.part()), c));
 		CameraSettings s = CameraSettings.get();
 		Rect lcd = l.lcd;
-		controls.add(new Dial(LevelGauge.centerX(lcd), LevelGauge.centerY(lcd), 12, () -> s.roll, v -> CraftographyClient.change(c -> c.roll = v),
+		controls.add(new Dial(LevelGauge.centerX(lcd), LevelGauge.centerY(lcd), 12*ViewfinderHud.lcdScale(lcd), () -> s.roll, v -> CraftographyClient.change(c -> c.roll = v),
 			(v, amount, fine) -> {
 				s.addRoll(amount * (fine ? 0.1 : 1));
 				CameraSettings.save();

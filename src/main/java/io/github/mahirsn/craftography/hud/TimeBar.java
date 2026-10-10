@@ -20,8 +20,9 @@ public final class TimeBar {
 
 	/** Bar line rectangle (height 0) at the bottom of the live view, in GUI units. Also used to drag the handle. */
 	public static Rect bar(Rect liveView) {
-		double w = liveView.w() - 40;
-		return new Rect(liveView.x() + 20, liveView.bottom() - 31, w, 0);
+		double scale = ViewfinderHud.lcdScale(liveView);
+		double w = liveView.w() - 40*scale;
+		return new Rect(liveView.x() + 20*scale, liveView.bottom() - 31*scale, w, 0);
 	}
 
 	/** Day tick under a mouse x position, snapped to 10 ticks. */
