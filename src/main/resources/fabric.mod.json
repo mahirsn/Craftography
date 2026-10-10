@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "craftography",
+	"version": "${version}",
+	"name": "Craftography",
+	"description": "Turns the screen into a camera viewfinder: framing masks, composition guides, lens, roll, client-side time of day and a shutter.",
+	"authors": [
+		"mahirsn"
+	],
+	"contact": {
+		"sources": "https://github.com/mahirsn/Craftography"
+	},
+	"license": "MIT",
+	"icon": "assets/craftography/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"io.github.mahirsn.craftography.CraftographyClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
