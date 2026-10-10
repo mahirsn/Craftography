@@ -22,6 +22,11 @@ public final class Draw {
 		g.pose().popMatrix();
 	}
 
+	/** A sprite from assets/craftography/textures/gui/sprites/camera, at integer GUI coordinates. */
+	public static void camera(GuiGraphicsExtractor g, String name, double x, double y, int w, int h, int color) {
+		g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.fromNamespaceAndPath("craftography", "camera/" + name), (int) x, (int) y, w, h, color);
+	}
+
 	public static int argb(float alpha, int rgb) {
 		int a = Math.round(Easing.clamp01(alpha) * 255f);
 		return a << 24 | rgb & 0xFFFFFF;

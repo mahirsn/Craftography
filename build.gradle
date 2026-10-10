@@ -48,5 +48,7 @@ jar {
 	from("LICENSE") {
 		rename { "${it}_$projectName"}
 	}
+	// The Exposure MIT notice must ship with the adapted sprites.
+	from("THIRD_PARTY_NOTICES.md")
 }
 

@@ -28,14 +28,15 @@ public final class ViewfinderHud {
 		CameraSettings s = CameraSettings.get();
 		float p = CameraMode.progress();
 		Rect f = currentFrame(g.guiWidth(), g.guiHeight());
-		AspectMask.draw(g, f, s.maskOpacity * p, 0.9f * p);
+		AspectMask.draw(g, f, s.aspect != CameraSettings.Aspect.FREE, s.maskOpacity * p, 0.9f * p, p);
 		GuideOverlay.draw(g, f, s.guide, s.guideOpacity * p);
 		double mm = CameraMode.focalLength();
 		ZoomScale.draw(g, f, mm, p);
 		LevelGauge.draw(g, f, s.roll, p);
 		int time = visibleDayTicks(s);
 		TimeBar.draw(g, f, time, s.timeOfDay >= 0, p);
-		InfoStrip.draw(g, f, s, mm, time, p);
+		InfoStrip.draw(g, f, s, mm, p);
+		CameraBar.draw(g, s, mm, time, p);
 		Shutter.draw(g, f);
 	}
 }

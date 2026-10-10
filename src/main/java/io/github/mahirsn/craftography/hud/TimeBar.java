@@ -22,7 +22,8 @@ public final class TimeBar {
 	public static Rect bar(Rect f, double screenWidth, double screenHeight) {
 		double w = Math.max(160, f.w() * 0.8);
 		w = Math.min(w, screenWidth - 16);
-		double y = Math.min(f.bottom() + 14, screenHeight - 24);
+		// Below the bezel, above the camera bar.
+		double y = Math.min(f.bottom() + AspectMask.BEZEL + 14, CameraBar.top(screenHeight) - 7);
 		return new Rect((screenWidth - w) / 2, y, w, 0);
 	}
 

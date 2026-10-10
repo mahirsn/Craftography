@@ -10,6 +10,8 @@ public final class AspectMask {
 	// Margins as a fraction of the screen, so the frame has the same proportions in GUI units and window pixels.
 	static final double SIDE = 0.07, TOP = 0.08, BOTTOM = 0.17;
 	private static final int CORNER_SIZE = 8;
+	/** Width of the pixel-art bezel around the frame, in GUI units. */
+	public static final int BEZEL = 8;
 
 	private AspectMask() {
 	}
@@ -30,13 +32,19 @@ public final class AspectMask {
 		return new Rect(ax + (aw - fw) / 2, ay + (ah - fh) / 2, fw, fh);
 	}
 
-	public static void draw(GuiGraphicsExtractor g, Rect f, float maskAlpha, float lineAlpha) {
+	public static void draw(GuiGraphicsExtractor g, Rect f, boolean bezel, float maskAlpha, float lineAlpha, float bezelAlpha) {
 		int w = g.guiWidth(), h = g.guiHeight();
 		int mask = Draw.argb(maskAlpha, 0x000000);
 		Draw.rect(g, 0, 0, w, f.y(), mask);
 		Draw.rect(g, 0, f.bottom(), w, h, mask);
 		Draw.rect(g, 0, f.y(), f.x(), f.bottom(), mask);
 		Draw.rect(g, f.right(), f.y(), w, f.bottom(), mask);
+		if (bezel) {
+			// Nine-sliced sprite; its inner edge lies on the frame edge, so it never covers the picture.
+			int x = (int) Math.round(f.x()), y = (int) Math.round(f.y());
+			int fw = (int) Math.round(f.right()) - x, fh = (int) Math.round(f.bottom()) - y;
+			Draw.camera(g, "bezel", x - BEZEL, y - BEZEL, fw + 2 * BEZEL, fh + 2 * BEZEL, Draw.argb(bezelAlpha, 0xFFFFFF));
+		}
 
 		// Corner marks: one sprite (top-left), turned by 90 degree steps for the other corners.
 		int c = Draw.argb(lineAlpha, 0xFFFFFF);

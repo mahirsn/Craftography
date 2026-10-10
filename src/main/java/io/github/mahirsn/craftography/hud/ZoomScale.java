@@ -41,11 +41,11 @@ public final class ZoomScale {
 	/** Ruler area: labels on the left, the ruler line on the right edge. The panel drags inside this area. */
 	public static Rect ruler(Rect f) {
 		Font font = Minecraft.getInstance().font;
-		double x = Math.max(f.x() - 5, font.width("200") + 12);
+		double x = Math.max(f.x() - 5 - AspectMask.BEZEL, font.width("200") + 12);
 		double left = x - font.width("200") - 8;
 		// Full-screen frame (Free): keep clear of the title row and of the time bar.
 		boolean full = f.y() < 16;
-		double top = full ? 18 : f.y() + 4, bottom = full ? f.bottom() - 50 : f.bottom() - 4;
+		double top = full ? 18 : f.y() + 4, bottom = full ? f.bottom() - 60 : f.bottom() - 4;
 		return new Rect(left, top, x - left, bottom - top);
 	}
 

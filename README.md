@@ -50,4 +50,5 @@ The jar is written to `build/libs/`.
 
 ## License
 
-MIT
+MIT. The camera control button, plate and bezel sprites are adapted from
+[Exposure](https://github.com/mortuusars/Exposure) by mortuusars (MIT); see `THIRD_PARTY_NOTICES.md`.
