@@ -39,5 +39,15 @@
 	"craftography.moon.7": "Büyüyen şişkin ay",
 	"craftography.moon.server": "Sunucu ayı",
 	"craftography.panel.moon": "Ay",
-	"key.craftography.timer": "Sonraki zamanlayıcı"
+	"key.craftography.timer": "Sonraki zamanlayıcı",
+	"key.craftography.interactive": "Etkileşimli mod",
+	"craftography.interactive": "Etkileşimli kamera kontrolleri",
+	"craftography.button.zoom": "Lens",
+	"craftography.button.zoom.hint": "Yakınlaştırmak için yana sürükle ya da kaydır. Çift tık: 35 mm",
+	"craftography.button.time": "Günün saati",
+	"craftography.button.time.hint": "Değiştirmek için yana sürükle ya da kaydır. Çift tık: sunucu saati",
+	"craftography.button.timer": "Zamanlayıcı",
+	"craftography.button.timer.seconds": "%s sn",
+	"craftography.button.menu": "Ayarlar",
+	"craftography.button.shutter.cancel": "Geri sayım sürüyor. İptal için yeniden tıkla."
 }

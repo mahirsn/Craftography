@@ -39,5 +39,15 @@
 	"craftography.moon.7": "Waxing gibbous",
 	"craftography.moon.server": "Server moon",
 	"craftography.panel.moon": "Moon",
-	"key.craftography.timer": "Next self-timer"
+	"key.craftography.timer": "Next self-timer",
+	"key.craftography.interactive": "Interactive mode",
+	"craftography.interactive": "Interactive camera controls",
+	"craftography.button.zoom": "Lens",
+	"craftography.button.zoom.hint": "Drag sideways or scroll to zoom. Double-click: 35 mm",
+	"craftography.button.time": "Time of day",
+	"craftography.button.time.hint": "Drag sideways or scroll to change. Double-click: server time",
+	"craftography.button.timer": "Self-timer",
+	"craftography.button.timer.seconds": "%s s",
+	"craftography.button.menu": "Settings",
+	"craftography.button.shutter.cancel": "Counting down. Click again to cancel."
 }

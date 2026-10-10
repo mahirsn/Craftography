@@ -11,6 +11,10 @@ public abstract class Control {
 		this.area = area;
 	}
 
+	public Rect area() {
+		return area;
+	}
+
 	public boolean contains(double x, double y) {
 		return x >= area.x() && x < area.right() && y >= area.y() && y < area.bottom();
 	}
