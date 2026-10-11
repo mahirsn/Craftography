@@ -1,0 +1,33 @@
+# Builds the mod and publishes the jar as a GitHub release. Runs when a version tag (v*) is pushed, or when a pushed
+# commit's message contains [release]; then the tag is v<version from gradle.properties>, created on that commit.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+    branches: ['**']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew build
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="$GITHUB_REF_NAME"
+          [ "$GITHUB_REF_TYPE" = tag ] || tag="v$(sed -n 's/^version=//p' gradle.properties)"
+          jar=$(find build/libs -name '*.jar' ! -name '*-sources.jar')
+          gh release create "$tag" "$jar" --target "$GITHUB_SHA" --title "Craftography ${tag#v}" --prerelease \
+            --notes "Client-side Fabric mod for Minecraft 26.2. Needs Fabric Loader and Fabric API; put the jar in your mods folder. Built from ${GITHUB_SHA::7}."

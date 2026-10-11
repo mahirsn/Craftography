@@ -18,12 +18,14 @@ public final class TimeBar {
 	private TimeBar() {
 	}
 
-	/** Bar line rectangle (height 0) for a frame, in GUI units. Also used to drag the handle. */
-	public static Rect bar(Rect f, double screenWidth, double screenHeight) {
-		double w = Math.min(Math.max(160, f.w() * 0.8), screenWidth - 2 * AspectMask.gutter(screenWidth));
-		// In its own band above the camera bar, below the frame bezel.
-		double y = CameraBar.top(screenHeight) - 6;
-		return new Rect((screenWidth - w) / 2, y, w, 0);
+	/**
+	 * Bar line rectangle (height 0) in GUI units, also used to drag the handle: right above the camera bar and as wide
+	 * as it, less room for the sun and moon at the ends. Null on a narrow screen, where the dials take its place; the
+	 * bar's time plate still sets the time there.
+	 */
+	public static Rect bar(double screenWidth, double screenHeight) {
+		if (!CameraBar.wide(screenWidth)) return null;
+		return new Rect(CameraBar.x(screenWidth) + 14, CameraBar.top(screenHeight) - 6, CameraBar.width() - 28, 0);
 	}
 
 	/** Day tick under a mouse x position, snapped to 10 ticks. */
@@ -32,9 +34,10 @@ public final class TimeBar {
 		return TimeMath.dayTicks(Math.round(t * TimeMath.DAY / 10.0) * 10);
 	}
 
-	public static void draw(GuiGraphicsExtractor g, Rect f, int dayTicks, boolean overridden, float alpha) {
+	public static void draw(GuiGraphicsExtractor g, int dayTicks, boolean overridden, float alpha) {
 		Font font = Minecraft.getInstance().font;
-		Rect bar = bar(f, g.guiWidth(), g.guiHeight());
+		Rect bar = bar(g.guiWidth(), g.guiHeight());
+		if (bar == null) return;
 		double y = bar.y();
 		Draw.line(g, bar.x(), y, bar.right(), y, Draw.argb(alpha * 0.5f, InfoStrip.WHITE));
 		band(g, bar, GOLDEN, Draw.argb(alpha * 0.8f, GOLD));

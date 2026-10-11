@@ -7,8 +7,6 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /** The frame rectangle and the mask around it. The guides and the shutter crop use the same rectangle. */
 public final class AspectMask {
-	/** Time bar band between the frame bezel and the camera bar, in GUI units. */
-	public static final int TIME_BAND = 24;
 	private static final int CORNER_SIZE = 8;
 	/** Width of the pixel-art bezel around the frame, in GUI units. */
 	public static final int BEZEL = 8;
@@ -16,19 +14,15 @@ public final class AspectMask {
 	private AspectMask() {
 	}
 
-	/** Width of each side gutter, where the settings panels go; the same on both sides. */
-	public static double gutter(double width) {
-		return Math.round(Math.max(104, Math.min(150, width * 0.22)));
-	}
-
 	/**
-	 * The picture area: flush with the top of the screen, between two equal side gutters and above the time bar and
-	 * the camera bar, so no other element ever covers it. The aspect's frame is fitted into it, centred, top-aligned.
+	 * The picture area: the whole screen above the camera bar's band, less the bezel (flush with the top edge) and a
+	 * small side margin, so no control ever covers the picture. The aspect's frame is fitted into it, centred,
+	 * top-aligned.
 	 */
 	public static Rect frame(double width, double height, Aspect aspect) {
-		double ax = gutter(width) + BEZEL, aw = width - 2 * ax;
-		double ah = CameraBar.top(height) - TIME_BAND - BEZEL;
-		if (aspect.ratio <= 0) return new Rect(ax, 0, aw, ah);
+		double ax = BEZEL + 4, aw = width - 2 * ax;
+		double ah = CameraBar.bandTop(width, height) - 2 * BEZEL;
+		if (aspect.ratio <= 0) return new Rect(ax, BEZEL, aw, ah);
 		double fw, fh;
 		if (aw / ah > aspect.ratio) {
 			fh = ah;
@@ -37,7 +31,7 @@ public final class AspectMask {
 			fw = aw;
 			fh = aw / aspect.ratio;
 		}
-		return new Rect(ax + (aw - fw) / 2, 0, fw, fh);
+		return new Rect(ax + (aw - fw) / 2, BEZEL, fw, fh);
 	}
 
 	public static void draw(GuiGraphicsExtractor g, Rect f, boolean bezel, float maskAlpha, float lineAlpha, float bezelAlpha) {

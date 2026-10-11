@@ -112,9 +112,9 @@ public final class Shutter {
 		CameraSettings.Aspect aspect = s.aspect;
 		long mm = Math.round(CameraMode.focalLength());
 		Screenshot.takeScreenshot(mc.gameRenderer.mainRenderTarget(), image -> {
-			// The frame is laid out in GUI units; scale it to the image's pixels.
-			double k = image.getWidth() / (double) mc.getWindow().getGuiScaledWidth();
-			Rect r = AspectMask.frame(image.getWidth() / k, image.getHeight() / k, aspect).scale(k);
+			// The frame is laid out in GUI units, exactly as the HUD draws it; scale it to the image's pixels.
+			var window = mc.getWindow();
+			Rect r = AspectMask.frame(window.getGuiScaledWidth(), window.getGuiScaledHeight(), aspect).scale(window.getGuiScale());
 			int x = (int) Math.round(r.x()), y = (int) Math.round(r.y());
 			int w = Math.min((int) Math.round(r.w()), image.getWidth() - x), h = Math.min((int) Math.round(r.h()), image.getHeight() - y);
 			NativeImage photo = new NativeImage(w, h, false);
@@ -182,8 +182,8 @@ public final class Shutter {
 		if (preview != null && previewAt >= 0 && now - previewAt < PREVIEW_MS) {
 			NativeImage px = preview.getPixels();
 			if (px == null) return;
-			int w = PREVIEW_WIDTH, h = Math.round((float) px.getHeight() * w / px.getWidth());
-			int x = g.guiWidth() - w - 6, y = 6;
+			int w = Math.min(PREVIEW_WIDTH, (int) (f.w() / 3)), h = Math.round((float) px.getHeight() * w / px.getWidth());
+			int x = (int) Math.round(f.right()) - w - 4, y = (int) Math.round(f.y()) + 4;
 			float fade = Math.min(1f, (PREVIEW_MS - (now - previewAt)) / 300f);
 			g.blit(RenderPipelines.GUI_TEXTURED, PREVIEW, x, y, 0, 0, w, h, px.getWidth(), px.getHeight(), px.getWidth(), px.getHeight(), Draw.argb(fade, 0xFFFFFF));
 			int line = Draw.argb(fade, 0xFFFFFF);
