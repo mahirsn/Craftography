@@ -46,6 +46,7 @@ public class ControlsScreen extends Screen {
 	private final boolean held;
 	private final List<Control> controls = new ArrayList<>();
 	private Control dragging, lastPressed;
+	private double pressX;
 
 	public ControlsScreen(boolean held) {
 		super(Component.translatable(held ? "craftography.panel" : "craftography.interactive"));
@@ -169,6 +170,7 @@ public class ControlsScreen extends Screen {
 			c.press(event.x(), event.y());
 			dragging = c;
 			lastPressed = c;
+			pressX = event.x();
 		}
 		return true;
 	}
@@ -176,6 +178,8 @@ public class ControlsScreen extends Screen {
 	@Override
 	public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
 		if (dragging == null) return false;
+		// A press that turned something is a drag: the next quick press starts a new drag instead of a double click.
+		if (Math.abs(event.x() - pressX) >= 6) lastPressed = null;
 		dragging.drag(event.x(), event.y());
 		return true;
 	}

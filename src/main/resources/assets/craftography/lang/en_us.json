@@ -85,5 +85,7 @@
 	"craftography.dial.page.colour": "Colour",
 	"craftography.dial.page.focus": "Focus",
 	"craftography.dial.page.view": "View",
-	"craftography.dial.page.scene": "Scene"
+	"craftography.dial.page.scene": "Scene",
+	"craftography.dial.on": "On",
+	"craftography.dial.off": "Off"
 }

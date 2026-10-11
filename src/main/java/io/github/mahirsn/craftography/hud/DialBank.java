@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -25,15 +26,15 @@ public final class DialBank {
 	public static final int SLOTS = 3, WIDTH = 36, HEIGHT = 22;
 	/** How far above the dial its name is printed: level with the time bar's hour labels beside it. */
 	public static final int LABEL = 14;
-	private static final int WHITE = 0xFFFFFF, AMBER = 0xFFB000;
 
 	/**
 	 * One dial. {@code text} is the value on the top face, or null when {@code sprite} (a viewfinder sprite) shows it.
-	 * {@code step} gets steps (positive = next / more) from drag, scroll and, if {@code clickSteps}, a plain click.
-	 * {@code reset} runs on double-click; null steps once instead, so quick clicks on a choice keep cycling.
+	 * {@code step} gets steps (positive = next / more) from drag and scroll. {@code reset} runs on double-click. A dial
+	 * without a reset holds a choice or a switch: a click steps it once, and so does a double-click, so quick clicks
+	 * keep cycling.
 	 */
-	public record Dial(String id, Supplier<String> text, Supplier<String> sprite, DoubleConsumer step, boolean clickSteps,
-					   Runnable reset, BooleanSupplier changed, Supplier<Component> words) {
+	public record Dial(String id, Supplier<String> text, Supplier<String> sprite, DoubleConsumer step, Runnable reset,
+					   BooleanSupplier changed, Supplier<Component> words) {
 		public Component label() {
 			return Component.translatable("craftography.dial." + id);
 		}
@@ -53,8 +54,7 @@ public final class DialBank {
 
 	private static final Dial[][] PAGES = {
 		{
-			// The top face holds about 27 px of text: five-digit ISO speeds are shown in thousands.
-			value("iso", () -> s().iso < 10000 ? String.valueOf(s().iso) : String.format(java.util.Locale.ROOT, "%sK", s().iso % 1000 == 0 ? s().iso / 1000 : s().iso / 1000.0),
+			value("iso", () -> fit(s().iso),
 				n -> s().iso = ExposureMath.step(ExposureMath.ISO, s().iso, whole(n)),
 				() -> s().iso = ExposureMath.DEFAULT_ISO, () -> s().iso != ExposureMath.DEFAULT_ISO, () -> "ISO " + s().iso),
 			// The dial shows the denominator, as shutter speed dials do; the tooltip has the full speed.
@@ -67,7 +67,7 @@ public final class DialBank {
 				() -> ExposureMath.nearest(ExposureMath.APERTURE, s().aperture) != ExposureMath.nearest(ExposureMath.APERTURE, ExposureMath.DEFAULT_APERTURE)),
 		},
 		{
-			value("white_balance", () -> String.valueOf(s().kelvin),
+			value("white_balance", () -> fit(s().kelvin),
 				n -> s().kelvin = (int) Math.clamp(s().kelvin + Math.round(n * (fine() ? 50 : 200)), ExposureMath.MIN_KELVIN, ExposureMath.MAX_KELVIN),
 				() -> s().kelvin = ExposureMath.DEFAULT_KELVIN, () -> s().kelvin != ExposureMath.DEFAULT_KELVIN, () -> s().kelvin + "K"),
 			value("tint", () -> (s().tint > 0 ? "M" : s().tint < 0 ? "G" : "") + Math.abs(s().tint),
@@ -79,7 +79,9 @@ public final class DialBank {
 			value("focus", () -> s().autofocus ? "AF" : ExposureMath.formatFocus(s().focusDistance),
 				n -> {
 					s().autofocus = false;
-					s().focusDistance = Math.clamp(s().focusDistance * Math.pow(1.15, fine() ? n / 4 : n), ExposureMath.MIN_FOCUS, ExposureMath.FOCUS_INFINITY);
+					double d = Math.clamp(s().focusDistance * Math.pow(1.15, fine() ? n / 4 : n), ExposureMath.MIN_FOCUS, ExposureMath.FOCUS_INFINITY);
+					// Turning past the last step lands on infinity, not on a few millimetres short of it.
+					s().focusDistance = d >= ExposureMath.FOCUS_INFINITY - 0.5 ? ExposureMath.FOCUS_INFINITY : d;
 				}, () -> s().autofocus = true, () -> !s().autofocus),
 			toggle("autofocus", () -> s().autofocus, v -> s().autofocus = v, true),
 			toggle("peaking", () -> s().peaking, v -> s().peaking = v, false),
@@ -91,7 +93,7 @@ public final class DialBank {
 		},
 		{
 			new Dial("moon", null, () -> s().moonPhase < 0 ? "weather_server" : "moon_" + s().moonPhase,
-				n -> s().moonPhase = Math.floorMod(s().moonPhase + 1 + whole(n), TimeMath.MOON_PHASES + 1) - 1, true, null,
+				n -> s().moonPhase = Math.floorMod(s().moonPhase + 1 + whole(n), TimeMath.MOON_PHASES + 1) - 1, null,
 				() -> s().moonPhase >= 0,
 				() -> Component.translatable(s().moonPhase < 0 ? "craftography.moon.server" : "craftography.moon." + s().moonPhase)),
 			toggle("keep", () -> s().lockTimeWeather, v -> s().lockTimeWeather = v, false),
@@ -122,31 +124,35 @@ public final class DialBank {
 	}
 
 	private static Dial value(String id, Supplier<String> text, DoubleConsumer step, Runnable reset, BooleanSupplier changed, Supplier<String> words) {
-		return new Dial(id, text, null, step, false, reset, changed, () -> Component.literal(words.get()));
+		return new Dial(id, text, null, step, reset, changed, () -> Component.literal(words.get()));
+	}
+
+	/** The top face holds about 27 px of text: five-digit numbers (ISO 12800, 10000 K) are shown in thousands. */
+	private static String fit(int v) {
+		return v < 10000 ? String.valueOf(v) : String.format(java.util.Locale.ROOT, v % 1000 == 0 ? "%.0fK" : "%.1fK", v / 1000.0);
 	}
 
 	private static Component onOff(boolean on) {
 		return Component.translatable(on ? "options.on" : "options.off");
 	}
 
-	/** An on/off dial: each click or scroll notch flips it. */
+	/**
+	 * An on/off dial: each click or scroll notch flips it. The face uses the mod's own short words, since some
+	 * languages' "off" (Turkish "KAPALI") is wider than the face; the tooltip keeps the game's word.
+	 */
 	private static Dial toggle(String id, BooleanSupplier get, Consumer<Boolean> set, boolean def) {
-		return new Dial(id, () -> onOff(get.getAsBoolean()).getString(), null, n -> set.accept(!get.getAsBoolean()), true, null,
-			() -> get.getAsBoolean() != def, () -> onOff(get.getAsBoolean()));
-	}
-
-	private interface FloatGetter {
-		float get();
+		return new Dial(id, () -> Component.translatable(get.getAsBoolean() ? "craftography.dial.on" : "craftography.dial.off").getString(), null,
+			n -> set.accept(!get.getAsBoolean()), null, () -> get.getAsBoolean() != def, () -> onOff(get.getAsBoolean()));
 	}
 
 	private interface FloatSetter {
 		void set(float v);
 	}
 
-	private static Dial percent(String id, FloatGetter get, FloatSetter set, float def) {
-		return value(id, () -> Math.round(get.get() * 100) + "%",
-			n -> set.set((float) Math.clamp(get.get() + n * (fine() ? 0.01 : 0.05), 0, 1)),
-			() -> set.set(def), () -> Math.abs(get.get() - def) > 0.001);
+	private static Dial percent(String id, DoubleSupplier get, FloatSetter set, float def) {
+		return value(id, () -> Math.round(get.getAsDouble() * 100) + "%",
+			n -> set.set((float) Math.clamp(get.getAsDouble() + n * (fine() ? 0.01 : 0.05), 0, 1)),
+			() -> set.set(def), () -> Math.abs(get.getAsDouble() - def) > 0.001);
 	}
 
 	public static Page page() {
@@ -179,6 +185,6 @@ public final class DialBank {
 		// The name above the dial, printed like the time bar's hour labels and on their line.
 		String label = d.label().getString();
 		boolean changed = d.changed().getAsBoolean();
-		g.text(font, label, x + (WIDTH - font.width(label)) / 2, y - LABEL, Draw.argb(changed ? 1f : 0.7f, changed ? AMBER : WHITE), false);
+		g.text(font, label, x + (WIDTH - font.width(label)) / 2, y - LABEL, Draw.argb(changed ? 1f : 0.7f, changed ? InfoStrip.AMBER : InfoStrip.WHITE), false);
 	}
 }

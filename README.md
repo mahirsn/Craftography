@@ -26,7 +26,7 @@ the time, weather and moon phase you pick are visual only.
 - Self-timer: 3 or 10 seconds, with a beep and a blinking lamp.
 - Shutter that saves a PNG cropped to the frame, without HUD, to `screenshots/craftography/`.
 - Settings are saved in `config/craftography.json`. The HUD sprites can be changed with a resource pack
-  (`assets/craftography/textures/gui/sprites/viewfinder/`).
+  (`assets/craftography/textures/gui/sprites/camera/` and `.../viewfinder/`).
 - Works with Sodium and Iris, with shaders on or off.
 
 ## Controls
@@ -47,7 +47,7 @@ Only F7, F8 and F9 have default keys. Bind the rest in Options > Controls > Craf
 A key you bind works only in camera mode. While camera mode is on, a vanilla key on the same key is blocked.
 In interactive mode the player does not move or look around. Click a camera button, or scroll over it. Drag the lens,
 roll and time plates and the dials sideways, or scroll over them; click a dial that holds a choice or a switch to change
-it. Double-click a dial, a plate or the time bar to reset it. The menu button turns the dials to their next page.
+it. Double-click a dial that holds a value, a plate or the time bar to reset it. The menu button turns the dials to their next page.
 
 To take a photo of yourself: press F9, walk into the frame, set the self-timer and press the shutter. Without a bound
 shutter key, open interactive mode and click the shutter button.

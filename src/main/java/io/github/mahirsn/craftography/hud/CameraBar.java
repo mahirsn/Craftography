@@ -90,9 +90,15 @@ public final class CameraBar {
 
 	public static void draw(GuiGraphicsExtractor g, CameraSettings s, double mm, int dayTicks, float progress) {
 		g.pose().pushMatrix();
-		// Slides up from under the screen edge while camera mode opens.
-		g.pose().translate(0, Math.round((1 - progress) * (HEIGHT + 4)));
+		// The whole band slides up from under the screen edge while camera mode opens.
+		g.pose().translate(0, Math.round((1 - progress) * (g.guiHeight() - bandTop(g.guiWidth(), g.guiHeight()) + 4)));
 		for (int i = 0; i < DialBank.SLOTS; i++) DialBank.draw(g, i, dial(i, g.guiWidth(), g.guiHeight()), false);
+		// Under the middle dial, one dot per dial page, the current one lit: the dials have more than this page.
+		Rect middle = dial(DialBank.SLOTS / 2, g.guiWidth(), g.guiHeight());
+		int pages = DialBank.Page.values().length, px = (int) middle.x() + (DialBank.WIDTH - (3 * pages - 1)) / 2, py = (int) middle.y() + 20;
+		for (int p = 0; p < pages; p++) {
+			g.fill(px + 3 * p, py, px + 3 * p + 2, py + 1, Draw.argb(p == DialBank.page().ordinal() ? 1f : 0.4f, p == DialBank.page().ordinal() ? LED : 0xFFFFFF));
+		}
 		Item[] items = Item.values();
 		for (int i = 0; i < items.length; i++) {
 			drawItem(g, items[i], s, mm, dayTicks, false);
@@ -169,19 +175,21 @@ public final class CameraBar {
 	}
 
 	/**
-	 * A spirit level engraved in the plate: two fixed marks for the camera's horizontal and a line that tilts with the
-	 * roll, the way the picture is tilted.
+	 * A spirit level engraved in the plate: two fixed marks for the camera's horizontal and an 8 px line that tilts with
+	 * the roll, drawn on the pixel grid. Its slope rises one pixel per 15 degrees (at least one for any roll, at most
+	 * three), so even a slight tilt shows; the plate's number has the exact angle.
 	 */
 	private static void level(GuiGraphicsExtractor g, int cx, int cy, double roll) {
+		int rise = roll == 0 ? 0 : (int) Math.signum(roll) * Math.min(3, (int) Math.ceil(Math.abs(roll) / 15));
 		for (int dy = 1; dy >= 0; dy--) {
 			int color = Draw.argb(1f, dy == 1 ? ENGRAVE : TEXT);
 			g.fill(cx - 7, cy + dy, cx - 5, cy + dy + 1, color);
 			g.fill(cx + 5, cy + dy, cx + 7, cy + dy + 1, color);
-			g.pose().pushMatrix();
-			g.pose().translate(cx + 0.5f, cy + dy + 0.5f);
-			g.pose().rotate((float) Math.toRadians(roll));
-			g.fill(-4, 0, 4, 1, color);
-			g.pose().popMatrix();
+			// Clockwise roll: the right end goes down, as the picture turns.
+			for (int px = -4; px < 4; px++) {
+				int py = (int) Math.round((px + 0.5) * rise / 4.0);
+				g.fill(cx + px, cy + dy + py, cx + px + 1, cy + dy + py + 1, color);
+			}
 		}
 	}
 

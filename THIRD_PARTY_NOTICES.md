@@ -10,11 +10,10 @@ Adapted files, in `src/main/resources/assets/craftography/textures/gui/sprites/c
 
 | Craftography file | Exposure source (`common/src/main/resources/assets/exposure/textures/gui/`) | Change |
 |---|---|---|
-| `button.png`, `button_highlighted.png` | `sprites/camera_controls/composition_guide/none*.png` | icon removed |
+| `button.png`, `button_highlighted.png` | `sprites/camera_controls/composition_guide/none*.png` | icon removed, nine-sliced |
 | `shutter_button.png`, `shutter_button_highlighted.png` | `sprites/camera_controls/composition_guide/none*.png` | icon removed, widened to 21 px |
 | `plate_left.png`, `plate_left_highlighted.png` | `sprites/camera_controls/focal_length*.png` | none |
 | `plate_right.png`, `plate_right_highlighted.png` | `sprites/camera_controls/frame_counter*.png` | icon removed |
-| `plate.png`, `plate_highlighted.png` | `sprites/camera_controls/focal_length*.png`, `frame_counter*.png` | edges of both joined, icon removed, nine-sliced |
 | `separator.png` | `sprites/camera_controls/button_separator.png` | none |
 | `bezel.png` | `viewfinder/viewfinder.png` | border halved, center removed, nine-sliced |
 
