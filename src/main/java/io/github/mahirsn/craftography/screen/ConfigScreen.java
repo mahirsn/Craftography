@@ -35,7 +35,7 @@ import java.util.function.Supplier;
  * Mod Menu, the settings key, or right-clicking the dial page button in interactive mode.
  */
 public class ConfigScreen extends Screen {
-	private static final int WIDTH = 150;
+	private static final int WIDTH = 170;
 
 	private final Screen parent;
 	private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
@@ -94,13 +94,17 @@ public class ConfigScreen extends Screen {
 	}
 
 	private static CycleButton<Boolean> toggle(String key, Supplier<Boolean> get, Consumer<Boolean> set) {
-		return CycleButton.booleanBuilder(CommonComponents.OPTION_ON, CommonComponents.OPTION_OFF, get.get())
+		CycleButton<Boolean> button = CycleButton.booleanBuilder(CommonComponents.OPTION_ON, CommonComponents.OPTION_OFF, get.get())
 			.create(Component.translatable(key), (b, v) -> set.accept(v));
+		button.setWidth(WIDTH);
+		return button;
 	}
 
 	@SafeVarargs
 	private static <T> CycleButton<T> choice(String key, Function<T, Component> name, Supplier<T> get, Consumer<T> set, T... values) {
-		return new CycleButton.Builder<>(name, get).withValues(values).create(Component.translatable(key), (b, v) -> set.accept(v));
+		CycleButton<T> button = new CycleButton.Builder<>(name, get).withValues(values).create(Component.translatable(key), (b, v) -> set.accept(v));
+		button.setWidth(WIDTH);
+		return button;
 	}
 
 	/** A slider over a fixed list of positions, showing the setting's own text for the chosen one. */
@@ -150,7 +154,7 @@ public class ConfigScreen extends Screen {
 				"craftography.config.lean_mode.tip");
 			add(choice("craftography.button.timer", t -> t == 0 ? CommonComponents.OPTION_OFF : Component.translatable("craftography.button.timer.seconds", t),
 				() -> s().selfTimer, v -> s().selfTimer = v, 0, 3, 10), null);
-			add(toggle("craftography.dial.preview.name", () -> s().showPreview, v -> s().showPreview = v), null);
+			add(toggle("craftography.config.preview", () -> s().showPreview, v -> s().showPreview = v), "craftography.dial.preview.name");
 		}
 	}
 
@@ -195,7 +199,7 @@ public class ConfigScreen extends Screen {
 			for (int i = 0; i < phases.length; i++) phases[i] = i - 1;
 			add(choice("craftography.dial.moon.name", p -> Component.translatable(p < 0 ? "craftography.moon.server" : "craftography.moon." + p),
 				() -> s().moonPhase, v -> s().moonPhase = v, phases), null);
-			add(toggle("craftography.dial.keep.name", () -> s().lockTimeWeather, v -> s().lockTimeWeather = v), null);
+			add(toggle("craftography.config.keep", () -> s().lockTimeWeather, v -> s().lockTimeWeather = v), "craftography.dial.keep.name");
 		}
 	}
 }

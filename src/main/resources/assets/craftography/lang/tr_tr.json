@@ -101,5 +101,7 @@
 	"craftography.config.held_camera": "Elde 3D kamera",
 	"craftography.config.held_camera.tip": "Birinci şahısta elde kamera tut ve ekranına yaklaş. Kapalı: kamera modu her zaman vizörü gösterir.",
 	"craftography.config.lean_mode": "Yaklaşma tuşu",
-	"craftography.config.lean_mode.tip": "Basılı tut: tuttukça yaklaşır. Aç/kapa: her basış yaklaşır ya da uzaklaşır. Dokun ya da tut: kısa dokunuş aç/kapa, basılı tutmak bırakana kadar yaklaşır."
+	"craftography.config.lean_mode.tip": "Basılı tut: tuttukça yaklaşır. Aç/kapa: her basış yaklaşır ya da uzaklaşır. Dokun ya da tut: kısa dokunuş aç/kapa, basılı tutmak bırakana kadar yaklaşır.",
+	"craftography.config.preview": "Önizleme",
+	"craftography.config.keep": "Sahneyi koru"
 }

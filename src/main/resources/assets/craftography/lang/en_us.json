@@ -101,5 +101,7 @@
 	"craftography.config.held_camera": "3D camera in hand",
 	"craftography.config.held_camera.tip": "Hold a camcorder in first person and lean in to its screen. Off: camera mode always shows the viewfinder.",
 	"craftography.config.lean_mode": "Lean key",
-	"craftography.config.lean_mode.tip": "Hold: leans in while held. Toggle: each press leans in or out. Tap or hold: a tap toggles, holding leans in until you let go."
+	"craftography.config.lean_mode.tip": "Hold: leans in while held. Toggle: each press leans in or out. Tap or hold: a tap toggles, holding leans in until you let go.",
+	"craftography.config.preview": "Photo preview",
+	"craftography.config.keep": "Keep scene"
 }
