@@ -22,9 +22,10 @@ public final class HeldCamera {
 	/** The player's own F1 state; camera mode hides the vanilla HUD, but F1 should still hide the camera. */
 	public static boolean hiddenByUser;
 
-	// Lean pose: how far the camera moves toward the eye (view space, blocks) and turns so its screen faces the eye.
-	// ponytail: tuned by eye on the current model; derive from the LCD corners if the model changes a lot.
-	private static final float LEAN_X = -0.30f, LEAN_Y = 0.22f, LEAN_Z = 0.42f, LEAN_YAW = 0f, LEAN_PITCH = 0f;
+	// Lean pose (view space, blocks and degrees): at full lean the LCD window's centre is on the view axis, 0.30 block in
+	// front of the eye and square to it, and the yaw swings the lens away so no part of the camera shows through the
+	// window. Computed from the model's display transform and LCD geometry; recompute if either changes.
+	private static final float LEAN_X = -0.241f, LEAN_Y = 0.380f, LEAN_Z = 0.572f, LEAN_YAW = -18f, LEAN_PITCH = -6f;
 
 	private HeldCamera() {
 	}
