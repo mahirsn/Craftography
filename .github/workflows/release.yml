@@ -1,0 +1,28 @@
+# Builds the mod and publishes the jar as a GitHub release when a version tag (v*) is pushed.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew build
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          jar=$(find build/libs -name '*.jar' ! -name '*-sources.jar')
+          gh release create "$GITHUB_REF_NAME" "$jar" --title "Craftography ${GITHUB_REF_NAME#v}" --prerelease \
+            --notes "Client-side Fabric mod for Minecraft 26.2. Needs Fabric Loader and Fabric API; put the jar in your mods folder. Built from ${GITHUB_SHA::7}."
