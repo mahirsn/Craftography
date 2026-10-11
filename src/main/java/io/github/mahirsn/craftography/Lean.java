@@ -37,15 +37,20 @@ public final class Lean {
 	private Lean() {
 	}
 
-	/** Called every client tick with the lean key state. */
+	/**
+	 * A press of the lean key, from the key's click queue: a quick tap can start and end between two ticks, so presses
+	 * are not read from the held state.
+	 */
+	public static void press() {
+		pressedAt = Util.getMillis();
+		if (CameraSettings.get().leanMode != Mode.HOLD) toggled = !toggled;
+	}
+
+	/** Called every client tick with whether the lean key is held. */
 	public static void tick(boolean down) {
-		Mode mode = CameraSettings.get().leanMode;
 		if (!CameraMode.isOpen()) {
 			toggled = false;
-		} else if (down && !keyDown) {
-			pressedAt = Util.getMillis();
-			if (mode != Mode.HOLD) toggled = !toggled;
-		} else if (!down && keyDown && mode == Mode.BOTH && Util.getMillis() - pressedAt >= TAP_MS) {
+		} else if (!down && keyDown && CameraSettings.get().leanMode == Mode.BOTH && Util.getMillis() - pressedAt >= TAP_MS) {
 			// Held, not tapped: letting go leans back out.
 			toggled = !toggled;
 		}

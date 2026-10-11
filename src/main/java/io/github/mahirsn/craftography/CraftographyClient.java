@@ -62,10 +62,9 @@ public class CraftographyClient implements ClientModInitializer {
 		shutterKey = cameraKey("shutter", GLFW.GLFW_KEY_UNKNOWN, Shutter::press);
 		timerKey = cameraKey("timer", GLFW.GLFW_KEY_UNKNOWN, () -> change(CameraSettings::cycleTimer));
 		tripodKey = cameraKey("tripod", GLFW.GLFW_KEY_F9, Tripod::toggle);
-		// Right mouse button, like aiming. Lean reads whether it is held; listing it here blocks vanilla "use" on it.
+		// Right mouse button, like aiming. As a camera key it also blocks vanilla "use" on the same button.
 		leanKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.craftography.lean", InputConstants.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_RIGHT, CATEGORY));
-		CAMERA_KEYS.put(leanKey, () -> {
-		});
+		CAMERA_KEYS.put(leanKey, Lean::press);
 
 		ClientTickEvents.START_CLIENT_TICK.register(CraftographyClient::onTick);
 	}
