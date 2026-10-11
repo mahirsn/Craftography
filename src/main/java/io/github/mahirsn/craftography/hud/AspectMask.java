@@ -22,13 +22,14 @@ public final class AspectMask {
 	}
 
 	/**
-	 * The picture area: flush with the top of the screen, between two equal side gutters and above the time bar and
-	 * the camera bar, so no other element ever covers it. The aspect's frame is fitted into it, centred, top-aligned.
+	 * The picture area: its bezel flush with the top of the screen, between two equal side gutters and above the time
+	 * bar and the camera bar, so no other element ever covers it. The aspect's frame is fitted into it, centred,
+	 * top-aligned.
 	 */
 	public static Rect frame(double width, double height, Aspect aspect) {
 		double ax = gutter(width) + BEZEL, aw = width - 2 * ax;
-		double ah = CameraBar.top(height) - TIME_BAND - BEZEL;
-		if (aspect.ratio <= 0) return new Rect(ax, 0, aw, ah);
+		double ah = CameraBar.top(height) - TIME_BAND - 2 * BEZEL;
+		if (aspect.ratio <= 0) return new Rect(ax, BEZEL, aw, ah);
 		double fw, fh;
 		if (aw / ah > aspect.ratio) {
 			fh = ah;
@@ -37,7 +38,7 @@ public final class AspectMask {
 			fw = aw;
 			fh = aw / aspect.ratio;
 		}
-		return new Rect(ax + (aw - fw) / 2, 0, fw, fh);
+		return new Rect(ax + (aw - fw) / 2, BEZEL, fw, fh);
 	}
 
 	public static void draw(GuiGraphicsExtractor g, Rect f, boolean bezel, float maskAlpha, float lineAlpha, float bezelAlpha) {
