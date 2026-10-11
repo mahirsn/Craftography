@@ -49,5 +49,18 @@
 	"craftography.button.timer.seconds": "%s sn",
 	"craftography.button.menu": "Ayarlar",
 	"craftography.button.shutter.cancel": "Geri sayım sürüyor. İptal için yeniden tıkla.",
-	"key.craftography.tripod": "Tripod"
+	"key.craftography.tripod": "Tripod",
+	"craftography.panel.ratio": "Oran",
+	"craftography.panel.iso": "ISO",
+	"craftography.panel.shutter": "Enstantane",
+	"craftography.panel.aperture": "Diyafram",
+	"craftography.panel.white_balance": "BD",
+	"craftography.panel.tint": "Ton",
+	"craftography.panel.focus": "Odak",
+	"craftography.panel.autofocus": "AF",
+	"craftography.panel.grain": "Gren",
+	"craftography.panel.histogram": "Histogram",
+	"craftography.panel.peaking": "Odak vurgusu",
+	"craftography.panel.hint.drag": "Değiştirmek için yana sürükle ya da kaydır. Çift tık: varsayılan",
+	"craftography.panel.hint.click": "Değiştirmek için tıkla ya da kaydır"
 }

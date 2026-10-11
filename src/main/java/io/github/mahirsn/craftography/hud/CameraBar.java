@@ -129,8 +129,13 @@ public final class CameraBar {
 
 	/** An 11x9 icon in the button's icon area, engraved like Exposure's icons. */
 	private static void icon(GuiGraphicsExtractor g, String name, int x, int y) {
-		Draw.camera(g, "icon_" + name, x, y + 6, 11, 9, Draw.argb(1f, ENGRAVE));
-		Draw.camera(g, "icon_" + name, x, y + 5, 11, 9, Draw.argb(1f, TEXT));
+		engravedIcon(g, name, x, y + 5);
+	}
+
+	/** An engraved 11x9 camera icon ({@code icon_<name>}) with its top-left corner at (x, y). */
+	public static void engravedIcon(GuiGraphicsExtractor g, String name, int x, int y) {
+		Draw.camera(g, "icon_" + name, x, y + 1, 11, 9, Draw.argb(1f, ENGRAVE));
+		Draw.camera(g, "icon_" + name, x, y, 11, 9, Draw.argb(1f, TEXT));
 	}
 
 	/** Text centered in a plate's text area. */

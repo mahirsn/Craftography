@@ -14,7 +14,8 @@ import java.util.function.Supplier;
 /**
  * One side-panel setting drawn like a camera bar item: a raised plate with the name engraved on the left and the value
  * (text or icon) on the right, plus the bar's amber lamp when the setting is not at its default. Drag sideways or
- * scroll to step; a click without a drag steps once (cycles a choice, flips a switch); double-click resets.
+ * scroll to step. A row with a reset goes back to its default on double-click; a row without one (a choice, a switch)
+ * steps once per click instead, double-clicks included, like the bar's buttons.
  */
 public class SettingRow extends Control {
 	/** GUI units of horizontal drag per step, as on the bar's lens and time plates. */
@@ -41,6 +42,7 @@ public class SettingRow extends Control {
 	 * @param value      value text, or null when {@code icon} shows the value
 	 * @param step       steps (positive = next / more), from drag, scroll and click
 	 * @param clickSteps whether a plain click steps once; off for continuous values, where a click would jump
+	 * @param reset      runs on double-click; null to step once instead
 	 * @param tooltip    current value in words, under the name in the tooltip
 	 */
 	public SettingRow(Rect area, Component name, Supplier<String> value, Icon icon, DoubleConsumer step, boolean clickSteps,
@@ -62,6 +64,10 @@ public class SettingRow extends Control {
 
 	public Component tooltip() {
 		return tooltip == null ? null : tooltip.get();
+	}
+
+	public boolean clickSteps() {
+		return clickSteps;
 	}
 
 	@Override
@@ -92,7 +98,11 @@ public class SettingRow extends Control {
 
 	@Override
 	public void reset() {
-		reset.run();
+		if (reset != null) {
+			reset.run();
+		} else {
+			step.accept(1);
+		}
 	}
 
 	@Override

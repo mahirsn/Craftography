@@ -17,8 +17,9 @@ import io.github.mahirsn.craftography.hud.ViewfinderHud;
 import io.github.mahirsn.craftography.screen.widget.BarButton;
 import io.github.mahirsn.craftography.screen.widget.Control;
 import io.github.mahirsn.craftography.screen.widget.Dial;
-import io.github.mahirsn.craftography.screen.widget.SegmentedSelector;
+import io.github.mahirsn.craftography.screen.widget.SettingRow;
 import io.github.mahirsn.craftography.screen.widget.Slider;
+import io.github.mahirsn.craftography.util.Draw;
 import io.github.mahirsn.craftography.util.ExposureMath;
 import io.github.mahirsn.craftography.util.LensMath;
 import io.github.mahirsn.craftography.util.Rect;
@@ -35,12 +36,20 @@ import net.minecraft.network.chat.MutableComponent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
+import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 /**
- * Camera controls with a free cursor, on top of the viewfinder HUD. The zoom ruler, level gauge, time bar and camera
- * bar of the HUD become draggable and clickable. Two ways to open it:
+ * Camera controls with a free cursor, on top of the viewfinder HUD. The level gauge, time bar and camera bar of the HUD
+ * become draggable and clickable, and the side panels hold the settings as camera-bar plates. Two ways to open it:
  * <ul>
  * <li>interactive mode (toggle key): stays open until the toggle key or Esc; the settings sheet opens with the menu
  * button;</li>
@@ -49,7 +58,8 @@ import java.util.List;
  * While it is open the player does not move or look around, because vanilla sends no game input to a screen.
  */
 public class ControlsScreen extends Screen {
-	private double row = 27;
+	/** Settings columns: left and right x, width, top, row pitch and plate height, in GUI units. */
+	private double leftX, rightX, colW, top, pitch, rowH;
 
 	private final boolean held;
 	private boolean sheetOpen;
@@ -86,137 +96,121 @@ public class ControlsScreen extends Screen {
 
 		// Bottom: the time bar.
 		Rect bar = TimeBar.bar(f, width, height);
-		controls.add(new Slider(new Rect(bar.x() - 3, bar.y() - 6, bar.w() + 6, 12), false, false, 0, TimeMath.DAY,
+		controls.add(new Slider(new Rect(bar.x(), bar.y() - 6, bar.w(), 12), 0, TimeMath.DAY,
 			() -> ViewfinderHud.visibleDayTicks(s), v -> s.timeOfDay = TimeMath.dayTicks(Math.round(v / 10) * 10), v -> v,
 			(v, amount, fine) -> {
 				s.timeOfDay = TimeMath.dayTicks(Math.round(v) + Math.round(amount * (fine ? 10 : 100)));
 				return s.timeOfDay;
-			}, () -> s.timeOfDay = -1, null));
+			}, () -> s.timeOfDay = -1));
 
-		// Settings on the two sides of the frame, Exposure-style panels: camera on the left, scene on the right.
-		// Each side panel fills its gutter, from the top down to the time bar band; rows shrink to fit.
-		double w = AspectMask.gutter(width) - 12;
-		double lx = 6, rx = width - 6 - w, y0 = 9;
-		row = Math.min(27, (CameraBar.top(height) - AspectMask.TIME_BAND - 4 - y0) / 8);
-		List<Component> offOn = List.of(Component.translatable("options.off"), Component.translatable("options.on"));
-		double half = (w - 8) / 2;
+		// Settings on the two sides of the frame, one camera-bar style plate per setting: camera on the left, scene on
+		// the right. Each column fills its gutter from the picture's top edge down to the camera bar; rows shrink to fit.
+		colW = AspectMask.gutter(width) - 12;
+		leftX = 6;
+		rightX = width - 6 - colW;
+		top = AspectMask.BEZEL;
+		pitch = Math.min(20, (CameraBar.top(height) - 3 - top) / 10);
+		rowH = Math.max(10, Math.min(CameraBar.HEIGHT, Math.floor(pitch) - 1));
 
-		double y = y0;
-		sheet.add(stepped(new Rect(lx, y, w, row - 6), "ISO", ExposureMath.ISO.length,
-			() -> ExposureMath.nearest(ExposureMath.ISO, s.iso), i -> s.iso = ExposureMath.ISO[i], () -> s.iso = ExposureMath.DEFAULT_ISO,
-			() -> "ISO " + s.iso));
-		y += row;
-		sheet.add(stepped(new Rect(lx, y, w, row - 6), "Shutter", ExposureMath.SHUTTER.length,
-			() -> ExposureMath.nearest(ExposureMath.SHUTTER, s.shutter), i -> s.shutter = ExposureMath.SHUTTER[i],
-			() -> s.shutter = ExposureMath.DEFAULT_SHUTTER, () -> ExposureMath.formatShutter(s.shutter)));
-		y += row;
-		sheet.add(stepped(new Rect(lx, y, w, row - 6), "Aperture", ExposureMath.APERTURE.length,
-			() -> ExposureMath.nearest(ExposureMath.APERTURE, s.aperture), i -> s.aperture = ExposureMath.APERTURE[i],
-			() -> s.aperture = ExposureMath.DEFAULT_APERTURE, () -> ExposureMath.formatAperture(s.aperture)));
-		y += row;
-		sheet.add(new Slider(new Rect(lx, y, w, row - 6), false, false, ExposureMath.MIN_KELVIN, ExposureMath.MAX_KELVIN,
-			() -> s.kelvin, v -> s.kelvin = (int) Math.round(v / 100) * 100, v -> v,
-			(v, amount, fine) -> s.kelvin = (int) Math.max(ExposureMath.MIN_KELVIN, Math.min(ExposureMath.MAX_KELVIN, v + amount * (fine ? 50 : 200))),
-			() -> s.kelvin = ExposureMath.DEFAULT_KELVIN, Component.literal("WB")).withValue(() -> s.kelvin + "K"));
-		y += row;
-		sheet.add(new Slider(new Rect(lx, y, w, row - 6), false, false, -ExposureMath.MAX_TINT, ExposureMath.MAX_TINT,
-			() -> s.tint, v -> s.tint = (int) Math.round(v), v -> v,
-			(v, amount, fine) -> s.tint = (int) Math.max(-ExposureMath.MAX_TINT, Math.min(ExposureMath.MAX_TINT, v + amount * (fine ? 1 : 5))),
-			() -> s.tint = 0, Component.literal("Tint")).withValue(() -> (s.tint > 0 ? "M" : s.tint < 0 ? "G" : "") + Math.abs(s.tint)));
-		y += row;
-		sheet.add(new Slider(new Rect(lx, y, w, row - 6), false, true, ExposureMath.MIN_FOCUS, ExposureMath.FOCUS_INFINITY,
-			() -> s.focusDistance, v -> { s.focusDistance = v; s.autofocus = false; }, v -> v,
-			(v, amount, fine) -> { s.autofocus = false; return s.focusDistance = Math.max(ExposureMath.MIN_FOCUS, Math.min(ExposureMath.FOCUS_INFINITY, v * Math.pow(1.15, fine ? amount / 4 : amount))); },
-			() -> s.autofocus = true, Component.literal("Focus")).withValue(() -> s.autofocus ? "AF" : ExposureMath.formatFocus(s.focusDistance)));
-		y += row;
-		sheet.add(new SegmentedSelector(new Rect(lx, y, half, row - 6), Component.literal("AF"), offOn,
-			() -> s.autofocus ? 1 : 0, i -> s.autofocus = i == 1, null));
-		sheet.add(new SegmentedSelector(new Rect(lx + half + 8, y, half, row - 6), Component.literal("Grain"), offOn,
-			() -> s.noise ? 1 : 0, i -> s.noise = i == 1, null));
-		y += row;
-		sheet.add(new SegmentedSelector(new Rect(lx, y, half, row - 6), Component.literal("Hist"), offOn,
-			() -> s.histogram ? 1 : 0, i -> s.histogram = i == 1, null));
-		sheet.add(new SegmentedSelector(new Rect(lx + half + 8, y, half, row - 6), Component.literal("Peak"), offOn,
-			() -> s.peaking ? 1 : 0, i -> s.peaking = i == 1, null));
+		sheet.add(value(slot(false, 0), "craftography.panel.iso", () -> String.valueOf(s.iso),
+			n -> s.iso = ExposureMath.step(ExposureMath.ISO, s.iso, whole(n)),
+			() -> s.iso = ExposureMath.DEFAULT_ISO, () -> s.iso != ExposureMath.DEFAULT_ISO));
+		sheet.add(value(slot(false, 1), "craftography.panel.shutter", () -> ExposureMath.formatShutter(s.shutter),
+			n -> s.shutter = ExposureMath.step(ExposureMath.SHUTTER, s.shutter, whole(n)), () -> s.shutter = ExposureMath.DEFAULT_SHUTTER,
+			() -> ExposureMath.nearest(ExposureMath.SHUTTER, s.shutter) != ExposureMath.nearest(ExposureMath.SHUTTER, ExposureMath.DEFAULT_SHUTTER)));
+		sheet.add(value(slot(false, 2), "craftography.panel.aperture", () -> ExposureMath.formatAperture(s.aperture),
+			n -> s.aperture = ExposureMath.step(ExposureMath.APERTURE, s.aperture, whole(n)), () -> s.aperture = ExposureMath.DEFAULT_APERTURE,
+			() -> ExposureMath.nearest(ExposureMath.APERTURE, s.aperture) != ExposureMath.nearest(ExposureMath.APERTURE, ExposureMath.DEFAULT_APERTURE)));
+		sheet.add(value(slot(false, 3), "craftography.panel.white_balance", () -> s.kelvin + "K",
+			steps -> s.kelvin = (int) Math.clamp(s.kelvin + Math.round(steps * (fine() ? 50 : 200)), ExposureMath.MIN_KELVIN, ExposureMath.MAX_KELVIN),
+			() -> s.kelvin = ExposureMath.DEFAULT_KELVIN, () -> s.kelvin != ExposureMath.DEFAULT_KELVIN));
+		sheet.add(value(slot(false, 4), "craftography.panel.tint", () -> (s.tint > 0 ? "M" : s.tint < 0 ? "G" : "") + Math.abs(s.tint),
+			steps -> s.tint = (int) Math.clamp(s.tint + Math.round(steps * (fine() ? 1 : 5)), -ExposureMath.MAX_TINT, ExposureMath.MAX_TINT),
+			() -> s.tint = 0, () -> s.tint != 0));
+		sheet.add(value(slot(false, 5), "craftography.panel.focus", () -> s.autofocus ? "AF" : ExposureMath.formatFocus(s.focusDistance),
+			steps -> {
+				s.autofocus = false;
+				s.focusDistance = Math.clamp(s.focusDistance * Math.pow(1.15, fine() ? steps / 4 : steps), ExposureMath.MIN_FOCUS, ExposureMath.FOCUS_INFINITY);
+			}, () -> s.autofocus = true, () -> !s.autofocus));
+		sheet.add(toggle(slot(false, 6), "craftography.panel.autofocus", () -> s.autofocus, v -> s.autofocus = v, true));
+		sheet.add(toggle(slot(false, 7), "craftography.panel.grain", () -> s.noise, v -> s.noise = v, true));
+		sheet.add(toggle(slot(false, 8), "craftography.panel.histogram", () -> s.histogram, v -> s.histogram = v, false));
+		sheet.add(toggle(slot(false, 9), "craftography.panel.peaking", () -> s.peaking, v -> s.peaking = v, false));
 
-		y = y0;
 		Aspect[] aspects = Aspect.values();
-		sheet.add(new SegmentedSelector(new Rect(rx, y, w, row - 6), Component.translatable("craftography.panel.aspect"),
-			Arrays.stream(aspects).map(a -> (Component) (a == Aspect.FREE ? Component.translatable("craftography.aspect.free") : Component.literal(a.label))).toList(),
-			() -> s.aspect.ordinal(), i -> s.aspect = aspects[i],
-			(g, i, box, color) -> cameraIcon(g, "icon_aspect_" + aspectKey(aspects[i]), box, color)));
-		y += row;
+		sheet.add(choice(slot(true, 0), "craftography.panel.ratio", aspects.length, () -> s.aspect.ordinal(), i -> s.aspect = aspects[i],
+			Aspect.R3_2.ordinal(), i -> aspectName(aspects[i]), () -> aspectName(s.aspect).getString(), null));
 		Guide[] guides = Guide.values();
-		sheet.add(new SegmentedSelector(new Rect(rx, y, w, row - 6), Component.translatable("craftography.panel.guide"),
-			Arrays.stream(guides).map(gd -> (Component) Component.translatable(gd.translationKey())).toList(),
-			() -> s.guide.ordinal(), i -> s.guide = guides[i],
-			(g, i, box, color) -> icon(g, "guide_" + guides[i].name().toLowerCase(java.util.Locale.ROOT), box, 16, 11, color)));
-		y += row;
+		sheet.add(choice(slot(true, 1), "craftography.panel.guide", guides.length, () -> s.guide.ordinal(), i -> s.guide = guides[i],
+			Guide.THIRDS.ordinal(), i -> Component.translatable(guides[i].translationKey()), null,
+			(g, x, y) -> CameraBar.engravedIcon(g, "guide_" + s.guide.name().toLowerCase(Locale.ROOT), x, y)));
 		Weather[] weathers = Weather.values();
-		sheet.add(new SegmentedSelector(new Rect(rx, y, w, row - 6), Component.translatable("craftography.panel.weather"),
-			Arrays.stream(weathers).map(wt -> (Component) Component.translatable(wt.translationKey())).toList(),
-			() -> s.weather.ordinal(), i -> s.weather = weathers[i],
-			(g, i, box, color) -> icon(g, "weather_" + weathers[i].name().toLowerCase(java.util.Locale.ROOT), box, 11, 11, color)));
-		y += row;
-		List<Component> moons = new ArrayList<>();
-		moons.add(Component.translatable("craftography.moon.server"));
-		for (int p = 0; p < TimeMath.MOON_PHASES; p++) moons.add(Component.translatable("craftography.moon." + p));
-		sheet.add(new SegmentedSelector(new Rect(rx, y, w, row - 6), Component.translatable("craftography.panel.moon"),
-			moons, () -> s.moonPhase + 1, i -> s.moonPhase = i - 1,
-			(g, i, box, color) -> icon(g, i == 0 ? "weather_server" : "moon_" + (i - 1), box, 11, 11, color)));
-		y += row;
-		sheet.add(opacity(new Rect(rx, y, w, row - 6), "craftography.panel.mask_opacity", () -> s.maskOpacity, v -> s.maskOpacity = v, 0.75f));
-		y += row;
-		sheet.add(opacity(new Rect(rx, y, w, row - 6), "craftography.panel.guide_opacity", () -> s.guideOpacity, v -> s.guideOpacity = v, 0.45f));
-		y += row;
-		sheet.add(new SegmentedSelector(new Rect(rx, y, w, row - 6), Component.translatable("craftography.panel.lock"),
-			offOn, () -> s.lockTimeWeather ? 1 : 0, i -> s.lockTimeWeather = i == 1, null));
-		y += row;
-		sheet.add(new SegmentedSelector(new Rect(rx, y, w, row - 6), Component.translatable("craftography.panel.preview"),
-			offOn, () -> s.showPreview ? 1 : 0, i -> s.showPreview = i == 1, null));
+		sheet.add(choice(slot(true, 2), "craftography.panel.weather", weathers.length, () -> s.weather.ordinal(), i -> s.weather = weathers[i],
+			Weather.SERVER.ordinal(), i -> Component.translatable(weathers[i].translationKey()), null,
+			(g, x, y) -> CameraBar.engravedIcon(g, "weather_" + s.weather.name().toLowerCase(Locale.ROOT), x, y)));
+		sheet.add(choice(slot(true, 3), "craftography.panel.moon", TimeMath.MOON_PHASES + 1, () -> s.moonPhase + 1, i -> s.moonPhase = i - 1,
+			0, i -> Component.translatable(i == 0 ? "craftography.moon.server" : "craftography.moon." + (i - 1)), null,
+			(g, x, y) -> engravedSprite(g, s.moonPhase < 0 ? "weather_server" : "moon_" + s.moonPhase, x + 1, y)));
+		sheet.add(opacity(slot(true, 4), "craftography.panel.mask_opacity", () -> s.maskOpacity, v -> s.maskOpacity = v, 0.75f));
+		sheet.add(opacity(slot(true, 5), "craftography.panel.guide_opacity", () -> s.guideOpacity, v -> s.guideOpacity = v, 0.45f));
+		sheet.add(toggle(slot(true, 6), "craftography.panel.lock", () -> s.lockTimeWeather, v -> s.lockTimeWeather = v, false));
+		sheet.add(toggle(slot(true, 7), "craftography.panel.preview", () -> s.showPreview, v -> s.showPreview = v, true));
 	}
 
-	/** A slider over the steps of a list (ISO, shutter speeds, f-numbers): drag, scroll one step, double click resets. */
-	private static Slider stepped(Rect area, String name, int count, java.util.function.IntSupplier index,
-								  java.util.function.IntConsumer select, Runnable reset, java.util.function.Supplier<String> value) {
-		return new Slider(area, false, false, 0, count - 1, index::getAsInt, v -> select.accept((int) Math.round(v)), v -> v,
-			(v, amount, fine) -> {
-				int i = (int) Math.max(0, Math.min(count - 1, Math.round(v) + Math.signum(amount)));
-				select.accept(i);
-				return i;
-			}, reset, Component.literal(name)).withValue(value);
+	/** Rectangle of the {@code i}th row of the left or right settings column. */
+	private Rect slot(boolean right, int i) {
+		return new Rect(right ? rightX : leftX, Math.floor(top + i * pitch), colW, rowH);
 	}
 
-	private static String aspectKey(Aspect a) {
-		return a == Aspect.FREE ? "free" : a.label.replace(".", "").replace(':', '_');
+	private static boolean fine() {
+		return CraftographyClient.shiftDown();
 	}
 
-	private static void cameraIcon(GuiGraphicsExtractor g, String name, Rect box, int color) {
-		io.github.mahirsn.craftography.util.Draw.camera(g, name, Math.round(box.x() + (box.w() - 11) / 2), Math.round(box.y() + (box.h() - 9) / 2), 11, 9, color);
+	/** Whole steps from a scroll or drag amount; a small trackpad scroll still moves one step. */
+	private static int whole(double steps) {
+		return (int) Math.signum(steps) * Math.max(1, (int) Math.abs(Math.round(steps)));
 	}
 
-	/** Draws a sprite centered in a segment box, at its pixel size if it fits. */
-	private static void icon(GuiGraphicsExtractor g, String name, Rect box, int w, int h, int color) {
-		double scale = Math.min(1, Math.min(box.w() / w, box.h() / h));
-		int sw = (int) Math.round(w * scale), sh = (int) Math.round(h * scale);
-		io.github.mahirsn.craftography.util.Draw.sprite(g, name, Math.round(box.x() + (box.w() - sw) / 2), Math.round(box.y() + (box.h() - sh) / 2), sw, sh, color);
+	private static Component aspectName(Aspect a) {
+		return a == Aspect.FREE ? Component.translatable("craftography.aspect.free") : Component.literal(a.label);
+	}
+
+	private static Component onOff(boolean on) {
+		return Component.translatable(on ? "options.on" : "options.off");
+	}
+
+	/** A continuous value: drag or scroll to change, double-click resets. */
+	private static SettingRow value(Rect area, String key, Supplier<String> text, DoubleConsumer step, Runnable reset, BooleanSupplier changed) {
+		return new SettingRow(area, Component.translatable(key), text, null, step, false, reset, changed, () -> Component.literal(text.get()));
+	}
+
+	/** One of a few choices: each click or scroll notch moves to the next one. */
+	private static SettingRow choice(Rect area, String key, int count, IntSupplier get, IntConsumer set, int def,
+									 IntFunction<Component> words, Supplier<String> text, SettingRow.Icon icon) {
+		return new SettingRow(area, Component.translatable(key), text, icon, n -> set.accept(Math.floorMod(get.getAsInt() + whole(n), count)),
+			true, null, () -> get.getAsInt() != def, () -> words.apply(get.getAsInt()));
+	}
+
+	/** An on/off switch: each click or scroll notch flips it. */
+	private static SettingRow toggle(Rect area, String key, BooleanSupplier get, Consumer<Boolean> set, boolean def) {
+		return new SettingRow(area, Component.translatable(key), () -> onOff(get.getAsBoolean()).getString(), null,
+			n -> set.accept(!get.getAsBoolean()), true, null, () -> get.getAsBoolean() != def, () -> onOff(get.getAsBoolean()));
 	}
 
 	private interface FloatSetter {
 		void set(float v);
 	}
 
-	private static Slider opacity(Rect area, String key, java.util.function.DoubleSupplier get, FloatSetter set, float def) {
-		return new Slider(area, false, false, 0, 1, get, v -> set.set((float) Math.max(0, Math.min(1, v))), v -> v,
-			(v, amount, fine) -> Math.max(0, Math.min(1, v + amount * (fine ? 0.01 : 0.05))), () -> set.set(def), Component.translatable(key));
+	private static SettingRow opacity(Rect area, String key, DoubleSupplier get, FloatSetter set, float def) {
+		return value(area, key, () -> Math.round(get.getAsDouble() * 100) + "%",
+			n -> set.set((float) Math.clamp(get.getAsDouble() + n * (fine() ? 0.01 : 0.05), 0, 1)),
+			() -> set.set(def), () -> Math.abs(get.getAsDouble() - def) > 0.001);
 	}
 
-	/** Drag snap: within 3 % of a preset focal length, use the preset. */
-	private static double snapToPreset(double mm) {
-		for (double p : LensMath.PRESETS) {
-			if (Math.abs(mm / p - 1) < 0.03) return p;
-		}
-		return LensMath.clamp(mm);
+	/** A viewfinder sprite engraved like the camera icons, drawn 9x9 so it sits in an icon's place. */
+	private static void engravedSprite(GuiGraphicsExtractor g, String name, int x, int y) {
+		Draw.sprite(g, name, x, y + 1, 9, 9, Draw.argb(1f, Draw.PRINT_LIGHT));
+		Draw.sprite(g, name, x, y, 9, 9, Draw.argb(1f, Draw.PRINT));
 	}
 
 	private void addBar(CameraSettings s) {
@@ -282,33 +276,16 @@ public class ControlsScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float a) {
 		if (laidOutFor != CameraSettings.get().aspect) layout();
 		Control hovered = dragging != null ? dragging : at(mouseX, mouseY);
-		if (sheetOpen) drawSheetPanel(g);
 		for (Control c : active()) c.draw(g, c == hovered);
-		if (dragging == null && hovered instanceof SegmentedSelector selector) {
-			Component label = selector.hoveredLabel(mouseX);
-			if (label != null) g.setTooltipForNextFrame(font, label, mouseX, mouseY);
+		if (dragging == null && hovered instanceof SettingRow row) {
+			MutableComponent title = row.name().copy();
+			List<Component> lines = new ArrayList<>(List.of(title));
+			if (row.tooltip() != null) lines.add(row.tooltip().copy().withStyle(ChatFormatting.GRAY));
+			lines.add(Component.translatable(row.clickSteps() ? "craftography.panel.hint.click" : "craftography.panel.hint.drag")
+				.withStyle(ChatFormatting.DARK_GRAY));
+			g.setComponentTooltipForNextFrame(font, lines, mouseX, mouseY);
 		}
 		if (dragging == null && hovered instanceof BarButton button) g.setComponentTooltipForNextFrame(font, button.tooltip(), mouseX, mouseY);
-	}
-
-	/** Dark camera-screen panel behind the settings sheet. */
-	private void drawSheetPanel(GuiGraphicsExtractor g) {
-		drawPanel(g, sheet.stream().filter(c -> c.area().x() < width / 2.0).toList());
-		drawPanel(g, sheet.stream().filter(c -> c.area().x() >= width / 2.0).toList());
-	}
-
-	private void drawPanel(GuiGraphicsExtractor g, List<Control> group) {
-		double x1 = width, y1 = height, x2 = 0, y2 = 0;
-		for (Control c : group) {
-			x1 = Math.min(x1, c.area().x());
-			y1 = Math.min(y1, c.area().y());
-			x2 = Math.max(x2, c.area().right());
-			y2 = Math.max(y2, c.area().bottom());
-		}
-		if (x2 <= x1) return;
-		int x = (int) Math.floor(x1) - 7, y = (int) Math.floor(y1) - 6;
-		// One grey camera-body plate per side, the controls engraved and mounted on it.
-		io.github.mahirsn.craftography.util.Draw.camera(g, "plate", x, y, (int) Math.ceil(x2) + 7 - x, (int) Math.ceil(y2) + 6 - y, -1);
 	}
 
 	@Override
@@ -351,6 +328,7 @@ public class ControlsScreen extends Screen {
 
 	@Override
 	public boolean mouseReleased(MouseButtonEvent event) {
+		if (dragging != null) dragging.release();
 		dragging = null;
 		return true;
 	}
