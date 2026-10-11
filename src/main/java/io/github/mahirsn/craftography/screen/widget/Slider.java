@@ -86,14 +86,16 @@ public class Slider extends Control {
 		}
 		Font font = Minecraft.getInstance().font;
 		double t = toT(get.getAsDouble());
-		double cy = area.y() + area.h() - 4;
-		g.text(font, label, (int) area.x(), (int) area.y(), hovered ? accent : white, true);
+		Draw.plate(g, area, hovered);
+		Draw.engraved(g, label.getString(), area.x(), area.y());
 		String value = valueText != null ? valueText.get() : Math.round(t * 100) + "%";
-		g.text(font, value, (int) (area.right() - font.width(value)), (int) area.y(), white, true);
-		double hx = area.x() + t * area.w();
-		Draw.line(g, area.x(), cy, area.right(), cy, dim);
-		Draw.line(g, area.x(), cy, hx, cy, accent);
-		Draw.rect(g, hx - 1, cy - 3, hx + 1, cy + 3, hovered ? accent : white);
+		Draw.engraved(g, value, area.right() - font.width(value), area.y());
+		// An engraved groove with a raised knob, like the plates' own relief.
+		double cy = area.bottom() - 4, hx = area.x() + 1 + t * (area.w() - 3);
+		Draw.line(g, area.x(), cy, area.right(), cy, Draw.argb(1f, Draw.PRINT));
+		Draw.line(g, area.x(), cy + 1, area.right(), cy + 1, Draw.argb(1f, Draw.PRINT_LIGHT));
+		Draw.rect(g, hx - 2, cy - 3, hx + 2, cy + 4, Draw.argb(1f, Draw.PRINT));
+		Draw.rect(g, hx - 1, cy - 2, hx + 1, cy + 3, hovered ? 0xFFE6E0D6 : 0xFFB8B2AA);
 	}
 
 	private void outline(GuiGraphicsExtractor g, int color) {

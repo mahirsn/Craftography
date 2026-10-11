@@ -63,4 +63,19 @@ public final class Draw {
 		g.fill((int) Math.round(x1 * s), (int) Math.round(y1 * s), (int) Math.round(x2 * s), (int) Math.round(y2 * s), color);
 		g.pose().popMatrix();
 	}
+
+	/** Exposure's engraved print: dark text with a light line under it, as on the camera bar. */
+	public static final int PRINT = 0x2B2622, PRINT_LIGHT = 0x7A736C;
+
+	public static void engraved(GuiGraphicsExtractor g, String text, double x, double y) {
+		var font = net.minecraft.client.Minecraft.getInstance().font;
+		g.text(font, text, (int) x, (int) y + 1, argb(1f, PRINT_LIGHT), false);
+		g.text(font, text, (int) x, (int) y, argb(1f, PRINT), false);
+	}
+
+	/** A grey camera-bar plate behind a side-panel control, slightly larger than its hit area. */
+	public static void plate(GuiGraphicsExtractor g, io.github.mahirsn.craftography.util.Rect area, boolean hovered) {
+		camera(g, hovered ? "plate_highlighted" : "plate", Math.floor(area.x()) - 4, Math.floor(area.y()) - 5,
+			(int) Math.ceil(area.w()) + 8, (int) Math.ceil(area.h()) + 7, -1);
+	}
 }

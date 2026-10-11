@@ -77,20 +77,25 @@ public class SegmentedSelector extends Control {
 	@Override
 	public void draw(GuiGraphicsExtractor g, boolean hovered) {
 		Font font = Minecraft.getInstance().font;
-		int white = Draw.argb(0.9f, 0xFFFFFF), amber = Draw.argb(1f, 0xFFB000), dim = Draw.argb(0.35f, 0xFFFFFF);
-		g.text(font, title, (int) area.x(), (int) area.y(), hovered ? amber : white, true);
+		Draw.plate(g, area, hovered);
+		Draw.engraved(g, title.getString(), area.x(), area.y());
 		int selected = get.getAsInt();
 		for (int i = 0; i < labels.size(); i++) {
 			Rect b = box(i);
 			boolean on = i == selected;
-			int color = on ? amber : white;
+			if (on) {
+				// The chosen segment is pressed into the plate.
+				Draw.rect(g, b.x() + 1, b.y(), b.right() - 1, b.bottom(), Draw.argb(.22f, 0x000000));
+				Draw.line(g, b.x() + 1, b.y(), b.right() - 1, b.y(), Draw.argb(1f, Draw.PRINT));
+				Draw.line(g, b.x() + 1, b.bottom(), b.right() - 1, b.bottom(), Draw.argb(1f, 0xB8B2AA));
+			}
+			int color = Draw.argb(on ? 1f : .55f, Draw.PRINT);
 			if (icon != null) {
 				icon.draw(g, i, new Rect(b.x() + 1, b.y() + 1, b.w() - 2, b.h() - 3), color);
 			} else {
-				Component label = labels.get(i);
-				g.text(font, label, (int) Math.round(b.x() + (b.w() - font.width(label)) / 2), (int) (b.y() + 2), color, true);
+				String label = labels.get(i).getString();
+				g.text(font, label, (int) Math.round(b.x() + (b.w() - font.width(label)) / 2), (int) (b.y() + 2), color, false);
 			}
-			Draw.line(g, b.x() + 1, b.bottom(), b.right() - 1, b.bottom(), on ? amber : dim);
 		}
 	}
 }

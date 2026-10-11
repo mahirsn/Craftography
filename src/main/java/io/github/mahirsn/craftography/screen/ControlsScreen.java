@@ -50,7 +50,7 @@ import java.util.List;
  * While it is open the player does not move or look around, because vanilla sends no game input to a screen.
  */
 public class ControlsScreen extends Screen {
-	private static final int ROW = 26;
+	private static final int ROW = 28;
 
 	private final boolean held;
 	private boolean sheetOpen;
@@ -101,7 +101,7 @@ public class ControlsScreen extends Screen {
 
 		// Settings on the two sides of the frame, Exposure-style panels: camera on the left, scene on the right.
 		double w = Math.min(118, (width - 40) / 3.0);
-		double lx = 8, rx = width - 8 - w, y0 = Math.max(f.y() + 8, 6);
+		double lx = 8, rx = width - 8 - w, y0 = Math.max(f.y() + 8, 8);
 		List<Component> offOn = List.of(Component.translatable("options.off"), Component.translatable("options.on"));
 		double half = (w - 8) / 2;
 
@@ -133,31 +133,31 @@ public class ControlsScreen extends Screen {
 			(v, amount, fine) -> { s.autofocus = false; return s.focusDistance = Math.max(ExposureMath.MIN_FOCUS, Math.min(ExposureMath.FOCUS_INFINITY, v * Math.pow(1.15, fine ? amount / 4 : amount))); },
 			() -> s.autofocus = true, Component.literal("Focus")).withValue(() -> s.autofocus ? "AF" : ExposureMath.formatFocus(s.focusDistance)));
 		y += ROW;
-		sheet.add(new SegmentedSelector(new Rect(lx, y, half, ROW - 4), Component.literal("AF"), offOn,
+		sheet.add(new SegmentedSelector(new Rect(lx, y, half, ROW - 6), Component.literal("AF"), offOn,
 			() -> s.autofocus ? 1 : 0, i -> s.autofocus = i == 1, null));
-		sheet.add(new SegmentedSelector(new Rect(lx + half + 8, y, half, ROW - 4), Component.literal("Grain"), offOn,
+		sheet.add(new SegmentedSelector(new Rect(lx + half + 8, y, half, ROW - 6), Component.literal("Grain"), offOn,
 			() -> s.noise ? 1 : 0, i -> s.noise = i == 1, null));
 		y += ROW;
-		sheet.add(new SegmentedSelector(new Rect(lx, y, half, ROW - 4), Component.literal("Histogram"), offOn,
+		sheet.add(new SegmentedSelector(new Rect(lx, y, half, ROW - 6), Component.literal("Histogram"), offOn,
 			() -> s.histogram ? 1 : 0, i -> s.histogram = i == 1, null));
-		sheet.add(new SegmentedSelector(new Rect(lx + half + 8, y, half, ROW - 4), Component.literal("Peaking"), offOn,
+		sheet.add(new SegmentedSelector(new Rect(lx + half + 8, y, half, ROW - 6), Component.literal("Peaking"), offOn,
 			() -> s.peaking ? 1 : 0, i -> s.peaking = i == 1, null));
 
 		y = y0;
 		Aspect[] aspects = Aspect.values();
-		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 4), Component.translatable("craftography.panel.aspect"),
+		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 6), Component.translatable("craftography.panel.aspect"),
 			Arrays.stream(aspects).map(a -> (Component) (a == Aspect.FREE ? Component.translatable("craftography.aspect.free") : Component.literal(a.label))).toList(),
 			() -> s.aspect.ordinal(), i -> s.aspect = aspects[i],
 			(g, i, box, color) -> cameraIcon(g, "icon_aspect_" + aspectKey(aspects[i]), box, color)));
 		y += ROW;
 		Guide[] guides = Guide.values();
-		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 4), Component.translatable("craftography.panel.guide"),
+		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 6), Component.translatable("craftography.panel.guide"),
 			Arrays.stream(guides).map(gd -> (Component) Component.translatable(gd.translationKey())).toList(),
 			() -> s.guide.ordinal(), i -> s.guide = guides[i],
 			(g, i, box, color) -> icon(g, "guide_" + guides[i].name().toLowerCase(java.util.Locale.ROOT), box, 16, 11, color)));
 		y += ROW;
 		Weather[] weathers = Weather.values();
-		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 4), Component.translatable("craftography.panel.weather"),
+		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 6), Component.translatable("craftography.panel.weather"),
 			Arrays.stream(weathers).map(wt -> (Component) Component.translatable(wt.translationKey())).toList(),
 			() -> s.weather.ordinal(), i -> s.weather = weathers[i],
 			(g, i, box, color) -> icon(g, "weather_" + weathers[i].name().toLowerCase(java.util.Locale.ROOT), box, 11, 11, color)));
@@ -165,7 +165,7 @@ public class ControlsScreen extends Screen {
 		List<Component> moons = new ArrayList<>();
 		moons.add(Component.translatable("craftography.moon.server"));
 		for (int p = 0; p < TimeMath.MOON_PHASES; p++) moons.add(Component.translatable("craftography.moon." + p));
-		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 4), Component.translatable("craftography.panel.moon"),
+		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 6), Component.translatable("craftography.panel.moon"),
 			moons, () -> s.moonPhase + 1, i -> s.moonPhase = i - 1,
 			(g, i, box, color) -> icon(g, i == 0 ? "weather_server" : "moon_" + (i - 1), box, 11, 11, color)));
 		y += ROW;
@@ -173,10 +173,10 @@ public class ControlsScreen extends Screen {
 		y += ROW;
 		sheet.add(opacity(new Rect(rx, y, w, ROW - 6), "craftography.panel.guide_opacity", () -> s.guideOpacity, v -> s.guideOpacity = v, 0.45f));
 		y += ROW;
-		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 4), Component.translatable("craftography.panel.lock"),
+		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 6), Component.translatable("craftography.panel.lock"),
 			offOn, () -> s.lockTimeWeather ? 1 : 0, i -> s.lockTimeWeather = i == 1, null));
 		y += ROW;
-		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 4), Component.translatable("craftography.panel.preview"),
+		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 6), Component.translatable("craftography.panel.preview"),
 			offOn, () -> s.showPreview ? 1 : 0, i -> s.showPreview = i == 1, null));
 	}
 
@@ -286,7 +286,7 @@ public class ControlsScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float a) {
 		if (laidOutFor != CameraSettings.get().aspect) layout();
 		Control hovered = dragging != null ? dragging : at(mouseX, mouseY);
-		if (sheetOpen) drawSheetPanel(g);
+		// Each side-panel control draws its own grey plate, like the camera bar.
 		for (Control c : active()) c.draw(g, c == hovered);
 		if (dragging == null && hovered instanceof SegmentedSelector selector) {
 			Component label = selector.hoveredLabel(mouseX);
