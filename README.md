@@ -15,7 +15,7 @@ the time, weather and moon phase you pick are visual only.
 - Camera roll from -90° to +90° with a horizon level.
 - Client-side time of day bar with golden and blue hour bands, visual weather and moon phase.
 - Pixel-art camera body: a bezel around the frame and a row of camera buttons under it.
-- Interactive mode: a free cursor and a button for every camera action. Side panels hold the settings:
+- Interactive mode: a free cursor and a button for every camera action. Side panels hold the settings, each on a sideways thumbwheel you roll by dragging or scrolling:
   ISO, shutter, aperture, white balance, tint, focus, grain, histogram and peaking on the left; aspect ratio,
   guide, weather, moon, mask and guide opacity on the right. The same panels open while the control panel key is held.
 - Tripod: the camera stays where you set it down, and you can walk into the shot.

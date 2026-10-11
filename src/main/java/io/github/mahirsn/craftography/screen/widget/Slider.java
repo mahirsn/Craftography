@@ -61,9 +61,20 @@ public class Slider extends Control {
 		return Math.max(0, Math.min(1, t));
 	}
 
+	private double pressX = Double.NaN, pressT;
+
+	@Override
+	public void press(double x, double y) {
+		// A thumbwheel is rolled, not jumped: the drag moves the value from where it was.
+		pressX = x;
+		pressT = toT(get.getAsDouble());
+		if (label == null) drag(x, y);
+	}
+
 	@Override
 	public void drag(double x, double y) {
 		double t = vertical ? 1 - (y - area.y()) / area.h() : (x - area.x()) / area.w();
+		if (label != null && !vertical && !Double.isNaN(pressX)) t = pressT + (x - pressX) / (area.w() * 1.5);
 		set.accept(snap.applyAsDouble(toValue(t)));
 	}
 
@@ -84,18 +95,11 @@ public class Slider extends Control {
 			if (hovered) outline(g, Draw.argb(0.6f, 0xFFB000));
 			return;
 		}
-		Font font = Minecraft.getInstance().font;
 		double t = toT(get.getAsDouble());
-		Draw.plate(g, area, hovered);
+		// Label engraved on the panel, the value on a sideways thumbwheel that turns as it changes.
 		Draw.engraved(g, label.getString(), area.x(), area.y());
 		String value = valueText != null ? valueText.get() : Math.round(t * 100) + "%";
-		Draw.engraved(g, value, area.right() - font.width(value), area.y());
-		// An engraved groove with a raised knob, like the plates' own relief.
-		double cy = area.bottom() - 4, hx = area.x() + 1 + t * (area.w() - 3);
-		Draw.line(g, area.x(), cy, area.right(), cy, Draw.argb(1f, Draw.PRINT));
-		Draw.line(g, area.x(), cy + 1, area.right(), cy + 1, Draw.argb(1f, Draw.PRINT_LIGHT));
-		Draw.rect(g, hx - 2, cy - 3, hx + 2, cy + 4, Draw.argb(1f, Draw.PRINT));
-		Draw.rect(g, hx - 1, cy - 2, hx + 1, cy + 3, hovered ? 0xFFE6E0D6 : 0xFFB8B2AA);
+		Draw.thumbwheel(g, area.x(), area.bottom() - 12, area.w(), 12, t * 3, hovered, value);
 	}
 
 	private void outline(GuiGraphicsExtractor g, int color) {

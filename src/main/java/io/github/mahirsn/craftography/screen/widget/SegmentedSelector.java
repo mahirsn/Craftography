@@ -77,7 +77,6 @@ public class SegmentedSelector extends Control {
 	@Override
 	public void draw(GuiGraphicsExtractor g, boolean hovered) {
 		Font font = Minecraft.getInstance().font;
-		Draw.plate(g, area, hovered);
 		Draw.engraved(g, title.getString(), area.x(), area.y());
 		int selected = get.getAsInt();
 		for (int i = 0; i < labels.size(); i++) {

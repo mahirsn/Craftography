@@ -50,7 +50,7 @@ import java.util.List;
  * While it is open the player does not move or look around, because vanilla sends no game input to a screen.
  */
 public class ControlsScreen extends Screen {
-	private static final int ROW = 28;
+	private static final int ROW = 27;
 
 	private final boolean held;
 	private boolean sheetOpen;
@@ -286,7 +286,7 @@ public class ControlsScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float a) {
 		if (laidOutFor != CameraSettings.get().aspect) layout();
 		Control hovered = dragging != null ? dragging : at(mouseX, mouseY);
-		// Each side-panel control draws its own grey plate, like the camera bar.
+		if (sheetOpen) drawSheetPanel(g);
 		for (Control c : active()) c.draw(g, c == hovered);
 		if (dragging == null && hovered instanceof SegmentedSelector selector) {
 			Component label = selector.hoveredLabel(mouseX);
@@ -311,7 +311,8 @@ public class ControlsScreen extends Screen {
 		}
 		if (x2 <= x1) return;
 		int x = (int) Math.floor(x1) - 7, y = (int) Math.floor(y1) - 6;
-		io.github.mahirsn.craftography.util.Draw.camera(g, "panel", x, y, (int) Math.ceil(x2) + 7 - x, (int) Math.ceil(y2) + 6 - y, -1);
+		// One grey camera-body plate per side, the controls engraved and mounted on it.
+		io.github.mahirsn.craftography.util.Draw.camera(g, "plate", x, y, (int) Math.ceil(x2) + 7 - x, (int) Math.ceil(y2) + 6 - y, -1);
 	}
 
 	@Override
