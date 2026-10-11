@@ -112,7 +112,9 @@ public final class Shutter {
 		CameraSettings.Aspect aspect = s.aspect;
 		long mm = Math.round(CameraMode.focalLength());
 		Screenshot.takeScreenshot(mc.gameRenderer.mainRenderTarget(), image -> {
-			Rect r = AspectMask.frame(image.getWidth(), image.getHeight(), aspect);
+			// The frame is laid out in GUI units; scale it to the image's pixels.
+			double k = image.getWidth() / (double) mc.getWindow().getGuiScaledWidth();
+			Rect r = AspectMask.frame(image.getWidth() / k, image.getHeight() / k, aspect).scale(k);
 			int x = (int) Math.round(r.x()), y = (int) Math.round(r.y());
 			int w = Math.min((int) Math.round(r.w()), image.getWidth() - x), h = Math.min((int) Math.round(r.h()), image.getHeight() - y);
 			NativeImage photo = new NativeImage(w, h, false);

@@ -20,10 +20,9 @@ public final class TimeBar {
 
 	/** Bar line rectangle (height 0) for a frame, in GUI units. Also used to drag the handle. */
 	public static Rect bar(Rect f, double screenWidth, double screenHeight) {
-		double w = Math.max(160, f.w() * 0.8);
-		w = Math.min(w, screenWidth - 16);
-		// Below the bezel, above the camera bar.
-		double y = Math.min(f.bottom() + AspectMask.BEZEL + 14, CameraBar.top(screenHeight) - 7);
+		double w = Math.min(Math.max(160, f.w() * 0.8), screenWidth - 2 * AspectMask.gutter(screenWidth));
+		// In its own band above the camera bar, below the frame bezel.
+		double y = CameraBar.top(screenHeight) - 6;
 		return new Rect((screenWidth - w) / 2, y, w, 0);
 	}
 

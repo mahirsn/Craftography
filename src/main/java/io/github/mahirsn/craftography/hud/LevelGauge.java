@@ -19,7 +19,8 @@ public final class LevelGauge {
 	}
 
 	public static double centerX(Rect f, double screenWidth) {
-		return Math.min(f.right() + 6 + AspectMask.BEZEL + RADIUS, screenWidth - 26);
+		// Inside the picture at its right edge, like a viewfinder level: the gutter belongs to the settings panel.
+		return f.right() - RADIUS - 8;
 	}
 
 	public static double centerY(Rect f) {
