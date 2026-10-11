@@ -182,8 +182,8 @@ public final class Shutter {
 		if (preview != null && previewAt >= 0 && now - previewAt < PREVIEW_MS) {
 			NativeImage px = preview.getPixels();
 			if (px == null) return;
-			int w = PREVIEW_WIDTH, h = Math.round((float) px.getHeight() * w / px.getWidth());
-			int x = g.guiWidth() - w - 6, y = 6;
+			int w = Math.min(PREVIEW_WIDTH, (int) (f.w() / 3)), h = Math.round((float) px.getHeight() * w / px.getWidth());
+			int x = (int) Math.round(f.right()) - w - 4, y = (int) Math.round(f.y()) + 4;
 			float fade = Math.min(1f, (PREVIEW_MS - (now - previewAt)) / 300f);
 			g.blit(RenderPipelines.GUI_TEXTURED, PREVIEW, x, y, 0, 0, w, h, px.getWidth(), px.getHeight(), px.getWidth(), px.getHeight(), Draw.argb(fade, 0xFFFFFF));
 			int line = Draw.argb(fade, 0xFFFFFF);
