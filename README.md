@@ -12,15 +12,16 @@ the time, weather and moon phase you pick are visual only.
 - Composition guides inside the frame: rule of thirds, phi grid, center cross, diagonals, quarters.
 - Lens from 10 mm to 200 mm (full-frame, vertical FOV), log-scale zoom that stops at the common focal lengths.
   Mouse sensitivity follows the zoom.
-- Camera roll from -90° to +90° with a horizon level.
+- Camera roll from -90° to +90° on a roll plate in the camera bar, with an engraved level that tilts with it.
 - Client-side time of day bar with golden and blue hour bands, visual weather and moon phase.
-- Pixel-art camera body: a bezel around the frame and a row of camera buttons under it.
-- Layout: the picture's bezel is flush with the top of the screen between two equal side gutters; the time bar and
-  the camera bar sit below it, and nothing ever covers it.
-- Interactive mode: a free cursor and a button for every camera action. Side panels hold the settings as plates in the
-  style of the camera bar, with an amber lamp on each one that is off its default: ISO, shutter, aperture, white
-  balance, tint, focus, autofocus, grain, histogram and peaking on the left; aspect ratio, guide, weather, moon, mask
-  and guide opacity, keep and preview on the right. The same panels open while the control panel key is held.
+- Pixel-art camera body: a bezel around the frame, and one band at the bottom of the screen with a row of camera
+  buttons and three top dials beside it.
+- Layout: the picture takes the whole screen above that band, for every aspect ratio, and nothing ever covers it.
+- Top dials with pages: exposure (ISO, shutter speed, aperture), colour (white balance, tint, grain), focus (focus
+  distance, autofocus, focus peaking), view (mask and guide opacity, histogram) and scene (moon phase, keep time and
+  weather, photo preview). The menu button turns the page. A dial's name turns amber while it is off its default.
+- Interactive mode: a free cursor to press every button and turn every dial and plate. It also opens while the
+  control panel key is held.
 - Tripod: the camera stays where you set it down, and you can walk into the shot.
 - Self-timer: 3 or 10 seconds, with a beep and a blinking lamp.
 - Shutter that saves a PNG cropped to the frame, without HUD, to `screenshots/craftography/`.
@@ -44,9 +45,9 @@ Only F7, F8 and F9 have default keys. Bind the rest in Options > Controls > Craf
 | Unbound | Shutter, control panel (hold), next guide, next aspect ratio, next weather, next self-timer, reset roll, back to server time |
 
 A key you bind works only in camera mode. While camera mode is on, a vanilla key on the same key is blocked.
-In interactive mode the player does not move or look around. Click a camera button, or scroll over it. Drag the lens
-and time plates sideways, or scroll over them. The menu button shows or hides the side panels. Drag a setting sideways or scroll
-over it; click a choice or a switch to change it. Double-click a setting, the dial, the time bar or a plate to reset it.
+In interactive mode the player does not move or look around. Click a camera button, or scroll over it. Drag the lens,
+roll and time plates and the dials sideways, or scroll over them; click a dial that holds a choice or a switch to change
+it. Double-click a dial, a plate or the time bar to reset it. The menu button turns the dials to their next page.
 
 To take a photo of yourself: press F9, walk into the frame, set the self-timer and press the shutter. Without a bound
 shutter key, open interactive mode and click the shutter button.
