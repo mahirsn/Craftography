@@ -40,9 +40,10 @@ public final class HeldCamcorder {
 	public static Matrix4f pose(double width, double height) {
 		float aspect = (float)(width/height);
 		float fit = Math.min(1, aspect/(16f/9));
-		return new Matrix4f().translate(.22f*fit, -.7f*fit-(1-frameProgress)*2.4f, -2.86f)
+		// Held at an angle so the open LCD, the left side panel and the rear panel all face the eye.
+		return new Matrix4f().translate(.48f*fit, -.7f*fit-(1-frameProgress)*2.4f, -2.85f)
 			.scale(-1.8f*fit, 1.8f*fit, 1.8f*fit)
-			.rotateX((float)Math.toRadians(5)).rotateY((float)Math.toRadians(-90));
+			.rotateX((float)Math.toRadians(8)).rotateY((float)Math.toRadians(-112.5));
 	}
 	public static void prepare(CameraRenderState state, int width, int height) {
 		frameProgress = CameraMode.progress();
@@ -74,7 +75,16 @@ public final class HeldCamcorder {
 				}
 			}, 0xF000F0);
 	}
+	/** Screen rectangle inscribed in a face on the plane x = const (model units, 0..16 per block). */
 	public static Rect surface(double width, double height, float x, float y0, float y1, float z0, float z1) {
+		return project(width,height,new float[][]{{x,y1,z0},{x,y1,z1},{x,y0,z0},{x,y0,z1}});
+	}
+	/** The same for a face on the plane z = const, like the left side panel. */
+	public static Rect surfaceZ(double width, double height, float z, float x0, float x1, float y0, float y1) {
+		return project(width,height,new float[][]{{x0,y1,z},{x1,y1,z},{x0,y0,z},{x1,y0,z}});
+	}
+	// Corners in order: top pair, then bottom pair.
+	public static Rect project(double width, double height, float[][] corners) {
 		Matrix4f p = new Matrix4f(projection);
 		// Preserve the exact physical-window projection for the current GUI (scaled sizes round up).
 		// Other dimensions are used for layout previews and resize checks.
@@ -83,14 +93,13 @@ public final class HeldCamcorder {
 		}
 		p.mul(pose(width,height)).translate(-.5f,-.5f,-.5f);
 		Vector3f[] v = new Vector3f[4];
-		int i=0;
-		for(float y:new float[]{y1,y0}) for(float z:new float[]{z0,z1}) {
-			Vector3f q=p.transformProject(new Vector3f(x/16,y/16,z/16));
-			v[i++]=new Vector3f((q.x+1)*(float)width/2,(1-q.y)*(float)height/2,0);
+		for (int i=0;i<4;i++) {
+			Vector3f q=p.transformProject(new Vector3f(corners[i][0]/16,corners[i][1]/16,corners[i][2]/16));
+			v[i]=new Vector3f((q.x+1)*(float)width/2,(1-q.y)*(float)height/2,0);
 		}
 		// Inscribed rectangle keeps HUD and processed pixels inside a slightly tilted quad.
-		double left=Math.max(v[0].x,v[2].x), right=Math.min(v[1].x,v[3].x);
-		if(left>right){left=Math.max(v[1].x,v[3].x);right=Math.min(v[0].x,v[2].x);}
+		double left=Math.max(Math.min(v[0].x,v[1].x),Math.min(v[2].x,v[3].x));
+		double right=Math.min(Math.max(v[0].x,v[1].x),Math.max(v[2].x,v[3].x));
 		double top=Math.max(v[0].y,v[1].y), bottom=Math.min(v[2].y,v[3].y);
 		return new Rect(left,top,right-left,bottom-top);
 	}
