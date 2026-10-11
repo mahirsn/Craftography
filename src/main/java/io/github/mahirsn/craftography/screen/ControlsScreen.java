@@ -20,6 +20,7 @@ import io.github.mahirsn.craftography.screen.widget.Control;
 import io.github.mahirsn.craftography.screen.widget.Dial;
 import io.github.mahirsn.craftography.screen.widget.SegmentedSelector;
 import io.github.mahirsn.craftography.screen.widget.Slider;
+import io.github.mahirsn.craftography.util.ExposureMath;
 import io.github.mahirsn.craftography.util.LensMath;
 import io.github.mahirsn.craftography.util.Rect;
 import io.github.mahirsn.craftography.util.TimeMath;
@@ -61,7 +62,7 @@ public class ControlsScreen extends Screen {
 	public ControlsScreen(boolean held) {
 		super(Component.translatable(held ? "craftography.panel" : "craftography.interactive"));
 		this.held = held;
-		this.sheetOpen = held;
+		this.sheetOpen = true; // the side panels are part of the interactive mode as well
 	}
 
 	@Override
@@ -98,42 +99,104 @@ public class ControlsScreen extends Screen {
 				return s.timeOfDay;
 			}, () -> s.timeOfDay = -1, null));
 
-		// Center column.
-		double w = Math.min(240, width - 2 * (ZoomScale.ruler(f).right() + 8));
-		double x = (width - w) / 2, y = Math.max(f.y() + 8, 4);
+		// Settings on the two sides of the frame, Exposure-style panels: camera on the left, scene on the right.
+		double w = Math.min(118, (width - 40) / 3.0);
+		double lx = 8, rx = width - 8 - w, y0 = Math.max(f.y() + 8, 6);
+		List<Component> offOn = List.of(Component.translatable("options.off"), Component.translatable("options.on"));
+		double half = (w - 8) / 2;
+
+		double y = y0;
+		sheet.add(stepped(new Rect(lx, y, w, ROW - 6), "ISO", ExposureMath.ISO.length,
+			() -> ExposureMath.nearest(ExposureMath.ISO, s.iso), i -> s.iso = ExposureMath.ISO[i], () -> s.iso = ExposureMath.DEFAULT_ISO,
+			() -> "ISO " + s.iso));
+		y += ROW;
+		sheet.add(stepped(new Rect(lx, y, w, ROW - 6), "Shutter", ExposureMath.SHUTTER.length,
+			() -> ExposureMath.nearest(ExposureMath.SHUTTER, s.shutter), i -> s.shutter = ExposureMath.SHUTTER[i],
+			() -> s.shutter = ExposureMath.DEFAULT_SHUTTER, () -> ExposureMath.formatShutter(s.shutter)));
+		y += ROW;
+		sheet.add(stepped(new Rect(lx, y, w, ROW - 6), "Aperture", ExposureMath.APERTURE.length,
+			() -> ExposureMath.nearest(ExposureMath.APERTURE, s.aperture), i -> s.aperture = ExposureMath.APERTURE[i],
+			() -> s.aperture = ExposureMath.DEFAULT_APERTURE, () -> ExposureMath.formatAperture(s.aperture)));
+		y += ROW;
+		sheet.add(new Slider(new Rect(lx, y, w, ROW - 6), false, false, ExposureMath.MIN_KELVIN, ExposureMath.MAX_KELVIN,
+			() -> s.kelvin, v -> s.kelvin = (int) Math.round(v / 100) * 100, v -> v,
+			(v, amount, fine) -> s.kelvin = (int) Math.max(ExposureMath.MIN_KELVIN, Math.min(ExposureMath.MAX_KELVIN, v + amount * (fine ? 50 : 200))),
+			() -> s.kelvin = ExposureMath.DEFAULT_KELVIN, Component.literal("White balance")).withValue(() -> s.kelvin + "K"));
+		y += ROW;
+		sheet.add(new Slider(new Rect(lx, y, w, ROW - 6), false, false, -ExposureMath.MAX_TINT, ExposureMath.MAX_TINT,
+			() -> s.tint, v -> s.tint = (int) Math.round(v), v -> v,
+			(v, amount, fine) -> s.tint = (int) Math.max(-ExposureMath.MAX_TINT, Math.min(ExposureMath.MAX_TINT, v + amount * (fine ? 1 : 5))),
+			() -> s.tint = 0, Component.literal("Tint")).withValue(() -> (s.tint > 0 ? "M" : s.tint < 0 ? "G" : "") + Math.abs(s.tint)));
+		y += ROW;
+		sheet.add(new Slider(new Rect(lx, y, w, ROW - 6), false, true, ExposureMath.MIN_FOCUS, ExposureMath.FOCUS_INFINITY,
+			() -> s.focusDistance, v -> { s.focusDistance = v; s.autofocus = false; }, v -> v,
+			(v, amount, fine) -> { s.autofocus = false; return s.focusDistance = Math.max(ExposureMath.MIN_FOCUS, Math.min(ExposureMath.FOCUS_INFINITY, v * Math.pow(1.15, fine ? amount / 4 : amount))); },
+			() -> s.autofocus = true, Component.literal("Focus")).withValue(() -> s.autofocus ? "AF" : ExposureMath.formatFocus(s.focusDistance)));
+		y += ROW;
+		sheet.add(new SegmentedSelector(new Rect(lx, y, half, ROW - 4), Component.literal("AF"), offOn,
+			() -> s.autofocus ? 1 : 0, i -> s.autofocus = i == 1, null));
+		sheet.add(new SegmentedSelector(new Rect(lx + half + 8, y, half, ROW - 4), Component.literal("Grain"), offOn,
+			() -> s.noise ? 1 : 0, i -> s.noise = i == 1, null));
+		y += ROW;
+		sheet.add(new SegmentedSelector(new Rect(lx, y, half, ROW - 4), Component.literal("Histogram"), offOn,
+			() -> s.histogram ? 1 : 0, i -> s.histogram = i == 1, null));
+		sheet.add(new SegmentedSelector(new Rect(lx + half + 8, y, half, ROW - 4), Component.literal("Peaking"), offOn,
+			() -> s.peaking ? 1 : 0, i -> s.peaking = i == 1, null));
+
+		y = y0;
 		Aspect[] aspects = Aspect.values();
-		sheet.add(new SegmentedSelector(new Rect(x, y, w, ROW - 4), Component.translatable("craftography.panel.aspect"),
+		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 4), Component.translatable("craftography.panel.aspect"),
 			Arrays.stream(aspects).map(a -> (Component) (a == Aspect.FREE ? Component.translatable("craftography.aspect.free") : Component.literal(a.label))).toList(),
-			() -> s.aspect.ordinal(), i -> s.aspect = aspects[i], null));
+			() -> s.aspect.ordinal(), i -> s.aspect = aspects[i],
+			(g, i, box, color) -> cameraIcon(g, "icon_aspect_" + aspectKey(aspects[i]), box, color)));
 		y += ROW;
 		Guide[] guides = Guide.values();
-		sheet.add(new SegmentedSelector(new Rect(x, y, w, ROW - 4), Component.translatable("craftography.panel.guide"),
+		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 4), Component.translatable("craftography.panel.guide"),
 			Arrays.stream(guides).map(gd -> (Component) Component.translatable(gd.translationKey())).toList(),
 			() -> s.guide.ordinal(), i -> s.guide = guides[i],
 			(g, i, box, color) -> icon(g, "guide_" + guides[i].name().toLowerCase(java.util.Locale.ROOT), box, 16, 11, color)));
 		y += ROW;
 		Weather[] weathers = Weather.values();
-		double weatherW = w * 0.35;
-		sheet.add(new SegmentedSelector(new Rect(x, y, weatherW, ROW - 4), Component.translatable("craftography.panel.weather"),
+		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 4), Component.translatable("craftography.panel.weather"),
 			Arrays.stream(weathers).map(wt -> (Component) Component.translatable(wt.translationKey())).toList(),
 			() -> s.weather.ordinal(), i -> s.weather = weathers[i],
 			(g, i, box, color) -> icon(g, "weather_" + weathers[i].name().toLowerCase(java.util.Locale.ROOT), box, 11, 11, color)));
+		y += ROW;
 		List<Component> moons = new ArrayList<>();
 		moons.add(Component.translatable("craftography.moon.server"));
 		for (int p = 0; p < TimeMath.MOON_PHASES; p++) moons.add(Component.translatable("craftography.moon." + p));
-		sheet.add(new SegmentedSelector(new Rect(x + weatherW + 12, y, w - weatherW - 12, ROW - 4), Component.translatable("craftography.panel.moon"),
+		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 4), Component.translatable("craftography.panel.moon"),
 			moons, () -> s.moonPhase + 1, i -> s.moonPhase = i - 1,
 			(g, i, box, color) -> icon(g, i == 0 ? "weather_server" : "moon_" + (i - 1), box, 11, 11, color)));
 		y += ROW;
-		double half = (w - 12) / 2;
-		sheet.add(opacity(new Rect(x, y, half, ROW - 6), "craftography.panel.mask_opacity", () -> s.maskOpacity, v -> s.maskOpacity = v, 0.75f));
-		sheet.add(opacity(new Rect(x + half + 12, y, half, ROW - 6), "craftography.panel.guide_opacity", () -> s.guideOpacity, v -> s.guideOpacity = v, 0.45f));
+		sheet.add(opacity(new Rect(rx, y, w, ROW - 6), "craftography.panel.mask_opacity", () -> s.maskOpacity, v -> s.maskOpacity = v, 0.75f));
 		y += ROW;
-		List<Component> offOn = List.of(Component.translatable("options.off"), Component.translatable("options.on"));
-		sheet.add(new SegmentedSelector(new Rect(x, y, half, ROW - 4), Component.translatable("craftography.panel.lock"),
+		sheet.add(opacity(new Rect(rx, y, w, ROW - 6), "craftography.panel.guide_opacity", () -> s.guideOpacity, v -> s.guideOpacity = v, 0.45f));
+		y += ROW;
+		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 4), Component.translatable("craftography.panel.lock"),
 			offOn, () -> s.lockTimeWeather ? 1 : 0, i -> s.lockTimeWeather = i == 1, null));
-		sheet.add(new SegmentedSelector(new Rect(x + half + 12, y, half, ROW - 4), Component.translatable("craftography.panel.preview"),
+		y += ROW;
+		sheet.add(new SegmentedSelector(new Rect(rx, y, w, ROW - 4), Component.translatable("craftography.panel.preview"),
 			offOn, () -> s.showPreview ? 1 : 0, i -> s.showPreview = i == 1, null));
+	}
+
+	/** A slider over the steps of a list (ISO, shutter speeds, f-numbers): drag, scroll one step, double click resets. */
+	private static Slider stepped(Rect area, String name, int count, java.util.function.IntSupplier index,
+								  java.util.function.IntConsumer select, Runnable reset, java.util.function.Supplier<String> value) {
+		return new Slider(area, false, false, 0, count - 1, index::getAsInt, v -> select.accept((int) Math.round(v)), v -> v,
+			(v, amount, fine) -> {
+				int i = (int) Math.max(0, Math.min(count - 1, Math.round(v) + Math.signum(amount)));
+				select.accept(i);
+				return i;
+			}, reset, Component.literal(name)).withValue(value);
+	}
+
+	private static String aspectKey(Aspect a) {
+		return a == Aspect.FREE ? "free" : a.label.replace(".", "").replace(':', '_');
+	}
+
+	private static void cameraIcon(GuiGraphicsExtractor g, String name, Rect box, int color) {
+		io.github.mahirsn.craftography.util.Draw.camera(g, name, Math.round(box.x() + (box.w() - 11) / 2), Math.round(box.y() + (box.h() - 9) / 2), 11, 9, color);
 	}
 
 	/** Draws a sprite centered in a segment box, at its pixel size if it fits. */
@@ -234,8 +297,13 @@ public class ControlsScreen extends Screen {
 
 	/** Dark camera-screen panel behind the settings sheet. */
 	private void drawSheetPanel(GuiGraphicsExtractor g) {
+		drawPanel(g, sheet.stream().filter(c -> c.area().x() < width / 2.0).toList());
+		drawPanel(g, sheet.stream().filter(c -> c.area().x() >= width / 2.0).toList());
+	}
+
+	private void drawPanel(GuiGraphicsExtractor g, List<Control> group) {
 		double x1 = width, y1 = height, x2 = 0, y2 = 0;
-		for (Control c : sheet) {
+		for (Control c : group) {
 			x1 = Math.min(x1, c.area().x());
 			y1 = Math.min(y1, c.area().y());
 			x2 = Math.max(x2, c.area().right());

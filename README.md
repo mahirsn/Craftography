@@ -15,8 +15,9 @@ the time, weather and moon phase you pick are visual only.
 - Camera roll from -90° to +90° with a horizon level.
 - Client-side time of day bar with golden and blue hour bands, visual weather and moon phase.
 - Pixel-art camera body: a bezel around the frame and a row of camera buttons under it.
-- Interactive mode: a free cursor and a button for every camera action, plus a settings sheet with sliders,
-  a roll dial and selectors. The same sheet opens while the control panel key is held.
+- Interactive mode: a free cursor and a button for every camera action. Side panels hold the settings:
+  ISO, shutter, aperture, white balance, tint, focus, grain, histogram and peaking on the left; aspect ratio,
+  guide, weather, moon, mask and guide opacity on the right. The same panels open while the control panel key is held.
 - Tripod: the camera stays where you set it down, and you can walk into the shot.
 - Self-timer: 3 or 10 seconds, with a beep and a blinking lamp.
 - Shutter that saves a PNG cropped to the frame, without HUD, to `screenshots/craftography/`.
@@ -41,7 +42,7 @@ Only F7, F8 and F9 have default keys. Bind the rest in Options > Controls > Craf
 
 A key you bind works only in camera mode. While camera mode is on, a vanilla key on the same key is blocked.
 In interactive mode the player does not move or look around. Click a camera button, or scroll over it. Drag the lens
-and time plates sideways, or scroll over them. The menu button opens the settings sheet. Drag a control or scroll over
+and time plates sideways, or scroll over them. The menu button shows or hides the side panels. Drag a control or scroll over
 it; double-click a slider, the dial, the time bar or a plate to reset it.
 
 To take a photo of yourself: press F9, walk into the frame, set the self-timer and press the shutter. Without a bound

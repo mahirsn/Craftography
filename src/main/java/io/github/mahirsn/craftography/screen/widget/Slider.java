@@ -28,6 +28,13 @@ public class Slider extends Control {
 	private final Step step;
 	private final Runnable reset;
 	private final Component label;
+	/** Shown at the right of the label instead of a percentage, e.g. "ISO 400" or "1/125". */
+	private java.util.function.Supplier<String> valueText;
+
+	public Slider withValue(java.util.function.Supplier<String> text) {
+		valueText = text;
+		return this;
+	}
 
 	public Slider(Rect area, boolean vertical, boolean log, double min, double max, DoubleSupplier get, DoubleConsumer set,
 				  DoubleUnaryOperator snap, Step step, Runnable reset, Component label) {
@@ -81,7 +88,7 @@ public class Slider extends Control {
 		double t = toT(get.getAsDouble());
 		double cy = area.y() + area.h() - 4;
 		g.text(font, label, (int) area.x(), (int) area.y(), hovered ? accent : white, true);
-		String value = Math.round(t * 100) + "%";
+		String value = valueText != null ? valueText.get() : Math.round(t * 100) + "%";
 		g.text(font, value, (int) (area.right() - font.width(value)), (int) area.y(), white, true);
 		double hx = area.x() + t * area.w();
 		Draw.line(g, area.x(), cy, area.right(), cy, dim);
