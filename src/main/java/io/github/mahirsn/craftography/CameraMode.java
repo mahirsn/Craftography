@@ -5,7 +5,7 @@ import net.minecraft.util.Util;
 
 /** Whether camera mode is on, plus the open/close transition. */
 public final class CameraMode {
-	private static final float DURATION_MS = 250f;
+	private static final float DURATION_MS = 350f;
 
 	private static boolean open;
 	private static long changedAt;
@@ -38,7 +38,7 @@ public final class CameraMode {
 
 	/** Eased transition value, 0 = closed, 1 = fully open. */
 	public static float progress() {
-		return Easing.outCubic(rawProgress());
+		return Easing.inOutCubic(rawProgress());
 	}
 
 	public static void toggle() {

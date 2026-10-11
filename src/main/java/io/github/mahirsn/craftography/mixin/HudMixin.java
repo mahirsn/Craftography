@@ -1,7 +1,5 @@
 package io.github.mahirsn.craftography.mixin;
 
-import io.github.mahirsn.craftography.render.HeldCamcorder;
-
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import io.github.mahirsn.craftography.CameraMode;
 import io.github.mahirsn.craftography.hud.ViewfinderHud;
@@ -36,7 +34,6 @@ public abstract class HudMixin {
 
 	@Inject(method = "extractRenderState", at = @At("TAIL"))
 	private void craftography$drawViewfinder(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-		HeldCamcorder.setHudHidden(this.isHidden);
 		if (CameraMode.isActive() && !this.isHidden) ViewfinderHud.render(graphics, deltaTracker);
 	}
 }

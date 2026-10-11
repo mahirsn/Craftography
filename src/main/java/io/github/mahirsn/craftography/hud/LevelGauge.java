@@ -18,22 +18,21 @@ public final class LevelGauge {
 	private LevelGauge() {
 	}
 
-	/** Inside the live view, at its right edge, like a camera's electronic level. */
-	public static double centerX(Rect liveView) {
-		return liveView.right() - (RADIUS + 14)*ViewfinderHud.lcdScale(liveView);
+	public static double centerX(Rect f, double screenWidth) {
+		return Math.min(f.right() + 6 + AspectMask.BEZEL + RADIUS, screenWidth - 26);
 	}
 
-	public static double centerY(Rect liveView) {
-		return liveView.y() + liveView.h() / 2;
+	public static double centerY(Rect f) {
+		return f.y() + f.h() / 2;
 	}
 
 	public static void draw(GuiGraphicsExtractor g, Rect f, double roll, float alpha) {
 		Font font = Minecraft.getInstance().font;
 		boolean level = Math.abs(roll) < LEVEL;
-		int color = Draw.argb(alpha, level ? 0xBCD6C4 : 0xFFFFFF);
-		int dim = Draw.argb(alpha * 0.45f, 0xFFFFFF);
+		int color = Draw.argb(alpha, level ? InfoStrip.AMBER : InfoStrip.WHITE);
+		int dim = Draw.argb(alpha * 0.45f, InfoStrip.WHITE);
 		double r = RADIUS;
-		double cx = centerX(f), cy = centerY(f);
+		double cx = centerX(f, g.guiWidth()), cy = centerY(f);
 
 		// Fixed marks: the camera's own horizontal axis.
 		Draw.line(g, cx - r - 4, cy, cx - r, cy, dim);

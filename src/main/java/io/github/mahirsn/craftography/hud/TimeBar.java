@@ -9,7 +9,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /** 24 hour bar under the frame. Left end = 06:00 (tick 0), then noon, 18:00, midnight, back to 06:00. */
 public final class TimeBar {
-	private static final int GOLD = 0xD8A261, BLUE = 0x8496AC;
+	private static final int GOLD = 0xFFB000, BLUE = 0x4A7BD0;
 	// Bands in day ticks (05:00 = 23000, 06:00 = 0, 18:00 = 12000).
 	private static final int[][] GOLDEN = {{0, 1000}, {11000, 12500}};
 	private static final int[][] BLUE_HOUR = {{23000, 24000}, {12500, 13500}};
@@ -18,11 +18,13 @@ public final class TimeBar {
 	private TimeBar() {
 	}
 
-	/** Bar line rectangle (height 0) at the bottom of the live view, in GUI units. Also used to drag the handle. */
-	public static Rect bar(Rect liveView) {
-		double scale = ViewfinderHud.lcdScale(liveView);
-		double w = liveView.w() - 40*scale;
-		return new Rect(liveView.x() + 20*scale, liveView.bottom() - 31*scale, w, 0);
+	/** Bar line rectangle (height 0) for a frame, in GUI units. Also used to drag the handle. */
+	public static Rect bar(Rect f, double screenWidth, double screenHeight) {
+		double w = Math.max(160, f.w() * 0.8);
+		w = Math.min(w, screenWidth - 16);
+		// Below the bezel, above the camera bar.
+		double y = Math.min(f.bottom() + AspectMask.BEZEL + 14, CameraBar.top(screenHeight) - 7);
+		return new Rect((screenWidth - w) / 2, y, w, 0);
 	}
 
 	/** Day tick under a mouse x position, snapped to 10 ticks. */
@@ -31,16 +33,15 @@ public final class TimeBar {
 		return TimeMath.dayTicks(Math.round(t * TimeMath.DAY / 10.0) * 10);
 	}
 
-	public static void draw(GuiGraphicsExtractor g, Rect liveView, int dayTicks, boolean overridden, float alpha) {
+	public static void draw(GuiGraphicsExtractor g, Rect f, int dayTicks, boolean overridden, float alpha) {
 		Font font = Minecraft.getInstance().font;
-		Rect bar = bar(liveView);
-		Draw.rect(g, liveView.x(), bar.y() - 15, liveView.right(), bar.y() + 6, Draw.argb(0.45f * alpha, 0x000000));
+		Rect bar = bar(f, g.guiWidth(), g.guiHeight());
 		double y = bar.y();
-		Draw.line(g, bar.x(), y, bar.right(), y, Draw.argb(alpha * 0.5f, 0xFFFFFF));
+		Draw.line(g, bar.x(), y, bar.right(), y, Draw.argb(alpha * 0.5f, InfoStrip.WHITE));
 		band(g, bar, GOLDEN, Draw.argb(alpha * 0.8f, GOLD));
 		band(g, bar, BLUE_HOUR, Draw.argb(alpha * 0.8f, BLUE));
 
-		int dim = Draw.argb(alpha * 0.7f, 0xFFFFFF);
+		int dim = Draw.argb(alpha * 0.7f, InfoStrip.WHITE);
 		for (int m : MARKS) {
 			double x = x(bar, m);
 			Draw.line(g, x, y - 2, x, y + 2, dim);
@@ -51,7 +52,7 @@ public final class TimeBar {
 		Draw.sprite(g, "sun", bar.x() - 12, y - 3, 7, 7, dim);
 		Draw.sprite(g, "moon", bar.right() + 5, y - 3, 7, 7, dim);
 
-		int handle = Draw.argb(alpha, overridden ? CameraBody.AMBER : 0xFFFFFF);
+		int handle = Draw.argb(alpha, overridden ? InfoStrip.AMBER : InfoStrip.WHITE);
 		double hx = x(bar, dayTicks);
 		Draw.rect(g, hx - 1, y - 4, hx + 1, y + 4, handle);
 	}

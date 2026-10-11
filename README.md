@@ -8,32 +8,21 @@ the time, weather and moon phase you pick are visual only.
 
 ## Features
 
-- A real 3D camcorder rendered as a client-only held model, with a transparent flip-out LCD showing the live world.
-  The camera rises into a steady, illuminated close-up in 250 ms. LCD overlays and animated rear controls follow
-  the projected model; dial ticks rotate with easing and buttons depress.
-- Exposure in real stops: ISO 100-12800, aperture f/1.4-f/22 and shutter speed 1/4000-1 s. The defaults
-  (ISO 100, f/5.6, 1/125) leave the game's picture as it is. A centre-weighted light meter and a histogram help.
-- White balance in kelvin (2500-10000 K) with a green-magenta tint.
-- Depth of field from the focal length, aperture and focus distance (thin-lens model), with autofocus on the frame
-  centre or manual focus with the Focus wheel.
-- A shutter slower than a frame blurs motion. Sensor noise grows with ISO (can be turned off).
-- Focus peaking and the histogram are shown in the live view only, never in the photo.
-- Aspect ratio masks: 16:9, 3:2, 4:3, 1:1, 4:5, 9:16, 2.39:1 and free. Composition guides: rule of thirds, phi grid,
-  center cross, diagonals, quarters.
-- Lens from 10 mm to 200 mm (full-frame, vertical FOV). Mouse sensitivity follows the zoom.
-- Camera roll from -90° to +90° with an electronic level.
-- Client-side time of day, visual weather and moon phase.
-- F8 frees the cursor to use the camera's physical controls. Six tabs on the LCD select Exposure,
-  White balance, Focus, Frame, Time/weather or Timer/tripod. The rear dials and buttons adjust that mode's settings; hover a control to read its value.
-  Symbol buttons, wheels, keys and the time bar all read the same values. Lens effects and focus peaking stay inside the LCD; the surrounding world keeps its original image.
+- Camera mode with aspect ratio masks: 16:9, 3:2, 4:3, 1:1, 4:5, 9:16, 2.39:1 and free.
+- Composition guides inside the frame: rule of thirds, phi grid, center cross, diagonals, quarters.
+- Lens from 10 mm to 200 mm (full-frame, vertical FOV), log-scale zoom that stops at the common focal lengths.
+  Mouse sensitivity follows the zoom.
+- Camera roll from -90° to +90° with a horizon level.
+- Client-side time of day bar with golden and blue hour bands, visual weather and moon phase.
+- Pixel-art camera body: a bezel around the frame and a row of camera buttons under it.
+- Interactive mode: a free cursor and a button for every camera action, plus a settings sheet with sliders,
+  a roll dial and selectors. The same sheet opens while the control panel key is held.
 - Tripod: the camera stays where you set it down, and you can walk into the shot.
 - Self-timer: 3 or 10 seconds, with a beep and a blinking lamp.
-- Shutter that saves a PNG cropped to the frame, without HUD, to `screenshots/craftography/`. The photo shows the
-  same exposure, colour, depth of field, blur and noise as the live view.
-- Settings are saved in `config/craftography.json`. The sprites can be changed with a resource pack
-  (`assets/craftography/textures/gui/sprites/`).
-- Works with Sodium and Iris. With a shader pack on, depth of field is off (the pack does not give the camera the
-  depth of the scene) and the camera says so; all other effects work.
+- Shutter that saves a PNG cropped to the frame, without HUD, to `screenshots/craftography/`.
+- Settings are saved in `config/craftography.json`. The HUD sprites can be changed with a resource pack
+  (`assets/craftography/textures/gui/sprites/viewfinder/`).
+- Works with Sodium and Iris, with shaders on or off.
 
 ## Controls
 
@@ -48,17 +37,15 @@ Only F7, F8 and F9 have default keys. Bind the rest in Options > Controls > Craf
 | Alt + Scroll | Roll (Shift: fine) |
 | Ctrl + Scroll | Time of day, 100 ticks per step (Shift: 10) |
 | Middle click | Reset lens to 35 mm |
-| Unbound | Shutter, controls (hold), next guide, next aspect ratio, next weather, next self-timer, reset roll, back to server time |
+| Unbound | Shutter, control panel (hold), next guide, next aspect ratio, next weather, next self-timer, reset roll, back to server time |
 
 A key you bind works only in camera mode. While camera mode is on, a vanilla key on the same key is blocked.
-
-In interactive mode the player does not move or look around. Click a tab on the LCD, then drag vertically
-or scroll the rear wheels and click the physical switches/buttons. Double-click a wheel to reset it.
-Drag or scroll the rotary zoom dial. Hold the warm shutter button to half-press for focus; release it to take a photo.
-The LCD time bar and horizon level can also be dragged. F8 or Esc returns to aiming the camera.
+In interactive mode the player does not move or look around. Click a camera button, or scroll over it. Drag the lens
+and time plates sideways, or scroll over them. The menu button opens the settings sheet. Drag a control or scroll over
+it; double-click a slider, the dial, the time bar or a plate to reset it.
 
 To take a photo of yourself: press F9, walk into the frame, set the self-timer and press the shutter. Without a bound
-shutter key, open interactive mode and press the warm shutter button on the camera.
+shutter key, open interactive mode and click the shutter button.
 
 ## Install
 
@@ -74,5 +61,5 @@ The jar is written to `build/libs/`.
 
 ## License
 
-MIT. The included legacy LCD surround sprite is adapted from [Exposure](https://github.com/mortuusars/Exposure) by
-mortuusars (MIT); see `THIRD_PARTY_NOTICES.md`.
+MIT. The camera control button, plate and bezel sprites are adapted from
+[Exposure](https://github.com/mortuusars/Exposure) by mortuusars (MIT); see `THIRD_PARTY_NOTICES.md`.
