@@ -1,0 +1,7 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "craftography:item/camcorder"
+  },
+  "hand_animation_on_swap": false
+}

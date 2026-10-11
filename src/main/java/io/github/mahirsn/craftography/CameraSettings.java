@@ -72,6 +72,10 @@ public final class CameraSettings {
 	public boolean lockTimeWeather = false;
 	/** Show a small preview of the photo for two seconds after the shot. */
 	public boolean showPreview = true;
+	/** Hold a 3D camcorder in first person and lean in to its screen; off = always the viewfinder. */
+	public boolean heldCamera = true;
+	/** How the lean key works. */
+	public Lean.Mode leanMode = Lean.Mode.BOTH;
 	/** Self-timer delay in seconds: 0 (off), 3 or 10. */
 	public int selfTimer = 0;
 
@@ -123,6 +127,7 @@ public final class CameraSettings {
 	}
 
 	private CameraSettings sanitized() {
+		if (leanMode == null) leanMode = Lean.Mode.BOTH;
 		if (aspect == null) aspect = Aspect.R3_2;
 		if (guide == null) guide = Guide.THIRDS;
 		maskOpacity = clamp(maskOpacity, 0f, 1f);

@@ -99,7 +99,7 @@ public final class LensEffects {
 	 * peaking), and the light meter, which reads the picture as the photo would be.
 	 */
 	public static void liveView(RenderTarget main) {
-		if (!CameraMode.isActive()) return;
+		if (!CameraMode.isActive() || CameraMode.view() == 0) return;
 		Meter.request(() -> {
 			small = fitSize(small, "meter", Meter.WIDTH, Meter.HEIGHT);
 			simplePass("Craftography meter", DOWNSAMPLE, copyOfMain(main), small, FilterMode.LINEAR);
@@ -147,14 +147,14 @@ public final class LensEffects {
 
 	/** Called right after the level is drawn, before vanilla clears the depth for the hand: keeps the depth. */
 	public static void keepDepth(RenderTarget main) {
-		if (!CameraMode.isActive() || !depthOfFieldAvailable() || main.getDepthTexture() == null) return;
+		if (!CameraMode.isActive() || CameraMode.view() == 0 || !depthOfFieldAvailable() || main.getDepthTexture() == null) return;
 		depth = fit(depth, "depth", main, true);
 		depth.copyDepthFrom(main);
 	}
 
 	/** Called before the GUI and before a photo is taken. */
 	public static void apply(RenderTarget main) {
-		if (!CameraMode.isActive()) {
+		if (!CameraMode.isActive() || CameraMode.view() == 0) {
 			historyValid = false;
 			return;
 		}
@@ -200,7 +200,7 @@ public final class LensEffects {
 
 	private static void writeConfig(RenderTarget main, double frameSeconds) {
 		CameraSettings s = CameraSettings.get();
-		float p = CameraMode.progress();
+		float p = CameraMode.view();
 		Minecraft mc = Minecraft.getInstance();
 		Camera camera = mc.gameRenderer.mainCamera();
 		// Projection = (projection * view rotation) * inverse(view rotation).

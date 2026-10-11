@@ -2,6 +2,14 @@ plugins {
 	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 }
 
+repositories {
+	// Mod Menu, for the settings button in its mod list; optional at runtime. Only its own repository is asked for it.
+	exclusiveContent {
+		forRepository { maven { url = "https://maven.terraformersmc.com/releases/" } }
+		filter { includeGroup "com.terraformersmc" }
+	}
+}
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -9,6 +17,7 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 
 	testImplementation "org.junit.jupiter:junit-jupiter:5.13.4"
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher"

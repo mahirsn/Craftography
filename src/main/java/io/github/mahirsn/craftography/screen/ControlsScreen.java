@@ -45,7 +45,7 @@ import java.util.Locale;
 public class ControlsScreen extends Screen {
 	private final boolean held;
 	private final List<Control> controls = new ArrayList<>();
-	private Control dragging, lastPressed;
+	private Control dragging, lastPressed, menu;
 	private double pressX;
 
 	public ControlsScreen(boolean held) {
@@ -101,7 +101,7 @@ public class ControlsScreen extends Screen {
 					() -> CraftographyClient.change(CameraSettings::cycleTimer));
 				case TRIPOD -> BarButton.button(area, paint, () -> tooltip("key.craftography.tripod", CraftographyClient.tripodKey,
 					Component.translatable(Tripod.isActive() ? "options.on" : "options.off")), Tripod::toggle);
-				case MENU -> BarButton.button(area, paint, () -> tooltip("craftography.button.menu", null,
+				case MENU -> menu = BarButton.button(area, paint, () -> tooltip("craftography.button.menu", CraftographyClient.settingsKey,
 						Component.translatable("craftography.button.menu.page", DialBank.page().title(), DialBank.page().ordinal() + 1, DialBank.Page.values().length),
 						Component.translatable("craftography.button.menu.hint")),
 					DialBank::nextPage);
@@ -159,8 +159,12 @@ public class ControlsScreen extends Screen {
 			CraftographyClient.onMiddleClick();
 			return true;
 		}
-		if (event.button() != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
 		Control c = at(event.x(), event.y());
+		if (event.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT && c != null && c == menu) {
+			minecraft.gui.setScreen(new ConfigScreen(this));
+			return true;
+		}
+		if (event.button() != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
 		if (c == null) return false;
 		// A double click counts only on the control that got the first click.
 		if (doubleClick && c == lastPressed) {

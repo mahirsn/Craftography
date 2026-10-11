@@ -96,7 +96,6 @@ public final class Shutter {
 	private static void shoot() {
 		if (pending) return;
 		pending = true;
-		shotAt = Util.getMillis();
 		Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.9f, 0.6f));
 	}
 
@@ -107,6 +106,7 @@ public final class Shutter {
 	/** Called by GameRendererMixin right before the GUI is drawn. */
 	public static void capture() {
 		pending = false;
+		shotAt = Util.getMillis();
 		Minecraft mc = Minecraft.getInstance();
 		CameraSettings s = CameraSettings.get();
 		CameraSettings.Aspect aspect = s.aspect;

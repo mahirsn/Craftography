@@ -18,7 +18,7 @@ public final class ViewfinderHud {
 	/** Frame rectangle in GUI units, including the open/close animation. */
 	public static Rect currentFrame(double width, double height) {
 		Rect full = new Rect(0, 0, width, height);
-		return full.lerp(AspectMask.frame(width, height, CameraSettings.get().aspect), CameraMode.progress());
+		return full.lerp(AspectMask.frame(width, height, CameraSettings.get().aspect), CameraMode.view());
 	}
 
 	/** Time of day shown in the picture: the override, or the server time. */
@@ -28,7 +28,7 @@ public final class ViewfinderHud {
 
 	public static void render(GuiGraphicsExtractor g, DeltaTracker delta) {
 		CameraSettings s = CameraSettings.get();
-		float p = CameraMode.progress();
+		float p = CameraMode.view();
 		Rect f = currentFrame(g.guiWidth(), g.guiHeight());
 		AspectMask.draw(g, f, s.aspect != CameraSettings.Aspect.FREE, s.maskOpacity * p, 0.9f * p, p);
 		GuideOverlay.draw(g, f, s.guide, s.guideOpacity * p);

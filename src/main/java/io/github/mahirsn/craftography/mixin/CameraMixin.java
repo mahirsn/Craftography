@@ -25,12 +25,12 @@ public abstract class CameraMixin {
 	@Shadow
 	protected abstract void setPosition(Vec3 position);
 
-	/** Replaces the field of view with the lens' vertical FOV, blended by the open/close transition. */
+	/** Replaces the field of view with the lens' vertical FOV, blended by {@link CameraMode#view()}. */
 	@ModifyReturnValue(method = "calculateFov", at = @At("RETURN"))
 	private float craftography$lensFov(float fov) {
 		if (!CameraMode.isActive()) return fov;
 		float lens = (float) LensMath.vfov(CameraMode.focalLength());
-		return fov + (lens - fov) * CameraMode.progress();
+		return fov + (lens - fov) * CameraMode.view();
 	}
 
 	/**

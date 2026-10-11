@@ -52,16 +52,24 @@ public final class CameraMode {
 		changedAt = Util.getMillis();
 	}
 
+	/**
+	 * How much of the camera's own view is shown: the open/close transition times the lean to the camera screen. The
+	 * lens effects, lens FOV, roll and viewfinder HUD follow it; at 0 the player just holds the camera.
+	 */
+	public static float view() {
+		return progress() * Lean.value();
+	}
+
 	/** Lens focal length eased toward the setting, in mm. Smoothed in log space so zoom feels the same at every length. */
 	public static double focalLength() {
 		smooth();
 		return focalLength;
 	}
 
-	/** Roll eased toward the setting and scaled by the open/close transition, in degrees. */
+	/** Roll eased toward the setting and scaled by {@link #view()}, in degrees. */
 	public static double roll() {
 		smooth();
-		return roll * progress();
+		return roll * view();
 	}
 
 	private static void smooth() {

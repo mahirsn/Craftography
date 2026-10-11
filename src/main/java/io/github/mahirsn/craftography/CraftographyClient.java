@@ -2,6 +2,7 @@ package io.github.mahirsn.craftography;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mahirsn.craftography.capture.Shutter;
+import io.github.mahirsn.craftography.screen.ConfigScreen;
 import io.github.mahirsn.craftography.screen.ControlsScreen;
 import io.github.mahirsn.craftography.util.LensMath;
 import io.github.mahirsn.craftography.util.TimeMath;
@@ -37,6 +38,8 @@ public class CraftographyClient implements ClientModInitializer {
 	public static KeyMapping shutterKey;
 	public static KeyMapping timerKey;
 	public static KeyMapping tripodKey;
+	public static KeyMapping leanKey;
+	public static KeyMapping settingsKey;
 
 	/**
 	 * Keys that only work in camera mode, with their actions. Vanilla keys bound to the same key are blocked while
@@ -48,6 +51,7 @@ public class CraftographyClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		CameraSettings.load();
 		toggleKey = register("toggle", GLFW.GLFW_KEY_F7);
+		settingsKey = register("settings", GLFW.GLFW_KEY_UNKNOWN);
 		interactiveKey = cameraKey("interactive", GLFW.GLFW_KEY_F8, () -> openScreen(false));
 		guideKey = cameraKey("guide", GLFW.GLFW_KEY_UNKNOWN, () -> change(CameraSettings::cycleGuide));
 		aspectKey = cameraKey("aspect", GLFW.GLFW_KEY_UNKNOWN, () -> change(CameraSettings::cycleAspect));
@@ -58,6 +62,10 @@ public class CraftographyClient implements ClientModInitializer {
 		shutterKey = cameraKey("shutter", GLFW.GLFW_KEY_UNKNOWN, Shutter::press);
 		timerKey = cameraKey("timer", GLFW.GLFW_KEY_UNKNOWN, () -> change(CameraSettings::cycleTimer));
 		tripodKey = cameraKey("tripod", GLFW.GLFW_KEY_F9, Tripod::toggle);
+		// Right mouse button, like aiming. Lean reads whether it is held; listing it here blocks vanilla "use" on it.
+		leanKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.craftography.lean", InputConstants.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_RIGHT, CATEGORY));
+		CAMERA_KEYS.put(leanKey, () -> {
+		});
 
 		ClientTickEvents.START_CLIENT_TICK.register(CraftographyClient::onTick);
 	}
@@ -114,6 +122,9 @@ public class CraftographyClient implements ClientModInitializer {
 		while (toggleKey.consumeClick()) {
 			CameraMode.toggle();
 		}
+		while (settingsKey.consumeClick()) {
+			if (mc.gui.screen() == null) mc.gui.setScreen(new ConfigScreen(null));
+		}
 		boolean open = CameraMode.isOpen();
 		if (!open) {
 			Shutter.cancelTimer();
@@ -121,6 +132,7 @@ public class CraftographyClient implements ClientModInitializer {
 		}
 		Tripod.tick(mc);
 		Autofocus.tick(mc);
+		Lean.tick(open && leanKey.isDown());
 		for (Map.Entry<KeyMapping, Runnable> e : CAMERA_KEYS.entrySet()) {
 			while (e.getKey().consumeClick()) {
 				// Not in camera mode: the click is dropped.

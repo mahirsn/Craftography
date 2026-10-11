@@ -16,6 +16,9 @@
 	"entrypoints": {
 		"client": [
 			"io.github.mahirsn.craftography.CraftographyClient"
+		],
+		"modmenu": [
+			"io.github.mahirsn.craftography.screen.ModMenuIntegration"
 		]
 	},
 	"depends": {

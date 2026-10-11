@@ -1,6 +1,9 @@
 package io.github.mahirsn.craftography.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import io.github.mahirsn.craftography.Lean;
 import io.github.mahirsn.craftography.capture.Shutter;
+import io.github.mahirsn.craftography.render.HeldCamera;
 import io.github.mahirsn.craftography.render.LensEffects;
 import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,8 +20,15 @@ public abstract class GameRendererMixin {
 	@Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;render()V"))
 	private void craftography$capture(CallbackInfo ci) {
 		LensEffects.apply(((GameRenderer) (Object) this).mainRenderTarget());
-		if (Shutter.isPending()) Shutter.capture();
+		// Only once leaned in: the camcorder is gone and the effects are at full strength, as the viewfinder shows.
+		if (Shutter.isPending() && Lean.full()) Shutter.capture();
 		LensEffects.liveView(((GameRenderer) (Object) this).mainRenderTarget());
+	}
+
+	/** Camera mode hides the HUD as F1 does, which also hides the hand; the held camcorder is drawn anyway. */
+	@ModifyExpressionValue(method = "renderItemInHand", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/gui/GuiRenderState;isHudHidden:Z"))
+	private boolean craftography$showHeldCamera(boolean hidden) {
+		return hidden && !HeldCamera.visible();
 	}
 
 	/** Keeps the level depth for depth of field before vanilla clears it for the hand. */
