@@ -28,6 +28,10 @@ public abstract class Control {
 	public void drag(double x, double y) {
 	}
 
+	/** Mouse button released after {@link #press}. */
+	public void release() {
+	}
+
 	public abstract void scroll(double amount, boolean fine);
 
 	public abstract void reset();
