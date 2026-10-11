@@ -85,5 +85,7 @@
 	"craftography.dial.page.colour": "Renk",
 	"craftography.dial.page.focus": "Odak",
 	"craftography.dial.page.view": "Görünüm",
-	"craftography.dial.page.scene": "Sahne"
+	"craftography.dial.page.scene": "Sahne",
+	"craftography.dial.on": "Var",
+	"craftography.dial.off": "Yok"
 }

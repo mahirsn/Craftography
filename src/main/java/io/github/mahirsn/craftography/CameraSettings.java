@@ -149,7 +149,7 @@ public final class CameraSettings {
 	/** Changes the roll; crossing or landing near 0 stops at exactly 0 (level). */
 	public void addRoll(double degrees) {
 		double next = Math.max(-MAX_ROLL, Math.min(MAX_ROLL, roll + degrees));
-		if (roll != 0 && (Math.signum(next) != Math.signum(roll) || Math.abs(next) < 0.25)) next = 0;
+		if (roll != 0 && (Math.signum(next) != Math.signum(roll) || Math.abs(next) < 0.05)) next = 0;
 		roll = next;
 	}
 

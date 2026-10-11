@@ -44,7 +44,7 @@ public class DialControl extends Control {
 
 	@Override
 	public void release() {
-		if (!dragged && dial().clickSteps()) dial().step().accept(1);
+		if (!dragged && dial().reset() == null) dial().step().accept(1);
 	}
 
 	@Override
