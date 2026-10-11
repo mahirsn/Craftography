@@ -49,5 +49,18 @@
 	"craftography.button.timer.seconds": "%s s",
 	"craftography.button.menu": "Settings",
 	"craftography.button.shutter.cancel": "Counting down. Click again to cancel.",
-	"key.craftography.tripod": "Tripod"
+	"key.craftography.tripod": "Tripod",
+	"craftography.panel.ratio": "Ratio",
+	"craftography.panel.iso": "ISO",
+	"craftography.panel.shutter": "Shutter",
+	"craftography.panel.aperture": "Aperture",
+	"craftography.panel.white_balance": "WB",
+	"craftography.panel.tint": "Tint",
+	"craftography.panel.focus": "Focus",
+	"craftography.panel.autofocus": "AF",
+	"craftography.panel.grain": "Grain",
+	"craftography.panel.histogram": "Histogram",
+	"craftography.panel.peaking": "Peaking",
+	"craftography.panel.hint.drag": "Drag sideways or scroll to change. Double-click: default",
+	"craftography.panel.hint.click": "Click or scroll to change"
 }
