@@ -1,8 +1,9 @@
 #version 330
+#extension GL_ARB_separate_shader_objects : require
 
 // Craftography focus peaking: marks strong local contrast (what is in focus) in red. Live view only.
 
-#moj_import <minecraft:globals.glsl>
+#include <minecraft:globals.glsl>
 
 uniform sampler2D InSampler;
 
@@ -11,9 +12,9 @@ layout(std140) uniform SamplerInfo {
     vec2 InSize;
 };
 
-in vec2 texCoord;
+layout(location = 0) in vec2 texCoord;
 
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
 
 float luma(vec2 uv) {
     return dot(texture(InSampler, uv).rgb, vec3(0.2126, 0.7152, 0.0722));

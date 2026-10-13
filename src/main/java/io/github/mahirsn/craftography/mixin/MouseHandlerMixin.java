@@ -1,5 +1,6 @@
 package io.github.mahirsn.craftography.mixin;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.github.mahirsn.craftography.CameraMode;
@@ -9,7 +10,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.player.LocalPlayer;
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,8 +40,8 @@ public abstract class MouseHandlerMixin {
 	/** Middle click resets the lens instead of picking a block. */
 	@Inject(method = "onButton", at = @At("HEAD"), cancellable = true)
 	private void craftography$middleClick(long handle, MouseButtonInfo button, int action, CallbackInfo ci) {
-		if (button.button() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && handle == minecraft.getWindow().handle() && craftography$inGame()) {
-			if (action == GLFW.GLFW_PRESS) CraftographyClient.onMiddleClick();
+		if (button.button() == InputConstants.MOUSE_BUTTON_MIDDLE && handle == minecraft.getWindow().handle() && craftography$inGame()) {
+			if (action == InputConstants.PRESS) CraftographyClient.onMiddleClick();
 			ci.cancel();
 		}
 	}

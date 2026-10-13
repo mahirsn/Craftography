@@ -1,9 +1,10 @@
 #version 330
+#extension GL_ARB_separate_shader_objects : require
 
 // Craftography lens: depth of field, exposure, white balance and shutter-speed motion blur.
 // Reads the finished frame (Scene), the level depth and the previous output (History).
 
-#moj_import <minecraft:globals.glsl>
+#include <minecraft:globals.glsl>
 
 uniform sampler2D SceneSampler;
 uniform sampler2D DepthSampler;
@@ -17,9 +18,9 @@ layout(std140) uniform LensConfig {
     vec4 Flags;    // x: depth range 0..1 (1) or -1..1 (0)
 };
 
-in vec2 texCoord;
+layout(location = 0) in vec2 texCoord;
 
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
 
 const int TAPS = 64;
 const float GOLDEN_ANGLE = 2.39996323;

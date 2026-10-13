@@ -154,7 +154,7 @@ public final class Shutter {
 			target.resize(ow * k, oh * k);
 			mc.gameRenderer.update(net.minecraft.client.DeltaTracker.ONE);
 			mc.gameRenderer.extract(net.minecraft.client.DeltaTracker.ONE, true);
-			mc.gameRenderer.renderLevel(net.minecraft.client.DeltaTracker.ONE);
+			mc.gameRenderer.renderLevel();
 			io.github.mahirsn.craftography.render.LensEffects.apply(target);
 			Screenshot.takeScreenshot(target, image -> keep(mc, image, k));
 		} catch (Exception e) {

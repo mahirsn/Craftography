@@ -27,8 +27,10 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import org.lwjgl.glfw.GLFW;
 
+import org.lwjgl.sdl.SDLMouse;
+
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -157,11 +159,11 @@ public class ControlsScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		if (event.button() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) {
+		if (event.button() == InputConstants.MOUSE_BUTTON_MIDDLE) {
 			CraftographyClient.onMiddleClick();
 			return true;
 		}
-		if (event.button() != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
+		if (event.button() != InputConstants.MOUSE_BUTTON_LEFT) return false;
 		Control c = at(event.x(), event.y());
 		if (c == null) return false;
 		// A double click counts only on the control that got the first click.
@@ -238,9 +240,9 @@ public class ControlsScreen extends Screen {
 	private boolean panelKeyHeld() {
 		InputConstants.Key key = KeyMappingHelper.getBoundKeyOf(CraftographyClient.panelKey);
 		if (key.getType() == InputConstants.Type.MOUSE) {
-			return GLFW.glfwGetMouseButton(minecraft.getWindow().handle(), key.getValue()) == GLFW.GLFW_PRESS;
+			return (SDLMouse.SDL_GetMouseState((FloatBuffer) null, null) & 1 << key.getValue() - 1) != 0;
 		}
-		return key.getType() != InputConstants.Type.KEYSYM || CraftographyClient.isDown(key.getValue());
+		return key.getType() != InputConstants.Type.KEYBOARD || CraftographyClient.isDown(key.getValue());
 	}
 
 	@Override

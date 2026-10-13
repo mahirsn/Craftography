@@ -1,5 +1,6 @@
 package io.github.mahirsn.craftography.screen;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.NativeImage;
 import io.github.mahirsn.craftography.CraftographyClient;
 import io.github.mahirsn.craftography.util.Draw;
@@ -13,8 +14,8 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import com.mojang.blaze3d.Blaze3D;
 import net.minecraft.util.Util;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -250,7 +251,7 @@ public class GalleryScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		if (event.button() != GLFW.GLFW_MOUSE_BUTTON_LEFT) return super.mouseClicked(event, doubleClick);
+		if (event.button() != InputConstants.MOUSE_BUTTON_LEFT) return super.mouseClicked(event, doubleClick);
 		if (open >= 0) return true;
 		int i = at(event.x(), event.y());
 		if (i >= 0) openShot(i);
@@ -268,18 +269,18 @@ public class GalleryScreen extends Screen {
 	@Override
 	public boolean keyPressed(KeyEvent event) {
 		int key = event.key();
-		if (key == GLFW.GLFW_KEY_ESCAPE && open >= 0) {
+		if (key == InputConstants.KEY_ESCAPE && open >= 0) {
 			minecraft.getTextureManager().release(full);
 			loaded.remove(full);
 			open = -1;
 			return true;
 		}
-		if (key == GLFW.GLFW_KEY_O) {
-			Util.getPlatform().openPath(dir);
+		if (key == InputConstants.KEY_O) {
+			Blaze3D.openPath(dir);
 			return true;
 		}
-		if (key == GLFW.GLFW_KEY_RIGHT || key == GLFW.GLFW_KEY_LEFT) {
-			int d = key == GLFW.GLFW_KEY_RIGHT ? 1 : -1;
+		if (key == InputConstants.KEY_RIGHT || key == InputConstants.KEY_LEFT) {
+			int d = key == InputConstants.KEY_RIGHT ? 1 : -1;
 			if (open >= 0) openShot(Math.clamp(open + d, 0, shots.size() - 1));
 			else showPage(page + d);
 			return true;

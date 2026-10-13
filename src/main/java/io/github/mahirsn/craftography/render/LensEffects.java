@@ -1,18 +1,19 @@
 package io.github.mahirsn.craftography.render;
 
-import com.mojang.blaze3d.GpuFormat;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
-import com.mojang.blaze3d.pipeline.BindGroupLayout;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.BindGroupLayout;
+import com.mojang.renderpearl.api.pipeline.ColorTargetState;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.blaze3d.shaders.UniformType;
-import com.mojang.blaze3d.systems.CommandEncoder;
-import com.mojang.blaze3d.systems.RenderPass;
+import com.mojang.renderpearl.api.pipeline.UniformType;
+import com.mojang.renderpearl.api.commands.CommandEncoder;
+import com.mojang.renderpearl.api.commands.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.renderpearl.api.textures.FilterMode;
 import io.github.mahirsn.craftography.Autofocus;
 import io.github.mahirsn.craftography.CameraMode;
 import io.github.mahirsn.craftography.CameraSettings;
@@ -59,13 +60,14 @@ public final class LensEffects {
 
 	private static RenderPipeline pipeline(String name, String... samplers) {
 		BindGroupLayout.Builder layout = BindGroupLayout.builder();
-		for (String sampler : samplers) layout.withSampler(sampler + "Sampler");
+		for (String sampler : samplers) layout.withUniform(sampler + "Sampler", UniformType.COMBINED_IMAGE_SAMPLER);
 		layout.withUniform("LensConfig", UniformType.UNIFORM_BUFFER);
 		return RenderPipeline.builder(RenderPipelines.POST_PROCESSING_SNIPPET)
 			.withLocation(Identifier.fromNamespaceAndPath(CraftographyClient.MOD_ID, "pipeline/" + name))
 			.withVertexShader(Identifier.withDefaultNamespace("core/screenquad"))
 			.withFragmentShader(Identifier.fromNamespaceAndPath(CraftographyClient.MOD_ID, "post/" + name))
 			.withBindGroupLayout(layout.build())
+			.withColorTargetState(ColorTargetState.DEFAULT)
 			.build();
 	}
 
@@ -75,7 +77,8 @@ public final class LensEffects {
 			.withLocation(Identifier.fromNamespaceAndPath(CraftographyClient.MOD_ID, "pipeline/" + name))
 			.withVertexShader(Identifier.withDefaultNamespace("core/screenquad"))
 			.withFragmentShader(Identifier.fromNamespaceAndPath(CraftographyClient.MOD_ID, "post/" + name))
-			.withBindGroupLayout(BindGroupLayout.builder().withSampler("InSampler").withUniform("SamplerInfo", UniformType.UNIFORM_BUFFER).build())
+			.withBindGroupLayout(BindGroupLayout.builder().withUniform("InSampler", UniformType.COMBINED_IMAGE_SAMPLER).withUniform("SamplerInfo", UniformType.UNIFORM_BUFFER).build())
+			.withColorTargetState(ColorTargetState.DEFAULT)
 			.build();
 	}
 
@@ -85,10 +88,10 @@ public final class LensEffects {
 			Std140Builder.intoBuffer(view.data()).putVec2(out.width, out.height).putVec2(in.width, in.height);
 		}
 		try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> label, out.getColorTextureView(), Optional.empty())) {
-			pass.setPipeline(pipeline);
+			pass.setPipeline(RenderSystem.getCompiledPipeline(pipeline));
 			RenderSystem.bindDefaultUniforms(pass);
 			pass.setUniform("SamplerInfo", samplerInfo.currentBuffer());
-			pass.bindTexture("InSampler", in.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
+			pass.setUniform("InSampler", in.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
 			pass.draw(3, 1, 0, 0);
 		}
 		samplerInfo.rotate();
@@ -115,7 +118,7 @@ public final class LensEffects {
 	}
 
 	private static TextureTarget fitSize(TextureTarget target, String name, int width, int height) {
-		if (target == null) return new TextureTarget("Craftography " + name, width, height, false, GpuFormat.RGBA8_UNORM);
+		if (target == null) return new TextureTarget("Craftography " + name, width, height, GpuFormat.RGBA8_UNORM, null);
 		return target;
 	}
 
@@ -137,7 +140,7 @@ public final class LensEffects {
 	}
 
 	private static TextureTarget fit(TextureTarget target, String name, RenderTarget main, boolean useDepth) {
-		if (target == null) return new TextureTarget("Craftography " + name, main.width, main.height, useDepth, GpuFormat.RGBA8_UNORM);
+		if (target == null) return new TextureTarget("Craftography " + name, main.width, main.height, GpuFormat.RGBA8_UNORM, useDepth ? GpuFormat.D32_FLOAT : null);
 		if (target.width != main.width || target.height != main.height) {
 			target.resize(main.width, main.height);
 			historyValid = false;
@@ -174,19 +177,19 @@ public final class LensEffects {
 		var linear = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR);
 		var nearest = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST);
 		try (RenderPass pass = encoder.createRenderPass(() -> "Craftography lens", output.getColorTextureView(), Optional.empty())) {
-			pass.setPipeline(LENS);
+			pass.setPipeline(RenderSystem.getCompiledPipeline(LENS));
 			RenderSystem.bindDefaultUniforms(pass);
 			pass.setUniform("LensConfig", config.currentBuffer());
-			pass.bindTexture("SceneSampler", scene.getColorTextureView(), linear);
-			pass.bindTexture("DepthSampler", depth.getDepthTextureView(), nearest);
-			pass.bindTexture("HistorySampler", history.getColorTextureView(), nearest);
+			pass.setUniform("SceneSampler", scene.getColorTextureView(), linear);
+			pass.setUniform("DepthSampler", depth.getDepthTextureView(), nearest);
+			pass.setUniform("HistorySampler", history.getColorTextureView(), nearest);
 			pass.draw(3, 1, 0, 0);
 		}
 		try (RenderPass pass = encoder.createRenderPass(() -> "Craftography grain", main.getColorTextureView(), Optional.empty())) {
-			pass.setPipeline(GRAIN);
+			pass.setPipeline(RenderSystem.getCompiledPipeline(GRAIN));
 			RenderSystem.bindDefaultUniforms(pass);
 			pass.setUniform("LensConfig", config.currentBuffer());
-			pass.bindTexture("InSampler", output.getColorTextureView(), nearest);
+			pass.setUniform("InSampler", output.getColorTextureView(), nearest);
 			pass.draw(3, 1, 0, 0);
 		}
 		config.rotate();

@@ -5,6 +5,7 @@ import io.github.mahirsn.craftography.CameraMode;
 import io.github.mahirsn.craftography.Tripod;
 import io.github.mahirsn.craftography.util.LensMath;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
@@ -57,7 +58,7 @@ public abstract class CameraMixin {
 
 	/** Tripod: the player's walk bobbing and hurt shake must not move a camera that stands on its own. */
 	@Inject(method = "extractRenderState", at = @At("TAIL"))
-	private void craftography$steadyTripod(CameraRenderState state, float partialTicks, CallbackInfo ci) {
+	private void craftography$steadyTripod(CameraRenderState state, DeltaTracker deltaTracker, CallbackInfo ci) {
 		if (!Tripod.isActive()) return;
 		state.entityRenderState.bob = 0;
 		state.entityRenderState.hurtTime = -1;
