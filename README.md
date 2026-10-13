@@ -18,8 +18,8 @@ the time, weather and moon phase you pick are visual only.
   buttons and three top dials beside it.
 - Layout: the picture takes the whole screen above that band, for every aspect ratio, and nothing ever covers it.
 - Top dials with pages: exposure (ISO, shutter speed, aperture), colour (white balance, tint, grain), focus (focus
-  distance, autofocus, focus peaking), view (mask and guide opacity, histogram) and scene (moon phase, keep time and
-  weather, photo preview). The menu button turns the page. A dial's name turns amber while it is off its default.
+  distance, autofocus, focus peaking), view (mask and guide opacity, histogram), scene (moon phase, keep time and
+  weather, weather of your view) and photo (photo size, self-timer, photo preview). The menu button turns the page. A dial's name turns amber while it is off its default.
 - Interactive mode: a free cursor to press every button and turn every dial and plate. It also opens while the
   control panel key is held.
 - Tripod: the camera stays where you set it down, and you can walk into the shot.
