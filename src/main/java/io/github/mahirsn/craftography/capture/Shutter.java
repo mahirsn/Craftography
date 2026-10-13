@@ -104,27 +104,83 @@ public final class Shutter {
 		return pending;
 	}
 
+	/** A photo bigger than the screen waits for the next client tick, outside the frame being drawn. */
+	private static boolean hiResPending;
+
 	/** Called by GameRendererMixin right before the GUI is drawn. */
 	public static void capture() {
 		pending = false;
 		Minecraft mc = Minecraft.getInstance();
+		if (scaleFor(mc) > 1) {
+			hiResPending = true;
+			return;
+		}
+		Screenshot.takeScreenshot(mc.gameRenderer.mainRenderTarget(), image -> keep(mc, image, 1));
+	}
+
+	/** The frame, in the pixels of an image rendered at {@code scale} times the window. */
+	private static Rect frameIn(Minecraft mc, int scale) {
+		var window = mc.getWindow();
+		return AspectMask.frame(window.getGuiScaledWidth(), window.getGuiScaledHeight(), CameraSettings.get().aspect)
+			.scale(window.getGuiScale() * scale);
+	}
+
+	/** The multiple actually used: the setting, lowered so the photo's long side stays within 8K. */
+	private static int scaleFor(Minecraft mc) {
+		Rect f = frameIn(mc, 1);
+		int max = (int) Math.floor(CameraSettings.MAX_PHOTO_SIDE / Math.max(1, Math.max(f.w(), f.h())));
+		return Math.max(1, Math.min(CameraSettings.get().photoScale, max));
+	}
+
+	/** "3840 × 2560" for the photo size setting's tooltip. */
+	public static String photoSizeText() {
+		Minecraft mc = Minecraft.getInstance();
+		int k = scaleFor(mc);
+		Rect f = frameIn(mc, k);
+		return Math.round(f.w()) + " × " + Math.round(f.h());
+	}
+
+	/** Called at the start of a client tick: renders the world once at the photo's size, as vanilla's panorama does. */
+	public static void tickHiRes(Minecraft mc) {
+		if (!hiResPending) return;
+		hiResPending = false;
+		int k = scaleFor(mc);
+		var window = mc.getWindow();
+		int ow = window.getWidth(), oh = window.getHeight();
+		com.mojang.blaze3d.pipeline.RenderTarget target = mc.gameRenderer.mainRenderTarget();
+		try {
+			window.setWidth(ow * k);
+			window.setHeight(oh * k);
+			target.resize(ow * k, oh * k);
+			mc.gameRenderer.update(net.minecraft.client.DeltaTracker.ONE);
+			mc.gameRenderer.extract(net.minecraft.client.DeltaTracker.ONE, true);
+			mc.gameRenderer.renderLevel(net.minecraft.client.DeltaTracker.ONE);
+			io.github.mahirsn.craftography.render.LensEffects.apply(target);
+			Screenshot.takeScreenshot(target, image -> keep(mc, image, k));
+		} catch (Exception e) {
+			CraftographyClient.LOG.warn("Could not take the large photo", e);
+		} finally {
+			window.setWidth(ow);
+			window.setHeight(oh);
+			target.resize(ow, oh);
+		}
+	}
+
+	/** Crops the frame out of a screenshot taken at {@code scale} times the window, then previews and saves it. */
+	private static void keep(Minecraft mc, NativeImage image, int scale) {
 		CameraSettings s = CameraSettings.get();
 		CameraSettings.Aspect aspect = s.aspect;
 		long mm = Math.round(CameraMode.focalLength());
-		Screenshot.takeScreenshot(mc.gameRenderer.mainRenderTarget(), image -> {
-			// The frame is laid out in GUI units, exactly as the HUD draws it; scale it to the image's pixels.
-			var window = mc.getWindow();
-			Rect r = AspectMask.frame(window.getGuiScaledWidth(), window.getGuiScaledHeight(), aspect).scale(window.getGuiScale());
-			int x = (int) Math.round(r.x()), y = (int) Math.round(r.y());
-			int w = Math.min((int) Math.round(r.w()), image.getWidth() - x), h = Math.min((int) Math.round(r.h()), image.getHeight() - y);
-			NativeImage photo = new NativeImage(w, h, false);
-			image.copyRect(photo, x, y, 0, 0, w, h, false, false);
-			image.close();
-			if (s.showPreview) showPreview(mc, photo);
-			Path dir = mc.gameDirectory.toPath().resolve(Screenshot.SCREENSHOT_DIR).resolve("craftography");
-			String name = Util.getFilenameFormattedDateTime() + "_" + mm + "mm_" + (aspect == CameraSettings.Aspect.FREE ? "free" : aspect.fileLabel());
-			Util.ioPool().execute(() -> save(mc, dir, name, photo));
-		});
+		Rect r = frameIn(mc, scale);
+		int x = (int) Math.round(r.x()), y = (int) Math.round(r.y());
+		int w = Math.min((int) Math.round(r.w()), image.getWidth() - x), h = Math.min((int) Math.round(r.h()), image.getHeight() - y);
+		NativeImage photo = new NativeImage(w, h, false);
+		image.copyRect(photo, x, y, 0, 0, w, h, false, false);
+		image.close();
+		if (s.showPreview) showPreview(mc, photo);
+		Path dir = mc.gameDirectory.toPath().resolve(Screenshot.SCREENSHOT_DIR).resolve("craftography");
+		String name = Util.getFilenameFormattedDateTime() + "_" + mm + "mm_" + (aspect == CameraSettings.Aspect.FREE ? "free" : aspect.fileLabel());
+		Util.ioPool().execute(() -> save(mc, dir, name, photo));
 	}
 
 	private static void save(Minecraft mc, Path dir, String name, NativeImage photo) {

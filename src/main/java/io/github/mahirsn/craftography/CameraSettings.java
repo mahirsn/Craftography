@@ -74,6 +74,12 @@ public final class CameraSettings {
 	public boolean showPreview = true;
 	/** Self-timer delay in seconds: 0 (off), 3 or 10. */
 	public int selfTimer = 0;
+	/**
+	 * Photo size as a multiple of the screen's pixels: 1 takes the frame as the screen shows it; 2 to 6 render the
+	 * world again at that multiple for the photo, up to 8K (7680 px) on the long side.
+	 */
+	public int photoScale = 1;
+	public static final int MAX_PHOTO_SCALE = 6, MAX_PHOTO_SIDE = 7680;
 
 	private static final int[] TIMERS = {0, 3, 10};
 
@@ -130,6 +136,7 @@ public final class CameraSettings {
 		if (weather == null) weather = Weather.SERVER;
 		if (moonPhase < -1 || moonPhase > 7) moonPhase = -1;
 		if (java.util.Arrays.stream(TIMERS).noneMatch(t -> t == selfTimer)) selfTimer = 0;
+		photoScale = Math.clamp(photoScale, 1, MAX_PHOTO_SCALE);
 		iso = ExposureMath.ISO[ExposureMath.nearest(ExposureMath.ISO, iso)];
 		aperture = ExposureMath.APERTURE[ExposureMath.nearest(ExposureMath.APERTURE, aperture > 0 ? aperture : ExposureMath.DEFAULT_APERTURE)];
 		shutter = ExposureMath.SHUTTER[ExposureMath.nearest(ExposureMath.SHUTTER, shutter > 0 ? shutter : ExposureMath.DEFAULT_SHUTTER)];

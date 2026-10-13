@@ -45,7 +45,7 @@ public final class DialBank {
 	}
 
 	public enum Page {
-		EXPOSURE, COLOUR, FOCUS, VIEW, SCENE;
+		EXPOSURE, COLOUR, FOCUS, VIEW, SCENE, PHOTO;
 
 		public Component title() {
 			return Component.translatable("craftography.dial.page." + name().toLowerCase(java.util.Locale.ROOT));
@@ -97,6 +97,18 @@ public final class DialBank {
 				() -> s().moonPhase >= 0,
 				() -> Component.translatable(s().moonPhase < 0 ? "craftography.moon.server" : "craftography.moon." + s().moonPhase)),
 			toggle("keep", () -> s().lockTimeWeather, v -> s().lockTimeWeather = v, false),
+			new Dial("weather", () -> Component.translatable(s().weather.translationKey() + ".short").getString(), null,
+				n -> { for (int i = 0; i < Math.floorMod(whole(n), CameraSettings.Weather.values().length); i++) s().cycleWeather(); }, null,
+				() -> s().weather != CameraSettings.Weather.SERVER, () -> Component.translatable(s().weather.translationKey())),
+		},
+		{
+			// Photo size: the screen's frame, or the world rendered again at a multiple of it, up to 8K.
+			new Dial("size", () -> s().photoScale == 1 ? "1x" : s().photoScale + "x", null,
+				n -> s().photoScale = Math.clamp(s().photoScale + whole(n), 1, CameraSettings.MAX_PHOTO_SCALE),
+				() -> s().photoScale = 1, () -> s().photoScale != 1, () -> Component.literal(io.github.mahirsn.craftography.capture.Shutter.photoSizeText())),
+			new Dial("timer", () -> s().selfTimer == 0 ? Component.translatable("craftography.dial.off").getString() : s().selfTimer + "s", null,
+				n -> s().cycleTimer(), null, () -> s().selfTimer != 0,
+				() -> s().selfTimer == 0 ? Component.translatable("options.off") : Component.translatable("craftography.button.timer.seconds", s().selfTimer)),
 			toggle("preview", () -> s().showPreview, v -> s().showPreview = v, true),
 		},
 	};

@@ -25,6 +25,10 @@ the time, weather and moon phase you pick are visual only.
 - Tripod: the camera stays where you set it down, and you can walk into the shot.
 - Self-timer: 3 or 10 seconds, with a beep and a blinking lamp.
 - Shutter that saves a PNG cropped to the frame, without HUD, to `screenshots/craftography/`.
+- Photo size on the Photo dial page: the frame as the screen shows it (1x), or the world rendered once more at 2x to 6x
+  the screen for the photo, up to 8K (7680 px) on the long side.
+- Gallery (the camera bar button, or a key you bind): your photos newest first, and one large with its date, lens,
+  aspect ratio, size in pixels and file size. O opens the folder.
 - Settings are saved in `config/craftography.json`. The HUD sprites can be changed with a resource pack
   (`assets/craftography/textures/gui/sprites/camera/` and `.../viewfinder/`).
 - Works with Sodium and Iris, with shaders on or off.

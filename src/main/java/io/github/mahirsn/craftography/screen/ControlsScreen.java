@@ -105,6 +105,8 @@ public class ControlsScreen extends Screen {
 						Component.translatable("craftography.button.menu.page", DialBank.page().title(), DialBank.page().ordinal() + 1, DialBank.Page.values().length),
 						Component.translatable("craftography.button.menu.hint")),
 					DialBank::nextPage);
+				case GALLERY -> BarButton.button(area, paint, () -> tooltip("craftography.gallery", CraftographyClient.galleryKey),
+					() -> minecraft.gui.setScreen(new GalleryScreen(this)));
 				case SHUTTER -> BarButton.button(area, paint, () -> Shutter.timerRunning()
 					? tooltip("key.craftography.shutter", CraftographyClient.shutterKey, Component.translatable("craftography.button.shutter.cancel"))
 					: tooltip("key.craftography.shutter", CraftographyClient.shutterKey), Shutter::press);

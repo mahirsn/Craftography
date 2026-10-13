@@ -37,6 +37,7 @@ public class CraftographyClient implements ClientModInitializer {
 	public static KeyMapping shutterKey;
 	public static KeyMapping timerKey;
 	public static KeyMapping tripodKey;
+	public static KeyMapping galleryKey;
 
 	/**
 	 * Keys that only work in camera mode, with their actions. Vanilla keys bound to the same key are blocked while
@@ -58,6 +59,7 @@ public class CraftographyClient implements ClientModInitializer {
 		shutterKey = cameraKey("shutter", GLFW.GLFW_KEY_UNKNOWN, Shutter::press);
 		timerKey = cameraKey("timer", GLFW.GLFW_KEY_UNKNOWN, () -> change(CameraSettings::cycleTimer));
 		tripodKey = cameraKey("tripod", GLFW.GLFW_KEY_F9, Tripod::toggle);
+		galleryKey = register("gallery", GLFW.GLFW_KEY_UNKNOWN);
 
 		ClientTickEvents.START_CLIENT_TICK.register(CraftographyClient::onTick);
 	}
@@ -113,6 +115,10 @@ public class CraftographyClient implements ClientModInitializer {
 		}
 		while (toggleKey.consumeClick()) {
 			CameraMode.toggle();
+		}
+		Shutter.tickHiRes(mc);
+		while (galleryKey.consumeClick()) {
+			if (mc.gui.screen() == null) mc.gui.setScreen(new io.github.mahirsn.craftography.screen.GalleryScreen(null));
 		}
 		boolean open = CameraMode.isOpen();
 		if (!open) {

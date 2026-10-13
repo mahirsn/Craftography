@@ -19,7 +19,7 @@ import java.util.Locale;
  */
 public final class CameraBar {
 	public enum Item {
-		ZOOM(49), GUIDE(15), ASPECT(15), WEATHER(15), ROLL(49), SERVER_TIME(15), TIMER(15), TRIPOD(15), MENU(15), SHUTTER(21), TIME(49);
+		ZOOM(49), GUIDE(15), ASPECT(15), WEATHER(15), ROLL(49), SERVER_TIME(15), TIMER(15), TRIPOD(15), MENU(15), GALLERY(15), SHUTTER(21), TIME(49);
 
 		public final int width;
 
@@ -134,6 +134,10 @@ public final class CameraBar {
 				level(g, x + 8, y + 9, s.roll);
 				engravedText(g, String.format(Locale.ROOT, "%+.1f°", s.roll), x + 16, 31, y);
 				if (s.roll != 0) led(g, x + 6, y);
+			}
+			case GALLERY -> {
+				Draw.camera(g, "button" + state, x, y, item.width, HEIGHT, -1);
+				icon(g, "gallery", x + 2, y);
 			}
 			case MENU -> {
 				Draw.camera(g, "button" + state, x, y, item.width, HEIGHT, -1);
