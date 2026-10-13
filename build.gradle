@@ -20,10 +20,12 @@ test {
 
 processResources {
 	def version = project.version
+	def minecraft = project.minecraft_version
 	inputs.property "version", version
+	inputs.property "minecraft_version", minecraft
 
 	filesMatching("fabric.mod.json") {
-		expand "version": version
+		expand "version": version, "minecraft_version": minecraft
 	}
 }
 
