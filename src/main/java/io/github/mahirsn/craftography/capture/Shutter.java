@@ -27,11 +27,15 @@ import java.nio.file.Path;
  */
 public final class Shutter {
 	private static final Identifier PREVIEW = Identifier.fromNamespaceAndPath(CraftographyClient.MOD_ID, "shutter_preview");
-	private static final long CURTAIN_MS = 220, PREVIEW_MS = 2000;
+	private static final long CURTAIN_HALF_MS = 110, PREVIEW_MS = 2000;
 	private static final int PREVIEW_WIDTH = 120;
 
 	private static boolean pending;
 	private static long shotAt = -1;
+	/** True once the photo's frame is rendered; the curtain stays closed until then. */
+	private static boolean captured;
+	/** Time the curtain starts to open, or -1 while it is still closing. */
+	private static long openAt = -1;
 	private static DynamicTexture preview;
 	private static long previewAt = -1;
 	/** Time the self-timer fires, or -1 when it is not running. */
@@ -96,6 +100,8 @@ public final class Shutter {
 	private static void shoot() {
 		if (pending) return;
 		pending = true;
+		captured = false;
+		openAt = -1;
 		shotAt = Util.getMillis();
 		Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.9f, 0.6f));
 	}
@@ -115,6 +121,7 @@ public final class Shutter {
 			hiResPending = true;
 			return;
 		}
+		captured = true;
 		Screenshot.takeScreenshot(mc.gameRenderer.mainRenderTarget(), image -> keep(mc, image, 1));
 	}
 
@@ -163,6 +170,7 @@ public final class Shutter {
 			window.setWidth(ow);
 			window.setHeight(oh);
 			target.resize(ow, oh);
+			captured = true;
 		}
 	}
 
@@ -227,10 +235,14 @@ public final class Shutter {
 	public static void draw(GuiGraphicsExtractor g, Rect f) {
 		long now = Util.getMillis();
 		if (timerEnd >= 0) drawTimer(g, f);
-		if (shotAt >= 0 && now - shotAt < CURTAIN_MS) {
-			// Closes in the first half, opens in the second half.
-			double t = (now - shotAt) / (double) CURTAIN_MS;
-			double cover = (t < 0.5 ? t * 2 : (1 - t) * 2) * f.h() / 2;
+		if (shotAt >= 0) {
+			// Closes, stays closed until the photo is taken, then opens. The opening starts on a drawn frame, so the
+			// fully closed curtain is always shown once, whatever the frame rate or a large photo's stall.
+			double closed = Math.min(1, (now - shotAt) / (double) CURTAIN_HALF_MS);
+			if (closed >= 1 && captured && openAt < 0) openAt = now;
+			double amount = openAt < 0 ? closed : 1 - (now - openAt) / (double) CURTAIN_HALF_MS;
+			if (openAt >= 0 && amount <= 0) shotAt = -1;
+			double cover = Math.max(0, amount) * f.h() / 2;
 			int black = Draw.argb(1f, 0x000000);
 			Draw.rect(g, f.x(), f.y(), f.right(), f.y() + cover, black);
 			Draw.rect(g, f.x(), f.bottom() - cover, f.right(), f.bottom(), black);
